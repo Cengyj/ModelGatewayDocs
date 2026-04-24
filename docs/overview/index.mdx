@@ -1,0 +1,68 @@
+﻿---
+id: index
+title: 选择入口
+slug: /
+description: 面向 Windows 新手的 ForOpenCode 接入入口，按软件、配置方式和排障场景快速分流。
+platform: Windows
+difficulty: 入门
+estimatedTime: 3 分钟
+prerequisites:
+  - 能打开你要配置的软件
+  - 已能登录 ForOpenCode 控制台
+lastVerified: 2026-04-24
+hide_title: true
+hide_table_of_contents: true
+---
+
+import {LinkCard, MethodGrid, PageHeader, PrepareChecklist, WindowsTip} from '@site/src/components/GuideBlocks';
+
+<PageHeader
+  eyebrow="ForOpenCode Docs"
+  title="选择软件，然后按一种方式配置"
+  description="这里把接入流程拆成清晰的入口：先选你正在使用的软件，再选择 CC Switch 图形配置或手动配置文件。第一次配置建议从 CC Switch 开始。"
+  meta={['Windows 新手优先', 'CC Switch 推荐路线', '手动配置可选']}
+/>
+
+<MethodGrid
+  title="主入口"
+  items={[
+    {href: '/tools/codex/', title: 'Codex', description: '用 CC Switch 配置，或手动修改 Codex 配置文件接入 ForOpenCode。', badge: '推荐', recommended: true},
+    {href: '/tools/opencode/', title: 'OpenCode', description: '配置供应商、Base URL、setCacheKey、模型和 variants。', badge: '主流'},
+    {href: '/tools/openclaw/', title: 'OpenClaw', description: '重点确认 OpenAI Completions 协议、/v1 地址、默认供应商和 gateway 重启。', badge: '主流'},
+    {href: '/tools/claude-code/', title: 'Claude Code', description: '按当前实机截图填写根地址，并确认配置显示“使用中”。', badge: '主流'},
+  ]}
+/>
+
+## 开始前
+
+<div className="guide-link-grid">
+  <LinkCard href="/getting-started/install-tool" title="下载安装 CC Switch" description="如果你还没有工具，先从这里开始。" badge="准备" />
+  <LinkCard href="/getting-started/create-key" title="创建 API Key" description="去控制台创建并复制自己的 Key，后面所有配置都要用。" badge="准备" />
+  <LinkCard href="/site-config/" title="配置参数总表" description="核对根地址、/v1、Key 来源和模型 ID。" badge="参考" />
+</div>
+
+## 推荐路线
+
+<PrepareChecklist
+  title="第一次配置只做一件事"
+  items={[
+    '先拿到自己的 API Key。',
+    '选择你正在使用的软件。',
+    '优先打开该软件的“CC Switch 配置”页。',
+    '保存、启用、重启，再新开会话测试。',
+  ]}
+>
+  需要完整路径时，看 [第一次推荐路线](/getting-started/quick-path)。已经失败时，直接看 [配置失败怎么办](/troubleshooting/)。
+</PrepareChecklist>
+
+## 其他入口
+
+<div className="guide-link-grid">
+  <LinkCard href="/tools/cherry-studio/" title="gpt-image-2 图片生成" description="PC 端 Cherry Studio 和安卓聊天页生图都在这里。" badge="图片" />
+  <LinkCard href="/getting-started/zero-basics" title="零基础术语" description="看懂站点地址、/v1、API Key、模型 ID 和重启验证。" badge="基础" />
+  <LinkCard href="/troubleshooting/" title="配置失败怎么办" description="连接失败、鉴权失败、保存后没生效时，按现象排查。" badge="排障" />
+</div>
+
+<WindowsTip title="不知道选哪个？">
+  先点你正在用的软件，再选“CC Switch 配置”。手动配置文件只建议给已经会备份和编辑配置的人使用。
+</WindowsTip>

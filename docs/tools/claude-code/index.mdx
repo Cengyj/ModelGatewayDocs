@@ -1,0 +1,48 @@
+﻿---
+title: Claude Code 配置入口
+slug: /tools/claude-code/
+description: 选择用 CC Switch 配置 Claude Code，或手动配置 Claude Code 接入 ForOpenCode。
+platform: Windows
+difficulty: 入门
+estimatedTime: 5 分钟
+lastVerified: 2026-04-24
+hide_title: true
+---
+
+import {ErrorCard, MethodGrid, PageHeader, PrepareChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+<PageHeader eyebrow="Claude Code" title="先选一种 Claude Code 配置方式" description="Claude Code 和其他工具最不同：当前实机截图中请求地址填根地址，不要照搬 /v1。第一次配置建议走 CC Switch。" meta={['推荐：CC Switch', '地址：根地址', '模型档位：gpt-5.4-low / medium / high']} />
+
+<MethodGrid items={[
+  {href: '/tools/claude-code/ccswitch', title: 'Claude Code：CC Switch 配置', description: '按截图填写供应商名称、Key 和根地址，再选择对应 gpt-5.4 档位。', badge: '推荐新手', recommended: true},
+  {href: '/tools/claude-code/manual', title: 'Claude Code：手动配置', description: '适合熟悉 Claude Code 环境变量或配置文件的人，按根地址和 Key 手动接入。', badge: '进阶'},
+  {href: '/troubleshooting/', title: '我已经配置失败了', description: '保存后没生效、鉴权失败或旧终端没刷新时从这里排查。', badge: '排障'},
+]} />
+
+<PrepareChecklist title="你需要准备" items={[
+  'ForOpenCode API Key。',
+  '知道 Claude Code 这里按当前实机截图填根地址。',
+  '知道第一次建议选 `gpt-5.4-medium`。',
+  '配置后重启终端并新开会话。',
+]} />
+
+<SuccessCard title="推荐选择">
+  <ul>
+    <li>第一次配置：选择 CC Switch 配置。</li>
+    <li>已经熟悉环境变量或配置文件：再看手动配置。</li>
+    <li>不确定模型档位：先用 `gpt-5.4-medium`。</li>
+  </ul>
+</SuccessCard>
+
+<ErrorCard title="Claude Code 最容易漏的点">
+  <ul>
+    <li>请求地址填根地址 `https://www.foropencode.com`。</li>
+    <li>不要照搬其他工具的 `/v1` 地址。</li>
+    <li>保存后要确认“使用中”。</li>
+    <li>启用后要重启终端。</li>
+  </ul>
+</ErrorCard>
+
+<WindowsTip title="不要照搬其他工具">
+  OpenCode、OpenClaw、Codex 多数填写 `/v1`，但 Claude Code 当前教程按根地址 `https://www.foropencode.com` 配置。
+</WindowsTip>

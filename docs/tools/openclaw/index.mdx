@@ -1,0 +1,48 @@
+﻿---
+title: OpenClaw 配置入口
+slug: /tools/openclaw/
+description: 选择用 CC Switch 配置 OpenClaw，或直接手动配置 OpenClaw 供应商。
+platform: Windows
+difficulty: 入门
+estimatedTime: 5 分钟
+lastVerified: 2026-04-24
+hide_title: true
+---
+
+import {ErrorCard, MethodGrid, PageHeader, PrepareChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+<PageHeader eyebrow="OpenClaw" title="先选一种 OpenClaw 配置方式" description="OpenClaw 的关键是供应商协议、/v1 API 端点、默认供应商和 gateway 重启。只保存配置不重启，通常不会生效。" meta={['推荐：CC Switch', '协议：OpenAI Completions', '需要重启 gateway']} />
+
+<MethodGrid items={[
+  {href: '/tools/openclaw/ccswitch', title: 'OpenClaw：CC Switch 配置', description: '按截图添加供应商和模型，设为默认后重启 gateway。', badge: '推荐新手', recommended: true},
+  {href: '/tools/openclaw/manual', title: 'OpenClaw：手动配置', description: '适合熟悉 OpenClaw 配置的人，按字段自行写入供应商。', badge: '进阶'},
+  {href: '/troubleshooting/', title: '我已经配置失败了', description: '连接失败、鉴权失败或旧会话没刷新时从这里排查。', badge: '排障'},
+]} />
+
+<PrepareChecklist title="你需要准备" items={[
+  'ForOpenCode API Key。',
+  '知道 OpenClaw 这里协议要选 `OpenAI Completions`。',
+  '知道如何执行 `openclaw gateway restart`。',
+  '配置后新开聊天验证。',
+]} />
+
+<SuccessCard title="推荐选择">
+  <ul>
+    <li>第一次配置：选择 CC Switch 配置。</li>
+    <li>已经懂 OpenClaw 配置结构：可以看手动配置。</li>
+    <li>已经失败：优先检查协议、默认供应商和 gateway 重启。</li>
+  </ul>
+</SuccessCard>
+
+<ErrorCard title="OpenClaw 最容易漏的点">
+  <ul>
+    <li>协议必须是 `OpenAI Completions`。</li>
+    <li>API 端点要带 `/v1`。</li>
+    <li>添加供应商后还要设为默认。</li>
+    <li>最后必须重启 gateway。</li>
+  </ul>
+</ErrorCard>
+
+<WindowsTip title="最稳路线">
+  OpenClaw 的“保存”和“生效”不是一回事。保存后一定要重启 gateway，并新开聊天验证。
+</WindowsTip>

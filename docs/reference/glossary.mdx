@@ -1,0 +1,53 @@
+---
+id: glossary
+title: 名词解释
+slug: /reference/glossary
+description: 给小白用户准备的高频术语表，帮助快速理解文档里的关键字段和操作动作。
+platform: Windows
+difficulty: 入门
+estimatedTime: 6 分钟
+prerequisites:
+  - 无
+lastVerified: 2026-03-30
+---
+
+import {GlossaryHint} from '@site/src/components/GuideBlocks';
+
+# 名词解释
+
+## Base URL / API Base URL / Endpoint
+
+这些词大多数时候都在问同一件事：你的工具应该把请求发到哪里。
+
+## API Key
+
+你的访问凭证。没有它，工具通常会报鉴权失败、未授权或 Key 无效。
+
+## OpenAI-compatible
+
+意思是“这个接口长得像 OpenAI 标准接口”，所以很多工具会要求你填 `/v1` 这样的标准路径。
+
+## `/v1`
+
+接口路径的一部分。不是每种场景都要带，但凡页面明确提到 OpenAI-compatible、Completions 或标准接口，通常就要特别检查这一段。
+
+## 模型 ID
+
+你要调用的模型名字，例如 `gpt-5.4`。写错、漏写、大小写不一致，都可能导致请求失败。
+
+## 供应商 / Provider
+
+很多工具会把“模型服务来源”叫做 Provider。你在添加 Provider 时，本质上是在告诉工具“以后从哪里拿模型能力”。
+
+## 重启工具
+
+完全关闭再重新打开。不是点击刷新，也不是切换一下页面。
+
+## 新开聊天验证
+
+新建一个空白会话再测试。因为旧会话经常会继续使用旧地址、旧模型或旧上下文。
+
+<GlossaryHint title="如果你还分不清“站点地址”和“接口地址”">
+  站点地址给浏览器和人看，接口地址给工具发请求。
+  一个是“打开官网”，一个是“调用服务”，看起来像，作用却不同。
+</GlossaryHint>

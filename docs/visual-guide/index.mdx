@@ -1,0 +1,117 @@
+﻿---
+id: index
+title: 截图总表
+slug: /visual-guide
+description: 当前站点的截图素材清单和更新规范，方便后续维护各个工具页的图文一致性。
+platform: Windows
+difficulty: 入门
+estimatedTime: 5 分钟
+prerequisites:
+  - 无
+lastVerified: 2026-04-24
+---
+
+import {PrepareChecklist, WindowsTip} from '@site/src/components/GuideBlocks';
+
+# 截图总表
+
+这一页专门记录站内已经接入的截图素材，以及后续补图时需要遵守的命名和维护规则。
+
+## 当前已接入的截图
+
+<div className="guide-table">
+
+| 页面 | 当前状态 | 已接入截图 |
+| --- | --- | --- |
+| OpenClaw | 已完成第一轮图文接入 | 9 张，覆盖入口、供应商、端点、模型、默认项、验证等流程 |
+| OpenCode | 已完成第一轮图文接入 | 6 张，覆盖入口、供应商、地址与 Key、模型配置、添加、成功状态 |
+| Codex | 已完成第一轮图文接入 | 4 张，覆盖入口、新建配置、启用、成功状态 |
+| Claude Code | 已完成第一轮图文接入 | 3 张，覆盖入口、填写配置、成功状态 |
+| gpt-image-2 PC | 已完成首版接入 | 12 张，覆盖 Cherry Studio 绑定令牌、获取模型、添加模型、设置端点和开始绘画 |
+| gpt-image-2 安卓 | 已完成首版接入 | 13 张，覆盖菜单、供应商、模型编辑、图像生成工具和聊天页生图 |
+| 控制台前置步骤 | 已完成第一轮图文接入 | 4 张，覆盖兑换、充值和创建 API Key |
+
+</div>
+
+## OpenClaw 截图目录
+
+- `static/img/openclaw/step-01-entry.png`
+- `static/img/openclaw/step-02-provider-form.png`
+- `static/img/openclaw/step-03-endpoint-key.png`
+- `static/img/openclaw/step-04-model-config.png`
+- `static/img/openclaw/step-05-set-default.png`
+- `static/img/openclaw/step-06-default-done.png`
+- `static/img/openclaw/step-07-run-cmd.png`
+- `static/img/openclaw/step-08-restart-gateway.png`
+- `static/img/openclaw/step-09-verify-chat.png`
+
+## OpenCode 截图目录
+
+- `static/img/opencode/step-01-entry.png`
+- `static/img/opencode/step-02-provider-form.png`
+- `static/img/opencode/step-03-endpoint-key.png`
+- `static/img/opencode/step-04-model-config.png`
+- `static/img/opencode/step-05-add-action.png`
+- `static/img/opencode/step-06-added-success.png`
+
+## Codex 截图目录
+
+- `static/img/codex/step-01-entry.png`
+- `static/img/codex/step-02-form.png`
+- `static/img/codex/step-03-enable.png`
+- `static/img/codex/step-04-enabled-success.png`
+
+## Claude Code 截图目录
+
+- `static/img/claude-code/step-01-entry.png`
+- `static/img/claude-code/step-02-form.png`
+- `static/img/claude-code/step-03-enabled-success.png`
+
+## gpt-image-2 PC 截图目录
+
+- `static/img/gpt-image-pc/step-01.png`
+- `static/img/gpt-image-pc/step-05.png`
+- `static/img/gpt-image-pc/step-06.png`
+- `static/img/gpt-image-pc/step-07.png`
+- `static/img/gpt-image-pc/step-08.png`
+- `static/img/gpt-image-pc/step-09.png`
+- `static/img/gpt-image-pc/step-10.png`
+- `static/img/gpt-image-pc/step-11.png`
+
+## gpt-image-2 安卓截图目录
+
+- `static/img/gpt-image-android/step-01.png`
+- `static/img/gpt-image-android/step-02.png`
+- `static/img/gpt-image-android/step-03.png`
+- `static/img/gpt-image-android/step-04.png`
+- `static/img/gpt-image-android/step-05.png`
+- `static/img/gpt-image-android/step-06.png`
+- `static/img/gpt-image-android/step-07.png`
+- `static/img/gpt-image-android/step-08.png`
+- `static/img/gpt-image-android/step-09.png`
+- `static/img/gpt-image-android/step-10.png`
+- `static/img/gpt-image-android/step-11.png`
+- `static/img/gpt-image-android/step-12.png`
+- `static/img/gpt-image-android/step-13.png`
+
+## 控制台前置步骤截图目录
+
+- `static/img/account/redeem-credit/step-01-redeem-credit.png`
+- `static/img/account/create-key/step-01-open-token-page.png`
+- `static/img/account/create-key/step-02-fill-form.png`
+- `static/img/account/create-key/step-03-copy-key.png`
+
+<PrepareChecklist
+  title="后续补截图时必须遵守"
+  items={[
+    '截图文件名统一使用 `tool/step-xx-action.png` 或当前目录既有命名规则。',
+    '截图前先清理掉无关窗口、无关账号信息和临时弹窗。',
+    '同一页面里连续步骤尽量保持同一缩放比例和同一主题色。',
+    '一旦工具版本变化导致界面改动，必须同步更新对应教程页和截图总表。',
+  ]}
+/>
+
+<WindowsTip title="为什么保留这张总表">
+  对新手来说，最怕的是“图和字不一致”。有了这张总表，后续每次补图、换图、删图都有统一入口，也方便确认素材目录和教程页是否同步。
+</WindowsTip>
+

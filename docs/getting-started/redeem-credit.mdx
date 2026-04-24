@@ -1,0 +1,92 @@
+---
+id: redeem-credit
+title: 先兑换充值额度
+slug: /getting-started/redeem-credit
+description: 给第一次使用的人准备的兑换充值引导，按控制台真实截图说明如何进入钱包管理并用兑换码充值额度。
+platform: Windows
+difficulty: 入门
+estimatedTime: 3 分钟
+prerequisites:
+  - 能登录 ForOpenCode 控制台
+  - 已拿到兑换码
+lastVerified: 2026-03-30（已按实机截图核对）
+---
+
+import {ErrorCard, PrepareChecklist, StageNav, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+# 先兑换充值额度
+
+如果你的账号里没有可用额度，后面就算地址和 Key 都填对了，也可能照样无法正常使用。
+所以在创建 API Key 和配置工具前，先把额度准备好。
+
+<StageNav
+  items={[
+    {href: '#prepare', title: '直达准备', description: '先确认你手里已经有兑换码。'},
+    {href: '#do', title: '直达操作', description: '按截图进入钱包管理并完成兑换。'},
+    {href: '#check', title: '直达检查', description: '确认额度已经真的到账。'},
+    {href: '#fix', title: '直达排障', description: '兑换失败或看不到余额时先看这里。'},
+  ]}
+/>
+
+## 你会完成什么
+
+- 进入 ForOpenCode 控制台的 `钱包管理` 页面。
+- 切到 `额度充值`。
+- 输入兑换码并点击 `兑换额度`。
+- 确认余额已经到账，再继续后面的创建 Key 和工具配置。
+
+## 开始前准备 {#prepare}
+
+<PrepareChecklist
+  title="开始前准备"
+  items={[
+    '你已经能正常登录 ForOpenCode 控制台。',
+    '你手里已经拿到可用的兑换码。',
+    '你知道自己现在是在做“充值额度”，不是在创建 API Key。',
+  ]}
+/>
+
+## 跟着做 {#do}
+
+<PrepareChecklist
+  title="按这个顺序操作"
+  items={[
+    '先点击顶部 `控制台`。',
+    '左侧进入 `钱包管理`。',
+    '在页面里选择 `额度充值`。',
+    '把你的兑换码输入到兑换框里。',
+    '点击右侧 `兑换额度`。',
+  ]}
+>
+  这张截图已经把真实入口标出来了。第一次操作时，照着点最稳，不需要自己猜菜单在哪。
+</PrepareChecklist>
+
+<div className="guide-image">
+  <img src="/img/account/redeem-credit/step-01-redeem-credit.png" alt="在控制台的钱包管理中输入兑换码并点击兑换额度" />
+</div>
+
+## 完成后你会看到什么 {#check}
+
+<SuccessCard title="成功判定">
+  <ul>
+    <li>钱包管理页里的余额不再是原来的旧值。</li>
+    <li>兑换成功后，你可以继续去创建 API Key。</li>
+    <li>后面配置工具时，不会再因为账号没有额度而直接卡住。</li>
+  </ul>
+</SuccessCard>
+
+## 如果没成功先看这里 {#fix}
+
+<ErrorCard title="兑换充值最常见的问题">
+  <ul>
+    <li>输入的兑换码有空格、少字或多字。</li>
+    <li>你打开的是别的页面，不是在 `钱包管理 > 额度充值`。</li>
+    <li>兑换后没有重新看余额，误以为没到账。</li>
+    <li>手里的兑换码本身已经失效或已经被用过。</li>
+  </ul>
+</ErrorCard>
+
+<WindowsTip title="下一步应该去哪里">
+  额度准备好后，下一步通常就是去 [创建 API Key](/getting-started/create-key)。
+  有了额度和 Key，再去配置 OpenCode、OpenClaw 或 Codex 会顺很多。
+</WindowsTip>

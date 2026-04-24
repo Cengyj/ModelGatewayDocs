@@ -1,0 +1,131 @@
+﻿---
+title: Codex：手动配置文件
+slug: /tools/codex/config-file
+description: 通过 Codex 官方 config.toml 配置机制手动接入 ForOpenCode，适合熟悉 TOML、环境变量和终端的人。
+platform: Windows / macOS / Linux
+difficulty: 进阶
+estimatedTime: 15 分钟
+lastVerified: 2026-04-24
+hide_title: true
+---
+
+import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+<PageHeader
+  eyebrow="Codex / 手动配置"
+  title="手动修改 Codex 配置文件"
+  description="这页按 Codex 官方配置参考整理：Codex 使用 config.toml，支持配置 model、model_provider，以及自定义 model_providers。ForOpenCode 相关地址和模型值按本站参数表填写。"
+  meta={['官方字段：config.toml', '进阶方式', '先备份再修改']}
+/>
+
+<PrepareChecklist title="开始前准备" items={[
+  '你已经能打开用户目录，并能编辑 TOML 文件。',
+  '你已经有 ForOpenCode 控制台生成的 API Key。',
+  '你知道如何设置环境变量，并能关闭旧终端后重新打开。',
+  '如果你看不懂 TOML，建议先用 CC Switch 配置页。',
+]} />
+
+<CopyCard title="配置文件位置" code="~/.codex/config.toml" note="官方配置参考使用这个路径。Windows 上 `~` 表示你的用户目录。" />
+<CopyCard title="环境变量名" code="FOROPENCODE_API_KEY" note="这就是 Codex 读取 ForOpenCode Key 的变量名，别改成别的拼写。" />
+<CopyCard title="Base URL" code="https://www.foropencode.com/v1" note="这是写进 provider 的 OpenAI-compatible 地址，必须带 `/v1`。" />
+<CopyCard title="默认模型" code="gpt-5.4" note="先用这个默认模型跑通，再按场景切更高推理档位。" />
+
+## 官方依据
+
+<GlossaryHint title="Codex 官方配置字段">
+  Codex 官方配置参考说明：配置文件为 `config.toml`，可以通过顶层 `model` 设置模型，通过顶层 `model_provider` 选择 provider，并在 `model_providers` 表里配置自定义 provider 的 `name`、`base_url`、`env_key` 等字段。参考：[OpenAI Codex config reference](https://developers.openai.com/codex/config-reference)。
+</GlossaryHint>
+
+## 跟着做
+
+<StepChecklist title="步骤 1：找到并备份 config.toml" items={[
+  '打开用户目录下的 `.codex` 文件夹。',
+  '找到 `config.toml`；如果不存在，可以新建这个文件。',
+  '复制一份备份，例如 `config.toml.bak`。',
+  '确认备份可恢复后，再继续修改。',
+]} />
+
+<StepChecklist title="步骤 2：按你的平台设置 API Key 环境变量" items={[
+  '推荐把 ForOpenCode Key 放到环境变量，不直接写进配置文件。',
+  '临时测试用当前终端命令即可。',
+  '长期使用时，再写入系统级或 shell 配置文件。',
+  '设置后关闭旧终端并重新打开。',
+]} />
+
+<WindowsTip title="先选平台，再复制命令">
+  下面两个命令块分别对应临时环境变量和打开配置文件。你只需要点自己平台那一列，不要把三套命令混在一起执行。
+</WindowsTip>
+
+<PlatformCommandTabs
+  title="选择你的平台：设置临时环境变量"
+  description="把 `你的真实 Key` 替换成 ForOpenCode 控制台复制的 API Key。"
+  commands={[
+    {label: 'Windows PowerShell', code: '$env:FOROPENCODE_API_KEY="你的真实 Key"', note: '只对当前 PowerShell 窗口生效。长期使用请写入系统环境变量。'},
+    {label: 'macOS zsh', code: 'export FOROPENCODE_API_KEY="你的真实 Key"', note: '只对当前终端窗口生效。长期使用可写入 `~/.zshrc`。'},
+    {label: 'Linux bash', code: 'export FOROPENCODE_API_KEY="你的真实 Key"', note: '只对当前 shell 生效。长期使用可写入 `~/.bashrc` 或对应 shell 配置。'},
+  ]}
+/>
+
+<PlatformCommandTabs
+  title="选择你的平台：打开配置文件"
+  description="如果文件不存在，就新建 `config.toml`。"
+  commands={[
+    {label: 'Windows PowerShell', code: 'notepad "$env:USERPROFILE\\.codex\\config.toml"', note: '`~` 在 Windows 上对应你的用户目录。'},
+    {label: 'macOS zsh', code: 'mkdir -p ~/.codex\nopen -e ~/.codex/config.toml', note: '使用系统文本编辑器打开；也可以换成你常用编辑器。'},
+    {label: 'Linux bash', code: 'mkdir -p ~/.codex\nnano ~/.codex/config.toml', note: '如果没有 nano，可改用 vim、code 或其他编辑器。'},
+  ]}
+/>
+
+<StepChecklist title="步骤 3：写入 ForOpenCode provider" items={[
+  '顶层 `model` 写 `gpt-5.4`。',
+  '顶层 `model_provider` 写 `foropencode`。',
+  '在 `[model_providers.foropencode]` 下写入名称、Base URL 和 env_key。',
+  '确认 `env_key` 和你设置的环境变量名完全一致。',
+]} />
+
+<GlossaryHint title="Codex 里最容易写错的三个地方">
+  一是把路径写错，二是把环境变量名写错，三是把 Base URL 漏掉 `/v1`。这三项只要有一项不一致，Codex 就会像没配好一样报错。
+</GlossaryHint>
+
+```toml
+model = "gpt-5.4"
+model_provider = "foropencode"
+
+[model_providers.foropencode]
+name = "ForOpenCode"
+base_url = "https://www.foropencode.com/v1"
+env_key = "FOROPENCODE_API_KEY"
+```
+
+<StepChecklist title="步骤 4：重启 Codex 并新开会话" items={[
+  '保存 `config.toml`。',
+  '关闭旧的 Codex、终端或 VS Code 窗口。',
+  '重新打开 Codex。',
+  '新开会话发送一个简单问题。',
+]} />
+
+## 成功和失败判断
+
+<SuccessCard title="成功判定">
+  <ul>
+    <li>新会话可以正常回复。</li>
+    <li>不再出现找不到 Key、401、地址不可达等错误。</li>
+    <li>需要回退时，恢复 `config.toml.bak` 并重启即可。</li>
+  </ul>
+</SuccessCard>
+
+<ErrorCard title="常见失败点">
+  <ul>
+    <li>`FOROPENCODE_API_KEY` 没设置，或环境变量名和 `env_key` 不一致。</li>
+    <li>`base_url` 少了 `/v1`。</li>
+    <li>TOML 表名写错，例如把 `[model_providers.foropencode]` 写成了别的名字。</li>
+    <li>改完配置后没有重启终端或 VS Code。</li>
+    <li>当前 Codex 版本对第三方 provider 的支持行为变化；无法确认时请先回到 CC Switch 配置方式。</li>
+  </ul>
+</ErrorCard>
+
+<WindowsTip title="不确定就不要硬改">
+  如果你看不懂 TOML 或不知道配置文件在哪，直接使用 [Codex：CC Switch 配置](/tools/codex/ccswitch) 更安全。
+</WindowsTip>
+
+

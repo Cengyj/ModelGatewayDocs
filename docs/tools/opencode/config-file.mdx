@@ -1,0 +1,140 @@
+﻿---
+title: OpenCode：手动配置
+slug: /tools/opencode/config-file
+description: 按 OpenCode 官方配置机制手动配置 ForOpenCode provider、模型、环境变量和验证流程。
+platform: Windows / macOS / Linux
+difficulty: 进阶
+estimatedTime: 18 分钟
+lastVerified: 2026-04-24
+hide_title: true
+---
+
+import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+<PageHeader eyebrow="OpenCode / 手动配置" title="手动配置 OpenCode" description="这页按 OpenCode 官方配置文档整理。OpenCode 配置文件支持 JSON/JSONC，可以在 config 里配置 provider、model、small_model 等字段。ForOpenCode 的具体 provider 结构仍要按你本机 OpenCode 版本合并。" meta={['官方依据：opencode config', 'JSON / JSONC', '先备份再合并']} />
+
+<PrepareChecklist title="开始前准备" items={[
+  '先确认你用的是 OpenCode，并能找到 OpenCode 配置文件。',
+  '准备 ForOpenCode API Key。',
+  '确认你会编辑 JSON 或 JSONC。',
+  '先备份原配置，不要直接覆盖整份文件。',
+]} />
+
+<CopyCard title="常见配置文件名" code="opencode.json 或 opencode.jsonc" note="OpenCode 官方文档说明可使用 JSON / JSONC 配置文件；实际路径以你的安装方式和项目为准。" />
+<CopyCard title="ForOpenCode Base URL" code="https://www.foropencode.com/v1" />
+<CopyCard title="模型 ID" code="gpt-5.4" />
+<CopyCard title="建议环境变量名" code="FOROPENCODE_API_KEY" />
+<CopyCard title="额外选项" code="setCacheKey = true" />
+
+## 官方依据
+
+<GlossaryHint title="OpenCode 官方配置机制">
+  OpenCode 官方配置文档说明，配置文件可使用 `opencode.json` 或 `opencode.jsonc`，并支持 `model`、`small_model`、`provider` 等配置项。参考：[OpenCode configuration docs](https://opencode.ai/docs/config/) 和 [OpenCode providers docs](https://opencode.ai/docs/providers/)。
+</GlossaryHint>
+
+## 跟着做
+
+<StepChecklist title="步骤 1：定位配置文件并备份" items={[
+  '先关闭正在运行的 OpenCode。',
+  '找到当前项目或用户级的 OpenCode 配置文件。',
+  '复制一份备份，例如 `opencode.jsonc.bak`。',
+  '确认备份可恢复后，再继续修改。',
+]} />
+
+<StepChecklist title="步骤 2：按你的平台准备 API Key" items={[
+  '推荐把 Key 放到环境变量里，不直接写进配置文件。',
+  '例如统一使用 `FOROPENCODE_API_KEY`。',
+  '如果你的 OpenCode 版本或 provider 配置必须写明 Key 字段，请确认文件不会提交到公开仓库。',
+  '设置环境变量后，关闭旧终端并重新打开。',
+]} />
+
+<PlatformCommandTabs
+  title="选择你的平台：设置临时环境变量"
+  description="手动配置里如果要引用环境变量，先在当前终端设置并测试。"
+  commands={[
+    {label: 'Windows PowerShell', code: '$env:FOROPENCODE_API_KEY="你的真实 Key"', note: '当前窗口生效；长期使用请设置系统环境变量。'},
+    {label: 'macOS zsh', code: 'export FOROPENCODE_API_KEY="你的真实 Key"', note: '当前窗口生效；长期使用可写入 `~/.zshrc`。'},
+    {label: 'Linux bash', code: 'export FOROPENCODE_API_KEY="你的真实 Key"', note: '当前 shell 生效；长期使用可写入 `~/.bashrc`。'},
+  ]}
+/>
+
+<PlatformCommandTabs
+  title="选择你的平台：常见配置文件操作"
+  description="OpenCode 配置文件位置会因项目和安装方式变化；这里给出当前目录创建/打开配置文件的常用命令。"
+  commands={[
+    {label: 'Windows PowerShell', code: 'notepad .\\opencode.jsonc', note: '适合项目目录配置；如果你使用用户级配置，请改成你的实际路径。'},
+    {label: 'macOS zsh', code: 'touch ./opencode.jsonc\nopen -e ./opencode.jsonc', note: '在当前项目目录创建并打开配置文件。'},
+    {label: 'Linux bash', code: 'touch ./opencode.jsonc\nnano ./opencode.jsonc', note: '在当前项目目录创建并打开配置文件。'},
+  ]}
+/>
+
+<StepChecklist title="步骤 3：合并 provider 配置" items={[
+  '新增 ForOpenCode provider，不要删除原 provider。',
+  'Base URL 使用 `https://www.foropencode.com/v1`。',
+  '模型使用 `gpt-5.4`。',
+  '按你当前 OpenCode 版本支持的字段写入 Key 或环境变量引用。',
+  '保留 `setCacheKey=true` 和 variants 配置。',
+]} />
+
+```jsonc
+{
+  // 示例片段：请合并到你现有配置，不要整份覆盖
+  "model": "foropencode/gpt-5.4",
+  "provider": {
+    "foropencode": {
+      "name": "ForOpenCode",
+      "baseURL": "https://www.foropencode.com/v1",
+      "apiKey": "读取 FOROPENCODE_API_KEY 或填入你的真实 Key",
+      "options": {
+        "setCacheKey": true
+      },
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4",
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "high": {"reasoningEffort": "high"},
+            "xhigh": {"reasoningEffort": "xhigh"}
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+<WindowsTip title="为什么示例写成片段">
+  OpenCode 官方配置支持 provider，但不同版本和 provider 类型的具体字段可能不同。本页不把示例当作唯一完整配置，避免你覆盖掉原配置或写入不兼容字段。
+</WindowsTip>
+
+<StepChecklist title="步骤 4：重启并验证" items={[
+  '保存配置文件。',
+  '重新打开 OpenCode。',
+  '新开会话测试，不要用旧会话判断。',
+  '失败时先恢复备份，再对照 CC Switch 页核对字段。',
+]} />
+
+<SuccessCard title="成功判定">
+  <ul>
+    <li>OpenCode 能选择或使用 ForOpenCode provider。</li>
+    <li>模型列表能看到 `gpt-5.4`。</li>
+    <li>新会话正常回复。</li>
+    <li>如果配置损坏，可以用备份文件回退。</li>
+  </ul>
+</SuccessCard>
+
+<ErrorCard title="手动配置风险">
+  <ul>
+    <li>不要把本页 JSONC 片段当作整份配置直接覆盖。</li>
+    <li>不要把示例 Key 原样保存。</li>
+    <li>JSON 多一个逗号、少一个括号都会导致配置失效。</li>
+    <li>不同 OpenCode 版本字段名可能不同，无法确认时优先使用 CC Switch。</li>
+  </ul>
+</ErrorCard>
+
+<WindowsTip title="更稳的方式">
+  不确定配置结构时，先使用 [OpenCode：CC Switch 配置](/tools/opencode/ccswitch)。
+</WindowsTip>
+
+

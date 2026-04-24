@@ -1,0 +1,93 @@
+---
+id: index
+title: 配置失败怎么办
+slug: /troubleshooting
+description: 面向 Windows 新手的排障地图，按失败现象快速定位原因和处理动作。
+platform: Windows
+difficulty: 入门
+estimatedTime: 10 分钟
+prerequisites:
+  - 已经至少尝试过一次配置
+lastVerified: 2026-03-30
+---
+
+import {ErrorCard, LinkCard, StageNav, StepChecklist, WindowsTip} from '@site/src/components/GuideBlocks';
+
+# 配置失败怎么办
+
+先不要急着重装工具，也不要把所有字段全部删掉重填。
+大多数失败都能归到下面这 4 类里。先按“现象”找入口，再做对应动作。
+
+<StageNav
+  items={[
+    {href: '#cannot-connect', title: '直达连接失败', description: '连不上、超时、网络错误。'},
+    {href: '#auth-failed', title: '直达鉴权失败', description: '401、Key 无效、权限不足。'},
+    {href: '#saved-not-working', title: '直达保存后没生效', description: '保存成功但还是走旧配置。'},
+    {href: '#single-tool-failed', title: '直达单工具失败', description: '只有一个工具不正常时从这里看。'},
+  ]}
+/>
+
+## 1. 无法连接站点 {#cannot-connect}
+
+<ErrorCard title="你通常会看到">
+  连接超时、站点不可达、无法访问服务、请求发送失败、网络错误。
+</ErrorCard>
+
+<StepChecklist
+  title="先做这 4 步"
+  items={[
+    '回到配置参数总表，重新确认自己填的是根地址还是 `/v1`。',
+    '检查地址里有没有漏掉 `https://`。',
+    '把地址复制到浏览器里，至少确认根地址能正常打开官网。',
+    '如果工具明确要求 OpenAI-compatible 接口，不要只填根地址。',
+  ]}
+/>
+
+## 2. 鉴权失败 {#auth-failed}
+
+<ErrorCard title="你通常会看到">
+  Unauthorized、401、Key 无效、Token 错误、权限不足。
+</ErrorCard>
+
+<StepChecklist
+  title="优先排这 4 件事"
+  items={[
+    '确认你填的是自己在 ForOpenCode 控制台生成的真实 API Key。',
+    '检查有没有把“你的 API Key”这类示例文本原样保留下来。',
+    '确认工具要求单独填 Key 时，你没有把 Key 拼进地址里。',
+    '如果你最近重新生成过 Key，旧 Key 可能已经失效。',
+  ]}
+/>
+
+## 3. 保存成功，但还是没生效 {#saved-not-working}
+
+<ErrorCard title="你通常会看到">
+  页面里明明显示保存成功，但请求依旧走旧地址、旧模型，或者根本没有变化。
+</ErrorCard>
+
+<StepChecklist
+  title="优先做这 3 件事"
+  items={[
+    '完全关闭工具，再重新打开。',
+    '新建一个空白会话，不要直接在旧聊天里测试。',
+    '重新打开配置页，确认刚才填的内容真的还在。',
+  ]}
+/>
+
+## 4. 只有一个工具失败，其他工具正常 {#single-tool-failed}
+
+<ErrorCard title="这通常说明">
+  你的 ForOpenCode 地址和 Key 大概率没问题，问题更可能出在这个工具自己的字段要求、协议选择或模型填写方式。
+</ErrorCard>
+
+<div className="guide-link-grid">
+  <LinkCard href="/tools/opencode/" title="去 OpenCode 页" description="重点看服务地址、Key 保存和最小测试请求。" />
+  <LinkCard href="/tools/openclaw/" title="去 OpenClaw 页" description="重点看 `/v1`、协议类型、模型 ID 和网关重启。" />
+  <LinkCard href="/tools/codex/" title="去 Codex 页" description="重点看地址、Key、新开会话验证和回退方式。" />
+  <LinkCard href="/tools/claude-code/" title="去 Claude Code 页" description="重点看根地址、不加 `/v1`、保存后状态和终端重启。" />
+</div>
+
+<WindowsTip title="什么时候该回到总表">
+  只要你开始怀疑“我是不是填错地址了”“这个工具到底该不该带 `/v1`”，就直接回 [配置参数总表](/site-config/)。
+  它是这套文档里唯一的字段真相源。
+</WindowsTip>

@@ -1,0 +1,38 @@
+﻿---
+id: quick-path
+title: 第一次推荐路线
+slug: /getting-started/quick-path
+description: 第一次接入 ForOpenCode 时，按最少决策完成一次可验证配置。
+platform: Windows
+difficulty: 入门
+estimatedTime: 30 分钟
+lastVerified: 2026-04-24
+---
+
+import Link from '@docusaurus/Link';
+import {LinkCard, PageHeader, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+<PageHeader eyebrow="Quick Path" title="第一次推荐路线" description="这条路线默认你是新手：先准备 Key，再选软件，然后优先使用 CC Switch 配置，最后重启并新开会话验证。" meta={['新手优先', '先 CC Switch', '最后新会话验证']} />
+
+<StepChecklist title="先按这个顺序走" items={[
+  <>如果还没有 Key，先去 <Link to="/getting-started/create-key">创建并复制 API Key</Link>。</>,
+  <>如果还没安装 CC Switch，先去 <Link to="/getting-started/install-tool">下载安装工具</Link>。</>,
+  <>打开 <Link to="/getting-started/which-page">我该看哪一页</Link>，选择你正在用的软件。</>,
+  '进入该软件的“CC Switch 配置”页，按截图填写。',
+  '保存、启用、重启，再新开会话测试。',
+]} />
+
+<SuccessCard title="跑通之后再做什么"><ul><li>回到对应软件入口页，补看手动配置或回退方式。</li><li>把配置参数总表收藏起来，后面排错时先核对地址和模型。</li><li>如果失败，不要连续乱改，直接进入排障页。</li></ul></SuccessCard>
+
+## 直接入口
+
+<div className="guide-link-grid">
+  <LinkCard href="/tools/codex/ccswitch" title="Codex：CC Switch 配置" description="编码代理用户优先走这里。" />
+  <LinkCard href="/tools/opencode/ccswitch" title="OpenCode：CC Switch 配置" description="需要配置 setCacheKey 和模型属性。" />
+  <LinkCard href="/tools/openclaw/ccswitch" title="OpenClaw：CC Switch 配置" description="重点是协议、默认供应商和 gateway 重启。" />
+  <LinkCard href="/tools/claude-code/ccswitch" title="Claude Code：CC Switch 配置" description="注意这里填根地址，不加 /v1。" />
+</div>
+
+<WindowsTip title="第一次不要做的事">
+  第一次不要直接同时改多个工具，也不要一边改 CC Switch 一边改配置文件。先让一个工具成功，再迁移其他工具。
+</WindowsTip>

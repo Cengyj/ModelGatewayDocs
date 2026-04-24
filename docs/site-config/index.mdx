@@ -1,0 +1,110 @@
+---
+id: index
+title: 配置参数总表
+slug: /site-config
+description: 全站唯一的配置真相源，用来区分站点地址、API 接口地址、/v1、Key 来源、模型 ID 和验证动作。
+platform: Windows
+difficulty: 入门
+estimatedTime: 8 分钟
+prerequisites:
+  - 能登录 ForOpenCode 控制台
+  - 已拿到可用的 API Key
+lastVerified: 2026-03-30
+---
+
+import {CopyCard, GlossaryHint, PrepareChecklist, StageNav, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+# 配置参数总表
+
+这一页是全站唯一的“填什么”真相源。看不懂字段名、忘了地址该填哪个、分不清什么时候要带 `/v1`，都先回到这里。
+
+<StageNav
+  items={[
+    {href: '#addresses', title: '直达地址区别', description: '快速看根地址和 `/v1` 的差异。'},
+    {href: '#tool-rules', title: '直达工具填写规则', description: '直接确认每个工具该怎么填。'},
+    {href: '#copy-values', title: '直达复制区', description: '只想复制地址、Key 来源和模型 ID。'},
+    {href: '#success-check', title: '直达成功判定', description: '配置完后快速核对有没有真正生效。'},
+  ]}
+/>
+
+<PrepareChecklist
+  title="开始前先确认"
+  items={[
+    '你已经在 ForOpenCode 控制台生成了自己的 API Key。',
+    '你能在浏览器里打开 ForOpenCode 官网。',
+    '你知道自己现在要配置的是哪一个工具。',
+  ]}
+>
+  如果这三项里有一项还没准备好，先不要急着进工具页面填字段。
+</PrepareChecklist>
+
+## 先分清 3 种地址 {#addresses}
+
+<div className="guide-table">
+
+| 名称 | 作用 | 什么时候用 | 当前值 |
+| --- | --- | --- | --- |
+| 站点首页地址 | 浏览器里打开官网、登录控制台 | 打开网页、查看令牌、找控制台入口 | `https://www.foropencode.com/` |
+| API 根地址 | 某些工具的 Base URL / Endpoint / Provider URL | 工具页面明确让你填“服务地址”但没有要求 OpenAI 标准路径时 | `https://www.foropencode.com/` |
+| API `/v1` 地址 | OpenAI-compatible 接口入口 | 工具要求 OpenAI-compatible、`/v1`、Completions、Chat Completions 时 | `https://www.foropencode.com/v1` |
+
+</div>
+
+<GlossaryHint title="最容易混淆的地方">
+  `https://www.foropencode.com/` 和 `https://www.foropencode.com/v1` 不是随便二选一。
+  前者是根地址，后者是带 OpenAI-compatible 路径的接口地址。
+  工具页如果明确要求 OpenAI 协议或 `/v1`，就不要只填根地址。
+</GlossaryHint>
+
+## 当前项目已确认的填写方式 {#tool-rules}
+
+<div className="guide-table">
+
+| 工具 | 地址字段怎么填 | Key 从哪里来 | 额外注意 |
+| --- | --- | --- | --- |
+| OpenCode | 按当前实机配置填写 `/v1` 地址 | ForOpenCode 控制台 > 令牌管理 | 接口格式选 `OpenAI Compatible`，并在列表里再点一次“添加” |
+| OpenClaw | 必须填写 `/v1` 地址 | ForOpenCode 控制台 > 令牌管理 | API 协议选 `OpenAI Completions` |
+| Codex | 按当前实机配置填写 `/v1` 地址 | ForOpenCode 控制台 > 令牌管理 | 模型填 `gpt-5.4`，添加后还要点“启用”并重启 CLI 或 VS Code |
+| Claude Code | 按当前实机配置填写根地址 | ForOpenCode 控制台 > 令牌管理 | 填 `https://www.foropencode.com`，不要加 `/v1`；如需 GPT 5.4，按任务选择 `gpt-5.4-low`、`gpt-5.4-medium` 或 `gpt-5.4-high` |
+
+</div>
+
+## 可直接复制 {#copy-values}
+
+<CopyCard title="站点首页地址" code="https://www.foropencode.com/" />
+
+<CopyCard title="OpenAI-compatible 接口地址" code="https://www.foropencode.com/v1" />
+
+<CopyCard
+  title="API Key 来源"
+  code="ForOpenCode 控制台 > 令牌管理"
+  note="不要把示例中的“你的 API Key”原样保留在工具里。必须换成你自己的真实 Key。"
+/>
+
+<CopyCard
+  title="当前示例模型 ID"
+  code="gpt-5.4"
+  note="这是当前项目已实机整理过的工具页共用示例模型，具体每个工具要不要单独填模型，以对应教程页为准。"
+/>
+
+<CopyCard
+  title="Claude Code 可选的 GPT 5.4 模型"
+  code={"gpt-5.4-low\ngpt-5.4-medium\ngpt-5.4-high"}
+  note="它们分别对应低、中、高思考程度。第一次配置 Claude Code 时，通常优先选 `gpt-5.4-medium`。"
+/>
+
+## 成功判定标准 {#success-check}
+
+<SuccessCard title="不是“能保存”就算成功">
+  至少满足下面 3 条，才算真的接上 ForOpenCode：
+  <ul>
+    <li>地址和 Key 已保存。</li>
+    <li>重启工具或新开会话后，仍然保留新配置。</li>
+    <li>发送一个最小测试问题时，能够正常返回，不再报连接或鉴权错误。</li>
+  </ul>
+</SuccessCard>
+
+<WindowsTip title="Windows 用户的小提醒">
+  如果某个工具提示你“重启应用后生效”，请真的关掉再重新打开。
+  很多“明明保存了却没效果”的情况，最后都是旧进程还在吃旧配置。
+</WindowsTip>

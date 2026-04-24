@@ -1,0 +1,36 @@
+# Dependencies
+/node_modules
+
+# Production
+/build
+
+# Generated files
+.docusaurus
+.cache-loader
+
+# Local env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+/serve.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local files
+/c.json
+/temp-docs
+
+# OS
+.DS_Store
+
+# Local tooling and generated logs
+/.tools
+/.sisyphus
+*.log
+*.tar.gz
+

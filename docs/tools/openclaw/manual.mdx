@@ -1,0 +1,98 @@
+﻿---
+title: OpenClaw：手动配置
+slug: /tools/openclaw/manual
+description: 结合 OpenClaw 官方仓库配置入口说明，手动配置 ForOpenCode 供应商、协议、模型和 gateway 重启。
+platform: Windows / macOS / Linux
+difficulty: 进阶
+estimatedTime: 18 分钟
+lastVerified: 2026-04-24
+hide_title: true
+---
+
+import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+<PageHeader eyebrow="OpenClaw / 手动配置" title="手动配置 OpenClaw" description="这页给已经熟悉 OpenClaw 配置结构的人使用。OpenClaw 官方仓库说明包含 gateway 命令和配置文件入口；ForOpenCode 具体供应商字段仍以你当前版本配置结构为准。" meta={['进阶方式', '先备份', '需要重启 gateway']} />
+
+<PrepareChecklist title="开始前准备" items={[
+  '先备份 OpenClaw 当前配置。',
+  '准备 ForOpenCode API Key。',
+  '确认你知道当前 OpenClaw 版本的 provider 配置结构。',
+  '确认知道如何执行 `openclaw gateway restart`。',
+  '如果不能恢复旧配置，请使用 CC Switch 方式。',
+]} />
+
+<CopyCard title="API 端点" code="https://www.foropencode.com/v1" />
+<CopyCard title="协议" code="OpenAI Completions" />
+<CopyCard title="模型 ID" code="gpt-5.4" />
+<CopyCard title="重启命令" code="openclaw gateway restart" />
+
+## 官方依据
+
+<GlossaryHint title="OpenClaw 官方入口和本页边界">
+  OpenClaw 官方仓库提供 gateway 命令和配置文件相关入口，但不同版本的 provider 字段可能变化。本页只固定 ForOpenCode 必填值：协议、端点、Key、模型、默认供应商和重启动作；不编造完整配置文件路径或结构。参考：[OpenClaw GitHub](https://github.com/CodePhiliaX/OpenClaw)。
+</GlossaryHint>
+
+## 跟着做
+
+<StepChecklist title="步骤 1：备份并确认配置入口" items={[
+  '关闭或暂停正在使用的 OpenClaw 会话。',
+  '找到当前版本的 providers 或供应商配置区域。',
+  '复制一份原配置，便于回退。',
+  '不要覆盖原来能用的供应商。',
+]} />
+
+<StepChecklist title="步骤 2：新增 ForOpenCode 供应商" items={[
+  '新增供应商标识，例如 `foropencode`。',
+  '供应商名称建议写 `ForOpenCode`。',
+  '协议使用 `OpenAI Completions`。',
+  '端点使用 `https://www.foropencode.com/v1`。',
+  'Key 使用自己的真实 Key，或使用当前版本支持的环境变量引用方式。',
+]} />
+
+<StepChecklist title="步骤 3：添加模型并设为默认" items={[
+  '模型 ID 使用 `gpt-5.4`。',
+  '显示名称也建议写 `gpt-5.4`。',
+  '确认模型挂在 ForOpenCode 供应商下。',
+  '把 ForOpenCode 设为默认供应商。',
+]} />
+
+<StepChecklist title="步骤 4：按你的平台重启 gateway 并验证" items={[
+  '保存配置。',
+  '执行 `openclaw gateway restart`。',
+  '重新打开 OpenClaw。',
+  '新开聊天验证，不要用旧聊天判断。',
+]} />
+
+<PlatformCommandTabs
+  title="选择你的平台：重启 OpenClaw gateway"
+  description="同一个动作在三平台命令基本一致，差别主要是在哪个终端里执行。"
+  commands={[
+    {label: 'Windows PowerShell', code: 'openclaw gateway restart', note: '也可以在 cmd 中执行同一条命令。执行后回到 OpenClaw 新开聊天测试。'},
+    {label: 'macOS zsh', code: 'openclaw gateway restart', note: '如果提示找不到命令，先确认 OpenClaw CLI 已加入 PATH。'},
+    {label: 'Linux bash', code: 'openclaw gateway restart', note: '如果提示权限或 PATH 问题，先确认 CLI 安装和环境变量。'},
+  ]}
+/>
+
+<SuccessCard title="成功判定">
+  <ul>
+    <li>新聊天能正常回复。</li>
+    <li>默认供应商已经指向 ForOpenCode。</li>
+    <li>gateway 已重启。</li>
+    <li>失败时可以恢复备份。</li>
+  </ul>
+</SuccessCard>
+
+<ErrorCard title="手动配置风险">
+  <ul>
+    <li>OpenClaw 配置结构可能随版本变化，本页不写死完整文件，避免误导不同版本用户。</li>
+    <li>忘记重启 gateway 会导致旧配置继续生效。</li>
+    <li>旧聊天可能不会刷新配置，必须新开聊天验证。</li>
+    <li>协议、端点、默认供应商任意一项错误，都可能表现为“Key 不可用”。</li>
+  </ul>
+</ErrorCard>
+
+<WindowsTip title="更稳的方式">
+  如果不知道配置文件结构，使用 [OpenClaw：CC Switch 配置](/tools/openclaw/ccswitch)。
+</WindowsTip>
+
+

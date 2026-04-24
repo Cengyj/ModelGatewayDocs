@@ -1,0 +1,14 @@
+services:
+  docs:
+    image: ${IMAGE_NAME:-model-gateway-docs}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SITE_URL: ${SITE_URL:-https://www.foropencode.com}
+        ALGOLIA_APP_ID: ${ALGOLIA_APP_ID:-}
+        ALGOLIA_SEARCH_API_KEY: ${ALGOLIA_SEARCH_API_KEY:-}
+        ALGOLIA_INDEX_NAME: ${ALGOLIA_INDEX_NAME:-}
+    ports:
+      - "${HOST_PORT:-8081}:80"
+    restart: unless-stopped
