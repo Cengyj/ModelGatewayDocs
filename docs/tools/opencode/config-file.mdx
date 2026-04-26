@@ -9,7 +9,7 @@ lastVerified: 2026-04-24
 hide_title: true
 ---
 
-import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
 
 <PageHeader eyebrow="OpenCode / 手动配置" title="手动配置 OpenCode" description="这页按 OpenCode 官方配置文档整理。OpenCode 配置文件支持 JSON/JSONC，可以在 config 里配置 provider、model、small_model 等字段。ForOpenCode 的具体 provider 结构仍要按你本机 OpenCode 版本合并。" meta={['官方依据：opencode config', 'JSON / JSONC', '先备份再合并']} />
 
@@ -19,12 +19,6 @@ import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, Prep
   '确认你会编辑 JSON 或 JSONC。',
   '先备份原配置，不要直接覆盖整份文件。',
 ]} />
-
-<CopyCard title="常见配置文件名" code="opencode.json 或 opencode.jsonc" note="OpenCode 官方文档说明可使用 JSON / JSONC 配置文件；实际路径以你的安装方式和项目为准。" />
-<CopyCard title="ForOpenCode Base URL" code="https://www.foropencode.com/v1" />
-<CopyCard title="模型 ID" code="gpt-5.4" />
-<CopyCard title="建议环境变量名" code="FOROPENCODE_API_KEY" />
-<CopyCard title="额外选项" code="setCacheKey = true" />
 
 ## 官方依据
 

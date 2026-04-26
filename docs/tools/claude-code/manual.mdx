@@ -9,9 +9,9 @@ lastVerified: 2026-04-24
 hide_title: true
 ---
 
-import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
 
-<PageHeader eyebrow="Claude Code / 手动配置" title="手动配置 Claude Code" description="Claude Code 官方文档说明可以通过 settings 文件和环境变量控制配置。本项目已确认 CC Switch 实机口径：Claude Code 接 ForOpenCode 时使用根地址，不加 /v1。" meta={['进阶方式', '根地址', '官方依据：settings / env']} />
+<PageHeader eyebrow="Claude Code / 手动配置" title="手动配置 Claude Code" description="Claude Code 手动配置建议直接修改 settings.json，在 env 中写入 ForOpenCode Key 和根地址。这里不要使用其他工具的 /v1 地址。" meta={['进阶方式', 'settings.json', '根地址']} />
 
 <PrepareChecklist title="开始前准备" items={[
   '确认你知道 Claude Code 当前使用哪种配置方式。',
@@ -20,82 +20,88 @@ import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, Prep
   '准备重启终端并新开会话。',
 ]} />
 
-<CopyCard title="服务地址" code="https://www.foropencode.com" note="Claude Code 当前教程按根地址配置，不要照搬其他工具的 /v1 地址。" />
-<CopyCard title="API Key 来源" code="ForOpenCode 控制台 > 令牌管理" note="先复制你自己的真实 Key，再回到终端或 settings 文件里填写。" />
-<CopyCard title="可选模型档位" code={"gpt-5.4-low\ngpt-5.4-medium\ngpt-5.4-high"} note="第一次建议先选 medium；跑通后再按任务复杂度切换。" />
-
 ## 官方依据
 
 <GlossaryHint title="Claude Code 官方配置机制">
-  Anthropic Claude Code 官方文档说明，Claude Code 支持通过用户级、项目级和本地 settings 文件配置，也支持环境变量；环境变量可用于 API key、base URL 等运行时配置。本页保留官方配置机制，但 ForOpenCode 的具体地址按本站实机截图：根地址。参考：[Claude Code settings](https://docs.anthropic.com/en/docs/claude-code/settings) 与 [Claude Code environment variables](https://docs.anthropic.com/en/docs/claude-code/settings#environment-variables)。
+  Claude Code 支持通过 settings 文件写入 `env` 配置。ForOpenCode 接入 Claude Code 时填写根地址 `https://foropencode.com/`，不要照搬 OpenCode、OpenClaw、Codex 等工具常用的 `/v1` 地址。
 </GlossaryHint>
 
 ## 跟着做
 
-<StepChecklist title="步骤 1：记录旧配置" items={[
-  '记录当前能用的服务地址、Key 来源或供应商名称。',
-  '如果使用环境变量，先记录旧变量值。',
-  '如果使用 settings 文件，先复制一份备份。',
-  '确认能回退后再修改。',
+<StepChecklist title="步骤 1：找到并备份 settings.json" items={[
+  '先关闭正在运行的 Claude Code。',
+  '找到你当前使用的 Claude Code `settings.json`。',
+  '常见位置包括用户级 settings、项目级 `.claude/settings.json` 或本地 `.claude/settings.local.json`，以你当前实际使用的文件为准。',
+  '修改前复制一份备份，确认能回退后再继续。',
 ]} />
 
-<StepChecklist title="步骤 2：选择配置方式" items={[
-  '如果你只想临时测试，优先使用当前终端环境变量。',
-  '如果你要长期使用，可以写入用户级或项目级 settings。',
-  '如果你不确定 settings 位置和字段，请不要手动改文件。',
-  '任何方式都要确保 Key 不进入公开仓库。',
+<StepChecklist title="步骤 2：写入 env 配置" items={[
+  '把 `ANTHROPIC_AUTH_TOKEN` 改成你自己的 ForOpenCode API Key。',
+  '把 `ANTHROPIC_BASE_URL` 填为 `https://foropencode.com/`。',
+  '确认地址末尾可以保留 `/`，但不要写成 `/v1`。',
+  '如果这是项目级配置，确认不会把真实 Key 提交到公开仓库。',
 ]} />
 
-<WindowsTip title="先决定你属于哪一类用户">
-  你如果只是想先跑通，就走临时环境变量；如果你已经知道 settings 文件在哪里，再考虑长期写入。两者不要混着配。
+```json
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-你的真实Key",
+    "ANTHROPIC_BASE_URL": "https://foropencode.com/"
+  },
+  "includeCoAuthoredBy": false
+}
+```
+
+<WindowsTip title="如果原文件已有其他配置">
+  不要整份覆盖。保留原有字段，只把上面的 `env` 和 `includeCoAuthoredBy` 合并进去；如果原来已经有 `env`，就在原 `env` 里新增或替换这两个变量。
 </WindowsTip>
 
 <PlatformCommandTabs
-  title="选择你的平台：临时设置 Claude Code 环境变量"
-  description="下面命令只对当前终端窗口生效，适合先测试是否能连通。变量名以 Claude Code 官方环境变量口径为准。"
+  title="选择你的平台：打开 settings.json"
+  description="路径以你实际使用的 settings 文件为准；下面只给常见打开方式。"
   commands={[
-    {label: 'Windows PowerShell', code: '$env:ANTHROPIC_AUTH_TOKEN="你的真实 Key"\n$env:ANTHROPIC_BASE_URL="https://www.foropencode.com"', note: '设置后在同一个 PowerShell 窗口启动 Claude Code 测试。'},
-    {label: 'macOS zsh', code: 'export ANTHROPIC_AUTH_TOKEN="你的真实 Key"\nexport ANTHROPIC_BASE_URL="https://www.foropencode.com"', note: '设置后在同一个终端窗口启动 Claude Code 测试。'},
-    {label: 'Linux bash', code: 'export ANTHROPIC_AUTH_TOKEN="你的真实 Key"\nexport ANTHROPIC_BASE_URL="https://www.foropencode.com"', note: '设置后在同一个 shell 中启动 Claude Code 测试。'},
+    {label: 'Windows PowerShell', code: 'notepad .\\.claude\\settings.json', note: '如果你使用用户级 settings，请改成你的实际路径。'},
+    {label: 'macOS zsh', code: 'open -e ./.claude/settings.json', note: '如果文件不存在，先创建 `.claude` 目录和 settings 文件。'},
+    {label: 'Linux bash', code: 'nano ./.claude/settings.json', note: '如果你使用本地私有配置，可改为 `.claude/settings.local.json`。'},
   ]}
 />
 
 <PlatformCommandTabs
-  title="选择你的平台：长期使用建议"
-  description="临时命令测试成功后，再考虑写入系统环境变量或 shell 配置。"
+  title="选择你的平台：确认 JSON 格式"
+  description="保存前可以用本机工具检查 JSON 是否有效。"
   commands={[
-    {label: 'Windows PowerShell', code: 'setx ANTHROPIC_AUTH_TOKEN "你的真实 Key"\nsetx ANTHROPIC_BASE_URL "https://www.foropencode.com"', note: '`setx` 对新开的终端生效；执行后必须关闭并重新打开终端。'},
-    {label: 'macOS zsh', code: 'echo \'export ANTHROPIC_AUTH_TOKEN="你的真实 Key"\' >> ~/.zshrc\necho \'export ANTHROPIC_BASE_URL="https://www.foropencode.com"\' >> ~/.zshrc', note: '写入后重新打开终端，或执行 `source ~/.zshrc`。'},
-    {label: 'Linux bash', code: 'echo \'export ANTHROPIC_AUTH_TOKEN="你的真实 Key"\' >> ~/.bashrc\necho \'export ANTHROPIC_BASE_URL="https://www.foropencode.com"\' >> ~/.bashrc', note: '写入后重新打开终端，或执行 `source ~/.bashrc`。'},
+    {label: 'Windows PowerShell', code: 'Get-Content .\\.claude\\settings.json | ConvertFrom-Json | Out-Null', note: '无报错表示 JSON 语法基本有效。'},
+    {label: 'macOS zsh', code: 'python3 -m json.tool ./.claude/settings.json >/dev/null', note: '无报错表示 JSON 语法基本有效。'},
+    {label: 'Linux bash', code: 'python3 -m json.tool ./.claude/settings.json >/dev/null', note: '无报错表示 JSON 语法基本有效。'},
   ]}
 />
 
-<StepChecklist title="步骤 3：写入 ForOpenCode 服务信息" items={[
-  '服务地址使用 `https://www.foropencode.com`。',
-  'API Key 使用自己的真实密钥。',
-  '模型档位按速度、均衡、复杂任务选择。',
-  '第一次测试建议用 `gpt-5.4-medium`。',
+<StepChecklist title="步骤 3：保存并重启 Claude Code" items={[
+  '保存 settings 文件。',
+  '关闭旧终端或旧 Claude Code 会话。',
+  '重新打开 Claude Code。',
+  '新开会话发送一个简单问题验证。',
 ]} />
 
-<StepChecklist title="步骤 4：重启并验证" items={[
-  '保存 settings 或环境变量。',
-  '关闭旧终端。',
-  '重新打开 Claude Code。',
-  '新开会话发送简单问题。',
+<StepChecklist title="步骤 4：失败时先检查这些项" items={[
+  '`ANTHROPIC_AUTH_TOKEN` 是否是完整的 ForOpenCode Key。',
+  '`ANTHROPIC_BASE_URL` 是否为 `https://foropencode.com/`，不是 `/v1`。',
+  'settings 文件是否被更高优先级的项目配置覆盖。',
+  '旧会话是否已经关闭并重新打开。',
 ]} />
 
 <SuccessCard title="成功判定">
   <ul>
     <li>新会话能正常回复。</li>
     <li>不再出现连接失败或鉴权失败。</li>
-    <li>回退时可以恢复原 settings 或环境变量。</li>
+    <li>回退时可以恢复原 settings 文件。</li>
   </ul>
 </SuccessCard>
 
 <ErrorCard title="手动配置风险">
   <ul>
     <li>不要把其他工具的 `/v1` 地址照搬到 Claude Code。</li>
-    <li>旧终端不会自动刷新新配置。</li>
+    <li>旧终端或旧 Claude Code 会话不会自动刷新新配置。</li>
     <li>settings 文件层级可能覆盖彼此，项目级配置可能覆盖用户级配置。</li>
     <li>如果你无法确认配置位置和优先级，请使用 CC Switch 配置方式。</li>
   </ul>
