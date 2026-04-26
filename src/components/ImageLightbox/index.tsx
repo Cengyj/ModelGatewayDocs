@@ -1,4 +1,4 @@
-import React, {type PointerEvent, type ReactNode, useEffect, useRef, useState} from 'react';
+import React, {type PointerEvent, useCallback, useEffect, useRef, useState} from 'react';
 
 type ActiveImage = {
   src: string;
@@ -10,9 +10,16 @@ type Point = {
   y: number;
 };
 
+type ToolbarAction = {
+  label: string;
+  symbol: string;
+  onClick: () => void;
+};
+
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 4;
 const SCALE_STEP = 0.25;
+const INITIAL_OFFSET: Point = {x: 0, y: 0};
 
 function clampScale(value: number) {
   return Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(value.toFixed(2))));
@@ -21,8 +28,30 @@ function clampScale(value: number) {
 export default function ImageLightbox() {
   const [activeImage, setActiveImage] = useState<ActiveImage | null>(null);
   const [scale, setScale] = useState(1);
-  const [offset, setOffset] = useState<Point>({x: 0, y: 0});
+  const [offset, setOffset] = useState<Point>(INITIAL_OFFSET);
   const dragRef = useRef<{pointerId: number; startX: number; startY: number; origin: Point} | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  const resetView = useCallback(() => {
+    setScale(1);
+    setOffset(INITIAL_OFFSET);
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    setActiveImage(null);
+    dragRef.current = null;
+    previousFocusRef.current?.focus();
+    previousFocusRef.current = null;
+  }, []);
+
+  const zoomIn = useCallback(() => {
+    setScale(currentScale => clampScale(currentScale + SCALE_STEP));
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    setScale(currentScale => clampScale(currentScale - SCALE_STEP));
+  }, []);
 
   useEffect(() => {
     function handleDocumentClick(event: MouseEvent) {
@@ -37,17 +66,17 @@ export default function ImageLightbox() {
       }
 
       event.preventDefault();
+      previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setActiveImage({
         src: target.currentSrc || target.src,
         alt: target.alt || '文档图片',
       });
-      setScale(1);
-      setOffset({x: 0, y: 0});
+      resetView();
     }
 
     document.addEventListener('click', handleDocumentClick);
     return () => document.removeEventListener('click', handleDocumentClick);
-  }, []);
+  }, [resetView]);
 
   useEffect(() => {
     if (!activeImage) {
@@ -56,6 +85,7 @@ export default function ImageLightbox() {
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    dialogRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -75,25 +105,7 @@ export default function ImageLightbox() {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeImage]);
-
-  function closeLightbox() {
-    setActiveImage(null);
-    dragRef.current = null;
-  }
-
-  function resetView() {
-    setScale(1);
-    setOffset({x: 0, y: 0});
-  }
-
-  function zoomIn() {
-    setScale(currentScale => clampScale(currentScale + SCALE_STEP));
-  }
-
-  function zoomOut() {
-    setScale(currentScale => clampScale(currentScale - SCALE_STEP));
-  }
+  }, [activeImage, closeLightbox, resetView, zoomIn, zoomOut]);
 
   function handleWheel(event: React.WheelEvent<HTMLDivElement>) {
     event.preventDefault();
@@ -136,7 +148,10 @@ export default function ImageLightbox() {
     }
 
     dragRef.current = null;
-    event.currentTarget.releasePointerCapture(event.pointerId);
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
   }
 
   function handleStageClick(event: React.MouseEvent<HTMLDivElement>) {
@@ -149,15 +164,21 @@ export default function ImageLightbox() {
     return null;
   }
 
+  const toolbarActions: ReadonlyArray<ToolbarAction> = [
+    {label: '缩小', symbol: '−', onClick: zoomOut},
+    {label: '放大', symbol: '+', onClick: zoomIn},
+    {label: '重置', symbol: '↺', onClick: resetView},
+    {label: '关闭', symbol: '×', onClick: closeLightbox},
+  ];
+
   return (
-    <div className="image-lightbox" role="dialog" aria-modal="true" aria-label="图片预览">
+    <div ref={dialogRef} className="image-lightbox" role="dialog" aria-modal="true" aria-label="图片预览" tabIndex={-1}>
       <div className="image-lightbox__backdrop" onClick={closeLightbox} />
       <div className="image-lightbox__toolbar" role="toolbar" aria-label="图片控制">
-        <IconButton label="缩小" title="缩小" onClick={zoomOut}>缩小</IconButton>
         <span className="image-lightbox__scale">{Math.round(scale * 100)}%</span>
-        <IconButton label="放大" title="放大" onClick={zoomIn}>放大</IconButton>
-        <IconButton label="重置" title="重置" onClick={resetView}>重置</IconButton>
-        <IconButton label="关闭" title="关闭" onClick={closeLightbox}>关闭</IconButton>
+        {toolbarActions.map(action => (
+          <IconButton key={action.label} label={action.label} symbol={action.symbol} onClick={action.onClick} />
+        ))}
       </div>
       <div
         className="image-lightbox__stage"
@@ -181,18 +202,17 @@ export default function ImageLightbox() {
 
 function IconButton({
   label,
-  title,
+  symbol,
   onClick,
-  children,
 }: {
+  key?: string;
   label: string;
-  title: string;
+  symbol: string;
   onClick: () => void;
-  children?: ReactNode;
 }) {
   return (
-    <button className="image-lightbox__button" type="button" aria-label={label} title={title} onClick={onClick}>
-      {children}
+    <button className="image-lightbox__button" type="button" aria-label={label} title={label} onClick={onClick}>
+      <span aria-hidden="true">{symbol}</span>
     </button>
   );
 }

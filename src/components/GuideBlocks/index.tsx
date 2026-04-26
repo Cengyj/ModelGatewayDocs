@@ -1,7 +1,5 @@
-﻿import React, {type ReactNode, useEffect, useMemo, useState} from 'react';
+import React, {type ReactNode, useEffect, useId, useMemo, useState} from 'react';
 import Link from '@docusaurus/Link';
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 type ListProps = {
   title: string;
@@ -71,7 +69,32 @@ type StageNavProps = {
 };
 
 function isHttpUrl(value: string) {
-  return /^https?:\/\//i.test(value.trim());
+  const trimmedValue = value.trim();
+  return /^https?:\/\//i.test(trimmedValue);
+}
+
+function useCopyFeedback(resetDelay = 1600) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setCopied(false), resetDelay);
+    return () => window.clearTimeout(timer);
+  }, [copied, resetDelay]);
+
+  async function copyText(value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return {copied, copyText};
 }
 
 function renderPlainTextWithLinks(text: string, keyPrefix: string) {
@@ -152,30 +175,12 @@ export function StepChecklist({title, items, children}: ListProps) {
 }
 
 export function CopyCard({title, code, note}: CopyCardProps) {
-  const [copied, setCopied] = useState(false);
+  const {copied, copyText} = useCopyFeedback();
   const normalizedCode = useMemo(() => code.replace(/\r\n/g, '\n'), [code]);
   const openUrl = useMemo(() => {
     const trimmedCode = normalizedCode.trim();
     return isHttpUrl(trimmedCode) && !/\s/.test(trimmedCode) ? trimmedCode : null;
   }, [normalizedCode]);
-
-  useEffect(() => {
-    if (!copied) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => setCopied(false), 1600);
-    return () => window.clearTimeout(timer);
-  }, [copied]);
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(normalizedCode);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  }
 
   return (
     <section className="copy-card">
@@ -193,7 +198,7 @@ export function CopyCard({title, code, note}: CopyCardProps) {
               打开
             </a>
           ) : null}
-          <button className="copy-card__button" type="button" onClick={handleCopy}>
+          <button className="copy-card__button" type="button" onClick={() => copyText(normalizedCode)}>
             {copied ? '已复制' : '复制'}
           </button>
         </div>
@@ -206,30 +211,12 @@ export function CopyCard({title, code, note}: CopyCardProps) {
 }
 
 export function InlineCopyCode({code}: InlineCopyCodeProps) {
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (!copied) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => setCopied(false), 1600);
-    return () => window.clearTimeout(timer);
-  }, [copied]);
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  }
+  const {copied, copyText} = useCopyFeedback();
 
   return (
     <span className="inline-copy-code">
       <code>{code}</code>
-      <button className="inline-copy-code__button" type="button" onClick={handleCopy}>
+      <button className="inline-copy-code__button" type="button" onClick={() => copyText(code)}>
         {copied ? '已复制' : '复制'}
       </button>
     </span>
@@ -359,6 +346,33 @@ export function MethodGrid({title = '选择配置方式', items}: MethodGridProp
 export function PlatformCommandTabs({title, description, commands}: PlatformCommandGridProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const activeCommand = commands[activeIndex] ?? commands[0];
+  const tabSetId = useId();
+
+  function selectNextTab(direction: 1 | -1) {
+    setActiveIndex(currentIndex => {
+      const nextIndex = currentIndex + direction;
+
+      if (nextIndex < 0) {
+        return commands.length - 1;
+      }
+
+      if (nextIndex >= commands.length) {
+        return 0;
+      }
+
+      return nextIndex;
+    });
+  }
+
+  function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      selectNextTab(1);
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      selectNextTab(-1);
+    }
+  }
 
   return (
     <section className="platform-command-tabs-wrap">
@@ -374,14 +388,22 @@ export function PlatformCommandTabs({title, description, commands}: PlatformComm
               key={command.label}
               type="button"
               role="tab"
+              id={`${tabSetId}-tab-${index}`}
               aria-selected={index === activeIndex}
+              aria-controls={`${tabSetId}-panel`}
+              tabIndex={index === activeIndex ? 0 : -1}
+              onKeyDown={handleTabKeyDown}
               onClick={() => setActiveIndex(index)}>
               {command.label}
             </button>
           ))}
         </div>
         {activeCommand ? (
-          <section className="platform-command-tabs__panel" role="tabpanel">
+          <section
+            className="platform-command-tabs__panel"
+            role="tabpanel"
+            id={`${tabSetId}-panel`}
+            aria-labelledby={`${tabSetId}-tab-${activeIndex}`}>
             <section className="platform-command-card platform-command-card--tab">
               <pre className="platform-command-card__code">
                 <code>{activeCommand.code}</code>

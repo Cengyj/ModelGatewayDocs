@@ -146,7 +146,7 @@ body {
   color: var(--guide-text);
   font-size: 0.98rem;
   font-weight: 760;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
 }
 
 .navbar__link {
@@ -180,7 +180,7 @@ body {
 .theme-doc-markdown h2,
 .theme-doc-markdown h3 {
   color: var(--guide-text);
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
 }
 
 .theme-doc-markdown h2 {
@@ -443,7 +443,7 @@ div[class^='codeBlockContainer'] {
   color: var(--guide-text);
   font-size: clamp(2.45rem, 5vw, 4.6rem);
   font-weight: 780;
-  letter-spacing: -0.07em;
+  letter-spacing: 0;
   line-height: 0.98;
   margin: 0 0 1.05rem;
   max-width: 980px;
@@ -589,7 +589,7 @@ div[class^='codeBlockContainer'] {
   color: var(--guide-text);
   font-size: 1.08rem;
   font-weight: 720;
-  letter-spacing: -0.028em;
+  letter-spacing: 0;
 }
 
 .guide-link-card__description,
@@ -639,7 +639,7 @@ div[class^='codeBlockContainer'] {
   color: var(--guide-text);
   font-size: 1rem;
   font-weight: 740;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   margin-bottom: 0.62rem;
 }
 
@@ -832,6 +832,7 @@ div[class^='codeBlockContainer'] {
   display: flex;
   inset: 0;
   justify-content: center;
+  outline: none;
   padding: 5.4rem 1.4rem 1.4rem;
   position: fixed;
   z-index: 9999;
@@ -870,13 +871,14 @@ div[class^='codeBlockContainer'] {
   cursor: pointer;
   display: inline-flex;
   flex: 0 0 auto;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 800;
   height: 2.35rem;
   justify-content: center;
-  min-width: 2.35rem;
-  padding: 0 0.74rem;
+  line-height: 1;
+  padding: 0;
   transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+  width: 2.35rem;
 }
 
 .image-lightbox__button:hover,
@@ -984,7 +986,7 @@ div[class^='codeBlockContainer'] {
   .guide-hero__title,
   .page-header-card h1 {
     font-size: 2.2rem;
-    letter-spacing: -0.055em;
+    letter-spacing: 0;
   }
 
   .guide-link-grid,
@@ -1033,11 +1035,9 @@ div[class^='codeBlockContainer'] {
   }
 
   .image-lightbox__button {
-    font-size: 0.82rem;
+    font-size: 1rem;
     height: 2rem;
-    min-width: 2rem;
-    padding: 0 0.5rem;
-    white-space: nowrap;
+    width: 2rem;
   }
 
   .image-lightbox__scale {
@@ -1062,7 +1062,7 @@ div[class^='codeBlockContainer'] {
   color: var(--guide-text);
   font-size: 1rem;
   font-weight: 740;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .platform-command-grid__header p {
