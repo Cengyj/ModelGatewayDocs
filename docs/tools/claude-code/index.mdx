@@ -9,15 +9,9 @@ lastVerified: 2026-04-24
 hide_title: true
 ---
 
-import {ErrorCard, MethodGrid, PageHeader, PrepareChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+import {ErrorCard, PageHeader, PrepareChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
 
-<PageHeader eyebrow="Claude Code" title="先选一种 Claude Code 配置方式" description="Claude Code 和其他工具最不同：当前实机截图中请求地址填根地址，不要照搬 /v1。第一次配置建议走 CC Switch。" meta={['推荐：CC Switch', '地址：根地址', '模型档位：gpt-5.4-low / medium / high']} />
-
-<MethodGrid items={[
-  {href: '/tools/claude-code/ccswitch', title: 'Claude Code：CC Switch 配置', description: '按截图填写供应商名称、Key 和根地址，再选择对应 gpt-5.4 档位。', badge: '推荐新手', recommended: true},
-  {href: '/tools/claude-code/manual', title: 'Claude Code：手动配置', description: '适合熟悉 Claude Code 环境变量或配置文件的人，按根地址和 Key 手动接入。', badge: '进阶'},
-  {href: '/troubleshooting/', title: '我已经配置失败了', description: '保存后没生效、鉴权失败或旧终端没刷新时从这里排查。', badge: '排障'},
-]} />
+<PageHeader eyebrow="Claude Code" title="Claude Code 配置说明" description="Claude Code 和其他工具最不同：当前实机截图中请求地址填根地址，不要照搬 /v1。第一次配置建议走 CC Switch。" meta={['推荐：CC Switch', '地址：根地址', '模型档位：gpt-5.4-low / medium / high']} />
 
 <PrepareChecklist title="你需要准备" items={[
   'ForOpenCode API Key。',
@@ -26,7 +20,7 @@ import {ErrorCard, MethodGrid, PageHeader, PrepareChecklist, SuccessCard, Window
   '配置后重启终端并新开会话。',
 ]} />
 
-<SuccessCard title="推荐选择">
+<SuccessCard title="配置建议">
   <ul>
     <li>第一次配置：选择 CC Switch 配置。</li>
     <li>已经熟悉环境变量或配置文件：再看手动配置。</li>

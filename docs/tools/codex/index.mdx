@@ -9,21 +9,13 @@ lastVerified: 2026-04-26
 hide_title: true
 ---
 
-import {MethodGrid, PageHeader, PrepareChecklist, WindowsTip} from '@site/src/components/GuideBlocks';
+import {PageHeader, PrepareChecklist, WindowsTip} from '@site/src/components/GuideBlocks';
 
 <PageHeader
   eyebrow="Codex"
-  title="先选一种 Codex 配置方式"
+  title="Codex 配置说明"
   description="如果你是 Windows 新手，推荐先走 CC Switch 图形界面；如果你熟悉配置文件，可以直接手动修改 Codex 的配置。"
   meta={['推荐：CC Switch', '手动：配置文件', '模型：gpt-5.4']}
-/>
-
-<MethodGrid
-  items={[
-    {href: '/tools/codex/ccswitch', title: 'Codex：CC Switch 配置', description: '按截图新增配置、填写 Key、/v1 地址和模型名，再启用后重启 Codex。', badge: '推荐新手', recommended: true},
-    {href: '/tools/codex/config-file', title: 'Codex：手动配置文件', description: '适合会改 TOML 和 JSON 的人。先备份，再修改 config.toml 和 auth.json。', badge: '进阶'},
-    {href: '/troubleshooting/', title: '我已经配置失败了', description: '遇到连接失败、鉴权失败、保存后不生效时，直接按现象排查。', badge: '排障'},
-  ]}
 />
 
 <PrepareChecklist
@@ -35,7 +27,7 @@ import {MethodGrid, PageHeader, PrepareChecklist, WindowsTip} from '@site/src/co
   ]}
 />
 
-<WindowsTip title="怎么选择">
+<WindowsTip title="建议路线">
   不确定就先选 CC Switch。手动配置文件适合已经知道 Codex 配置目录、能看懂 TOML 和 JSON、并且愿意先备份旧配置的人。
 </WindowsTip>
 
