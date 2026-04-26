@@ -9,7 +9,7 @@ lastVerified: 2026-04-24
 hide_title: true
 ---
 
-import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
 
 <PageHeader eyebrow="OpenClaw / 手动配置" title="手动配置 OpenClaw" description="这页给已经熟悉 OpenClaw 配置结构的人使用。OpenClaw 官方仓库说明包含 gateway 命令和配置文件入口；ForOpenCode 具体供应商字段仍以你当前版本配置结构为准。" meta={['进阶方式', '先备份', '需要重启 gateway']} />
 
@@ -20,11 +20,6 @@ import {CopyCard, ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, Prep
   '确认知道如何执行 `openclaw gateway restart`。',
   '如果不能恢复旧配置，请使用 CC Switch 方式。',
 ]} />
-
-<CopyCard title="API 端点" code="https://www.foropencode.com/v1" />
-<CopyCard title="协议" code="OpenAI Completions" />
-<CopyCard title="模型 ID" code="gpt-5.4" />
-<CopyCard title="重启命令" code="openclaw gateway restart" />
 
 ## 官方依据
 
