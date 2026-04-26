@@ -50,17 +50,13 @@ import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareCheckli
   '在根级 `models.providers` 下新增 `foropencode`。',
   '`baseUrl` 填 `https://www.foropencode.com/v1`。',
   '`api` 填 `openai-completions`，对应 OpenAI Chat Completions 兼容接口。',
-  '`apiKey` 建议先写 `${FOROPENCODE_API_KEY}`，把真实 Key 放进环境变量或 `~/.openclaw/.env`。',
+  '`apiKey` 填你的 ForOpenCode 真实 Key。',
   '在 `models.providers.foropencode.models` 数组里添加 `gpt-5.4`。',
+  '`contextWindow` 和 `contextTokens` 填 `1050000`，`maxTokens` 填 `128000`。',
 ]} />
 
 ```jsonc
 {
-  // 如果原文件已经有 env，就只新增这一行；也可以把 Key 写到 ~/.openclaw/.env
-  env: {
-    FOROPENCODE_API_KEY: "sk-你的真实Key"
-  },
-
   models: {
     mode: "merge",
     providers: {
@@ -68,13 +64,16 @@ import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareCheckli
         baseUrl: "https://www.foropencode.com/v1",
         api: "openai-completions",
         auth: "api-key",
-        apiKey: "${FOROPENCODE_API_KEY}",
+        apiKey: "sk-你的真实Key",
         models: [
           {
             id: "gpt-5.4",
             name: "gpt-5.4",
             reasoning: true,
-            input: ["text", "image"]
+            input: ["text", "image"],
+            contextWindow: 1050000,
+            contextTokens: 1050000,
+            maxTokens: 128000
           }
         ]
       }
@@ -100,8 +99,8 @@ import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareCheckli
   上面是要合并进去的片段。你的 `openclaw.json` 里可能已经有 `channels`、`gateway`、`agents`、`tools` 等配置，必须保留。重复字段时只合并对应子字段，例如把 `foropencode` 加到已有的 `models.providers` 里。
 </WindowsTip>
 
-<WindowsTip title="模型规格不要乱填">
-  `contextWindow`、`contextTokens` 和 `maxTokens` 是模型元数据。只有在你确认 ForOpenCode 当前 `gpt-5.4` 的实际上下文窗口和最大输出后才手动补充；不确定时先省略，避免用错误数值影响运行时判断。
+<WindowsTip title="模型规格字段">
+  `contextWindow` 是原生上下文窗口，`contextTokens` 是 OpenClaw 运行时有效上下文上限，`maxTokens` 是最大输出。这里把 `contextTokens` 也设为 `1050000`，避免运行时落回较小的默认上下文预算。
 </WindowsTip>
 
 <StepChecklist title="步骤 3：确认默认模型字段" items={[
