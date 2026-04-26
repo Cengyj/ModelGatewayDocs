@@ -74,9 +74,7 @@ import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareCheckli
             id: "gpt-5.4",
             name: "gpt-5.4",
             reasoning: true,
-            input: ["text", "image"],
-            contextWindow: 128000,
-            maxTokens: 32000
+            input: ["text", "image"]
           }
         ]
       }
@@ -100,6 +98,10 @@ import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareCheckli
 
 <WindowsTip title="不要整份覆盖">
   上面是要合并进去的片段。你的 `openclaw.json` 里可能已经有 `channels`、`gateway`、`agents`、`tools` 等配置，必须保留。重复字段时只合并对应子字段，例如把 `foropencode` 加到已有的 `models.providers` 里。
+</WindowsTip>
+
+<WindowsTip title="模型规格不要乱填">
+  `contextWindow`、`contextTokens` 和 `maxTokens` 是模型元数据。只有在你确认 ForOpenCode 当前 `gpt-5.4` 的实际上下文窗口和最大输出后才手动补充；不确定时先省略，避免用错误数值影响运行时判断。
 </WindowsTip>
 
 <StepChecklist title="步骤 3：确认默认模型字段" items={[
