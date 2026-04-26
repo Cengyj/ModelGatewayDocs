@@ -5,7 +5,7 @@ description: 选择用 CC Switch 配置 Codex，或直接修改 Codex 配置文�
 platform: Windows
 difficulty: 入门
 estimatedTime: 3 分钟
-lastVerified: 2026-04-24
+lastVerified: 2026-04-26
 hide_title: true
 ---
 
@@ -21,7 +21,7 @@ import {MethodGrid, PageHeader, PrepareChecklist, WindowsTip} from '@site/src/co
 <MethodGrid
   items={[
     {href: '/tools/codex/ccswitch', title: 'Codex：CC Switch 配置', description: '按截图新增配置、填写 Key、/v1 地址和模型名，再启用后重启 Codex。', badge: '推荐新手', recommended: true},
-    {href: '/tools/codex/config-file', title: 'Codex：手动配置文件', description: '适合会改 TOML 配置的人。先备份，再写入 ForOpenCode provider 和默认模型。', badge: '进阶'},
+    {href: '/tools/codex/config-file', title: 'Codex：手动配置文件', description: '适合会改 TOML 和 JSON 的人。先备份，再修改 config.toml 和 auth.json。', badge: '进阶'},
     {href: '/troubleshooting/', title: '我已经配置失败了', description: '遇到连接失败、鉴权失败、保存后不生效时，直接按现象排查。', badge: '排障'},
   ]}
 />
@@ -36,6 +36,6 @@ import {MethodGrid, PageHeader, PrepareChecklist, WindowsTip} from '@site/src/co
 />
 
 <WindowsTip title="怎么选择">
-  不确定就先选 CC Switch。手动配置文件适合已经知道 Codex 配置目录、能看懂 TOML、并且愿意先备份旧配置的人。
+  不确定就先选 CC Switch。手动配置文件适合已经知道 Codex 配置目录、能看懂 TOML 和 JSON、并且愿意先备份旧配置的人。
 </WindowsTip>
 

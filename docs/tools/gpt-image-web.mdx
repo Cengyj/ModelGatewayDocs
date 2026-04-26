@@ -1,0 +1,185 @@
+---
+id: gpt-image-web
+title: 网页端使用 gpt-image-2
+slug: /tools/gpt-image-web
+description: 在 Open WebUI 网页端添加 ForOpenCode 外部连接，选择 gpt-image-2 并开启图像生成。
+platform: Web
+difficulty: 入门
+estimatedTime: 8 分钟
+prerequisites:
+  - 已有可用的 ForOpenCode 令牌
+  - 能打开 Open WebUI 网页端
+  - 准备在浏览器里使用图片生成
+lastVerified: 2026-04-25
+---
+
+import Link from '@docusaurus/Link';
+import {ErrorCard, InlineCopyCode, PrepareChecklist, StageNav, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+
+# 网页端使用 gpt-image-2
+
+这页适合直接在浏览器里的 Open WebUI 生图。流程是先创建 ForOpenCode 令牌，再进入 Open WebUI 网页端，添加一个 OpenAI 兼容的外部连接，最后在模型列表里选择 `gpt-image-2` 或开启“图像生成”工具。
+
+<div className="guide-status-row">
+  <span className="guide-status-pill">适合：网页端 Open WebUI</span>
+  <span className="guide-status-pill">预计耗时：8 分钟</span>
+  <span className="guide-status-pill">关键：外部连接 URL 要带 /v1</span>
+  <span className="guide-status-pill">模型：gpt-image-2</span>
+</div>
+
+<StageNav
+  items={[
+    {href: '/tools/gpt-image-web#prepare', title: '先准备', description: '确认令牌、网页端入口、连接地址和模型名。'},
+    {href: '/tools/gpt-image-web#token', title: '创建令牌', description: '到控制台创建并复制 API Key。'},
+    {href: '/tools/gpt-image-web#webui', title: '进入网页端', description: '注册或登录 Open WebUI。'},
+    {href: '/tools/gpt-image-web#connection', title: '添加连接', description: '在外部连接里填写 URL、Bearer 密钥。'},
+    {href: '/tools/gpt-image-web#use', title: '开始生图', description: '选择 gpt-image-2 或开启图像生成工具。'},
+    {href: '/tools/gpt-image-web#fix', title: '常见问题', description: '失败时先检查令牌、URL、模型和开关。'},
+  ]}
+/>
+
+## 开始前先确认 {#prepare}
+
+<PrepareChecklist
+  title="前置条件"
+  items={[
+    <>你已经有一把可用的 ForOpenCode 令牌；没有的话按本页步骤创建，或先看 <Link to="/getting-started/create-key">创建并复制 API Key</Link>。</>,
+    '你要使用的是浏览器网页端，不是 PC 端 Cherry Studio，也不是安卓客户端。',
+    <>Open WebUI 外部连接地址固定填 <InlineCopyCode code="https://foropencode.com/v1" />。</>,
+    '网页端模型列表里如果出现 `gpt-image-2`，可以直接选择它作为生图模型。',
+    '如果暂时只看到聊天模型，也可以选择推荐聊天模型后开启“图像生成”。',
+  ]}
+/>
+
+## 创建 ForOpenCode 令牌 {#token}
+
+<StepChecklist
+  title="步骤 1：创建并复制令牌"
+  items={[
+    <>打开 <a href="https://foropencode.com/console/token" target="_blank" rel="noopener noreferrer"><code>https://foropencode.com/console/token</code></a>。</>,
+    '点击“添加令牌”或“创建新的令牌”。',
+    '填写令牌名称，令牌分组可留空，过期时间建议选择“永不过期”。',
+    '新建数量保持 1；额度可以开启“无限额度”或保持 0。',
+    '模型限制列表通常留空，确认无误后提交。',
+    '创建完成后，在令牌列表中点击复制图标复制密钥。',
+  ]}
+>
+  复制出来的是后面外部连接要粘贴的 Bearer 密钥。不要把完整密钥发到公开聊天或截图里。
+</StepChecklist>
+
+<div className="guide-image">
+  <img src="/img/gpt-image-web/step-01.png" alt="在 ForOpenCode 控制台创建并复制令牌" />
+</div>
+
+## 注册或登录 Open WebUI {#webui}
+
+<StepChecklist
+  title="步骤 2：进入网页端"
+  items={[
+    <>打开 <a href="https://dm.foropencode.com/" target="_blank" rel="noopener noreferrer"><code>https://dm.foropencode.com/</code></a>。</>,
+    '首次使用时点击注册，填写用户名、邮箱和密码。',
+    '已有账号则直接登录。',
+    '登录成功后进入聊天首页，左下角会显示用户头像。',
+  ]}
+>
+  如果看不到注册入口，可能是当前站点关闭了开放注册，需要管理员先创建账号。
+</StepChecklist>
+
+<div className="guide-image">
+  <img src="/img/gpt-image-web/step-02.png" alt="注册或登录 Open WebUI 网页端" />
+</div>
+
+## 添加外部连接 {#connection}
+
+<StepChecklist
+  title="步骤 3：找到外部连接"
+  items={[
+    '在 Open WebUI 首页点击左下角头像。',
+    '在弹出的菜单里点击“设置”。',
+    '进入设置窗口后，选择左侧“外部连接”。',
+    '在“管理直接连接”区域点击右侧加号。',
+  ]}
+>
+  这一步是在 Open WebUI 里新增一个能连接 ForOpenCode 的 OpenAI 兼容接口。
+</StepChecklist>
+
+<div className="guide-image">
+  <img src="/img/gpt-image-web/step-03.png" alt="在 Open WebUI 设置中找到外部连接" />
+</div>
+
+<StepChecklist
+  title="步骤 4：填写 URL 和密钥"
+  items={[
+    <>在“添加连接”窗口中，URL 填 <InlineCopyCode code="https://foropencode.com/v1" />。</>,
+    '认证方式选择“密钥（Bearer）”。',
+    'API 密钥处粘贴刚才从令牌管理页面复制的密钥。',
+    '保持右侧绿色开关开启。',
+    '模型 ID 可以先留空，让 Open WebUI 自动从 `/v1/models` 读取模型列表。',
+    '点击保存。',
+  ]}
+/>
+
+<div className="guide-image">
+  <img src="/img/gpt-image-web/step-04.png" alt="填写 Open WebUI 外部连接 URL 和 Bearer 密钥" />
+</div>
+
+## 选择模型并开启图像生成 {#use}
+
+<StepChecklist
+  title="步骤 5：选择 gpt-image-2 或开启图像生成"
+  items={[
+    '外部连接保存成功后，关闭设置窗口回到首页。',
+    '点击左上角模型名称下拉。',
+    '如果列表中已显示 `gpt-image-2`，直接选择它作为网页端生图模型。',
+    '如果只看到聊天模型，可以选择 `gpt-5.5`、`gpt-5.5-mini` 或 `gpt-5.4-mini`。',
+    '点击输入框左侧扩展图标，开启“图像生成”。',
+    '按需要设置分辨率、质量和背景，输入需求后发送。',
+  ]}
+>
+  直接选 `gpt-image-2` 是网页端生图入口；选择聊天模型再开启“图像生成”时，图片生成也会走 `gpt-image-2`。
+</StepChecklist>
+
+<div className="guide-image">
+  <img src="/img/gpt-image-web/step-05.png" alt="在 Open WebUI 网页端选择模型并开启图像生成" />
+</div>
+
+<WindowsTip title="模型该选哪一个">
+  <ul>
+    <li>优先选择网页端生图模型：`gpt-image-2`。</li>
+    <li>推荐聊天/提示词优化模型：`gpt-5.5`、`gpt-5.5-mini`、`gpt-5.4-mini`。</li>
+    <li>如果模型列表里没有 `gpt-image-2`，先确认外部连接已启用，并重新保存或刷新模型列表。</li>
+  </ul>
+</WindowsTip>
+
+## 常见问题 {#fix}
+
+<ErrorCard title="提示 Image generation requires your own API key">
+  <ul>
+    <li>先检查外部连接 URL 是否正好是 `https://foropencode.com/v1`。</li>
+    <li>确认认证方式是“密钥（Bearer）”，不是空认证或其他方式。</li>
+    <li>确认 API 密钥来自 ForOpenCode 令牌管理页面，且没有少复制字符。</li>
+    <li>确认连接右侧开关是开启状态，并且输入框工具菜单里已开启“图像生成”。</li>
+  </ul>
+</ErrorCard>
+
+<ErrorCard title="模型列表里看不到 gpt-image-2">
+  <ul>
+    <li>先保存外部连接，再刷新网页或重新打开模型下拉。</li>
+    <li>如果“模型 ID”手动填错，先清空，让 Open WebUI 自动读取 `/v1/models`。</li>
+    <li>回到令牌管理页面确认令牌启用，并且没有限制掉图片模型。</li>
+  </ul>
+</ErrorCard>
+
+<SuccessCard title="最终检查清单">
+  <ul>
+    <li>已创建并复制 ForOpenCode 令牌。</li>
+    <li>已登录 Open WebUI 网页端。</li>
+    <li>外部连接 URL 是 `https://foropencode.com/v1`。</li>
+    <li>认证方式是“密钥（Bearer）”，连接开关已开启。</li>
+    <li>模型列表可选择 `gpt-image-2`，或已在聊天模型下开启“图像生成”。</li>
+  </ul>
+</SuccessCard>
+
+<WindowsTip title="其他端教程">
+  如果你不是网页端，而是要在电脑客户端或安卓客户端使用 `gpt-image-2`，可以返回 <Link to="/tools/cherry-studio/">图片生成入口</Link> 选择对应教程。
+</WindowsTip>

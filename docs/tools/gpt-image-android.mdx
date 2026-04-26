@@ -14,7 +14,7 @@ lastVerified: 2026-04-24
 ---
 
 import Link from '@docusaurus/Link';
-import {CopyCard, ErrorCard, PrepareChecklist, StageNav, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
+import {ErrorCard, InlineCopyCode, PrepareChecklist, StageNav, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
 
 # 安卓手机使用 gpt-image-2
 
@@ -43,28 +43,20 @@ import {CopyCard, ErrorCard, PrepareChecklist, StageNav, StepChecklist, SuccessC
   items={[
     <>你已经有一把可用的 ForOpenCode API Key；没有的话先看 <Link to="/getting-started/create-key">创建并复制 API Key</Link>。</>,
     '安卓端先安装好 Kelivo，并能正常打开。',
+    <>`API Base URL` 固定填 <InlineCopyCode code="https://foropencode.com/v1" />。</>,
+    '模型名是 `gpt-image-2`，并且需要打开 `Response API (/responses)`。',
     '你准备使用聊天页生图，不是 PC 端 Cherry Studio 的绘画页。',
     '你会按顺序完成供应商、模型、内置工具三处配置。',
   ]}
 />
 
 <WindowsTip title="如果你还没装客户端">
-  安卓端请先下载安装 <a href="https://1846687794.share.123pan.cn/123pan/Ti2VTd-yhhKh?pwd=tAU5#">Kelivo</a>，再回来继续配置。两端用的客户端不一样，不要把 PC 教程里的 Cherry Studio 直接套到手机上。
+  安卓端请先下载安装 <a href="https://1846687794.share.123pan.cn/123pan/Ti2VTd-yhhKh?pwd=tAU5#" target="_blank" rel="noopener noreferrer">Kelivo</a>，再回来继续配置。两端用的客户端不一样，不要把 PC 教程里的 Cherry Studio 直接套到手机上。
 </WindowsTip>
 
 <WindowsTip title="还没有密钥先做这一步">
   如果你还没有 ForOpenCode API Key，不要先填客户端。先去 <Link to="/getting-started/create-key">创建并复制 API Key</Link>，复制成功后再回到本页继续配置安卓端。
 </WindowsTip>
-
-<CopyCard
-  title="API Base URL"
-  code="https://foropencode.com/v1"
-  note="安卓端这套流程使用 OpenAI 兼容接口，地址要带 /v1。"
-/>
-
-<CopyCard title="模型名" code="gpt-image-2" />
-
-<CopyCard title="必须打开" code="Response API (/responses)" />
 
 ## 配置 OpenAI 供应商 {#provider}
 
@@ -106,7 +98,7 @@ import {CopyCard, ErrorCard, PrepareChecklist, StageNav, StepChecklist, SuccessC
   title="步骤 3：填写 Key、Base URL 和 Response API"
   items={[
     '把你的 ForOpenCode API Key 填到 API Key。',
-    '把 `API Base URL` 填成 `https://foropencode.com/v1`。',
+    <>把 `API Base URL` 填成 <InlineCopyCode code="https://foropencode.com/v1" />。</>,
     '打开 `Response API (/responses)`。',
     '保存或确认当前供应商配置。',
   ]}
@@ -235,5 +227,5 @@ import {CopyCard, ErrorCard, PrepareChecklist, StageNav, StepChecklist, SuccessC
 </ErrorCard>
 
 <WindowsTip title="什么时候该看 PC 那一页">
-  如果你现在不是手机端聊天生图，而是要在电脑上通过 Cherry Studio 使用 `gpt-image-2`，直接跳去 [PC 电脑使用 gpt-image-2](/tools/gpt-image-pc)。
+  如果你现在不是手机端聊天生图，而是要在电脑上通过 Cherry Studio 使用 `gpt-image-2`，直接跳去 <Link to="/tools/gpt-image-pc">PC 电脑使用 gpt-image-2</Link>。
 </WindowsTip>

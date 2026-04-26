@@ -20,6 +20,10 @@ type CopyCardProps = {
   note?: string;
 };
 
+type InlineCopyCodeProps = {
+  code: string;
+};
+
 type LinkCardProps = {
   href: string;
   title: string;
@@ -66,11 +70,46 @@ type StageNavProps = {
   items: ReadonlyArray<StageNavItem>;
 };
 
+function isHttpUrl(value: string) {
+  return /^https?:\/\//i.test(value.trim());
+}
+
+function renderPlainTextWithLinks(text: string, keyPrefix: string) {
+  const parts = text.split(/(https?:\/\/[^\s，。；、）)]+)/gi);
+
+  return parts.map((part, index) => {
+    if (!isHttpUrl(part)) {
+      return part;
+    }
+
+    return (
+      <a href={part} key={`${keyPrefix}-url-${index}`} target="_blank" rel="noopener noreferrer">
+        {part}
+      </a>
+    );
+  });
+}
+
+function renderInlineString(text: string, keyPrefix: string) {
+  return text.split(/(`[^`]+`)/g).map((part, index) => {
+    if (!part) {
+      return null;
+    }
+
+    if (part.startsWith('`') && part.endsWith('`')) {
+      const codeText = part.slice(1, -1);
+      return <code key={`${keyPrefix}-code-${index}`}>{codeText}</code>;
+    }
+
+    return renderPlainTextWithLinks(part, `${keyPrefix}-text-${index}`);
+  });
+}
+
 function renderItems(items: ReadonlyArray<ReactNode>) {
   return (
     <ul className="guide-block-list">
       {items.map((item, index) => (
-        <li key={index}>{item}</li>
+        <li key={index}>{typeof item === 'string' ? renderInlineString(item, `item-${index}`) : item}</li>
       ))}
     </ul>
   );
@@ -115,6 +154,10 @@ export function StepChecklist({title, items, children}: ListProps) {
 export function CopyCard({title, code, note}: CopyCardProps) {
   const [copied, setCopied] = useState(false);
   const normalizedCode = useMemo(() => code.replace(/\r\n/g, '\n'), [code]);
+  const openUrl = useMemo(() => {
+    const trimmedCode = normalizedCode.trim();
+    return isHttpUrl(trimmedCode) && !/\s/.test(trimmedCode) ? trimmedCode : null;
+  }, [normalizedCode]);
 
   useEffect(() => {
     if (!copied) {
@@ -144,14 +187,52 @@ export function CopyCard({title, code, note}: CopyCardProps) {
             {note ?? '复制后粘贴到对应字段；如果你不确定放哪一项，先看步骤说明。'}
           </p>
         </div>
-        <button className="copy-card__button" type="button" onClick={handleCopy}>
-          {copied ? '已复制' : '复制'}
-        </button>
+        <div className="copy-card__actions">
+          {openUrl ? (
+            <a className="copy-card__button" href={openUrl} target="_blank" rel="noopener noreferrer">
+              打开
+            </a>
+          ) : null}
+          <button className="copy-card__button" type="button" onClick={handleCopy}>
+            {copied ? '已复制' : '复制'}
+          </button>
+        </div>
       </div>
       <pre className="copy-card__code">
         <code>{normalizedCode}</code>
       </pre>
     </section>
+  );
+}
+
+export function InlineCopyCode({code}: InlineCopyCodeProps) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setCopied(false), 1600);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <span className="inline-copy-code">
+      <code>{code}</code>
+      <button className="inline-copy-code__button" type="button" onClick={handleCopy}>
+        {copied ? '已复制' : '复制'}
+      </button>
+    </span>
   );
 }
 
@@ -206,14 +287,28 @@ export function WindowsTip({title, children}: ToneCardProps) {
 }
 
 export function LinkCard({href, title, description, badge}: LinkCardProps) {
-  return (
-    <Link className="guide-link-card" to={href}>
+  const content = (
+    <>
       <span className="guide-link-card__topline">
         {badge ? <span className="guide-link-card__badge">{badge}</span> : <span />}
         <span className="guide-link-card__arrow" aria-hidden="true">→</span>
       </span>
       <strong className="guide-link-card__title">{title}</strong>
       <span className="guide-link-card__description">{description}</span>
+    </>
+  );
+
+  if (isHttpUrl(href)) {
+    return (
+      <a className="guide-link-card" href={href} target="_blank" rel="noopener noreferrer">
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link className="guide-link-card" to={href}>
+      {content}
     </Link>
   );
 }

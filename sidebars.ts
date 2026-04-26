@@ -65,6 +65,7 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'tools/cherry-studio/index', label: '图片生成：选择设备'},
         {type: 'doc', id: 'tools/gpt-image-pc', label: 'PC 使用 gpt-image-2'},
         {type: 'doc', id: 'tools/gpt-image-android', label: '安卓使用 gpt-image-2'},
+        {type: 'doc', id: 'tools/gpt-image-web', label: '网页端使用 gpt-image-2'},
       ],
     },
     {

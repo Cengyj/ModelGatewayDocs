@@ -124,7 +124,7 @@ body {
 }
 
 .main-wrapper {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .navbar {
@@ -707,6 +707,19 @@ div[class^='codeBlockContainer'] {
   transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
 }
 
+.copy-card__actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.theme-doc-markdown a.copy-card__button {
+  color: var(--guide-text);
+  text-decoration: none;
+}
+
 .copy-card__button:hover {
   background: rgba(79, 70, 229, 0.14);
   border-color: rgba(79, 70, 229, 0.26);
@@ -734,6 +747,30 @@ div[class^='codeBlockContainer'] {
   line-height: 1.7;
   padding: 0;
   white-space: inherit;
+}
+
+.inline-copy-code {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.38rem;
+  vertical-align: baseline;
+}
+
+.inline-copy-code__button {
+  background: var(--guide-accent-soft);
+  border: 1px solid rgba(79, 70, 229, 0.18);
+  border-radius: 999px;
+  color: var(--guide-text);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 760;
+  line-height: 1;
+  padding: 0.22rem 0.48rem;
+}
+
+.inline-copy-code__button:hover {
+  background: rgba(79, 70, 229, 0.14);
+  border-color: rgba(79, 70, 229, 0.26);
 }
 
 .tone-card {
@@ -783,10 +820,107 @@ div[class^='codeBlockContainer'] {
 
 .guide-image img {
   border-radius: calc(var(--guide-radius-lg) - 8px);
+  cursor: zoom-in;
   display: block;
   height: auto;
   margin: 0 auto;
   max-width: 100%;
+}
+
+.image-lightbox {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 5.4rem 1.4rem 1.4rem;
+  position: fixed;
+  z-index: 9999;
+}
+
+.image-lightbox__backdrop {
+  background: rgba(2, 6, 23, 0.86);
+  inset: 0;
+  position: absolute;
+}
+
+.image-lightbox__toolbar {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.28);
+  display: flex;
+  gap: 0.45rem;
+  left: 50%;
+  max-width: calc(100vw - 1.6rem);
+  overflow-x: auto;
+  padding: 0.45rem;
+  position: fixed;
+  top: 1rem;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.image-lightbox__button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 1rem;
+  font-weight: 800;
+  height: 2.35rem;
+  justify-content: center;
+  min-width: 2.35rem;
+  padding: 0 0.74rem;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.image-lightbox__button:hover,
+.image-lightbox__button:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.image-lightbox__scale {
+  color: rgba(255, 255, 255, 0.86);
+  flex: 0 0 auto;
+  font-size: 0.84rem;
+  font-weight: 780;
+  min-width: 3.15rem;
+  text-align: center;
+}
+
+.image-lightbox__stage {
+  align-items: center;
+  cursor: grab;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  touch-action: none;
+  width: 100%;
+  z-index: 1;
+}
+
+.image-lightbox__stage:active {
+  cursor: grabbing;
+}
+
+.image-lightbox__stage img {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 26px 86px rgba(0, 0, 0, 0.42);
+  max-height: 100%;
+  max-width: 100%;
+  transform-origin: center;
+  user-select: none;
+  will-change: transform;
 }
 
 .guide-table {
@@ -883,6 +1017,36 @@ div[class^='codeBlockContainer'] {
 
   .theme-doc-markdown h2 {
     font-size: 1.48rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .image-lightbox {
+    padding: 4.4rem 0.65rem 0.65rem;
+  }
+
+  .image-lightbox__toolbar {
+    gap: 0.28rem;
+    max-width: calc(100vw - 0.8rem);
+    padding: 0.34rem;
+    top: 0.55rem;
+  }
+
+  .image-lightbox__button {
+    font-size: 0.82rem;
+    height: 2rem;
+    min-width: 2rem;
+    padding: 0 0.5rem;
+    white-space: nowrap;
+  }
+
+  .image-lightbox__scale {
+    font-size: 0.78rem;
+    min-width: 2.45rem;
+  }
+
+  .image-lightbox__stage img {
+    border-radius: 10px;
   }
 }
 
