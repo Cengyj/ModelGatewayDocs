@@ -23,7 +23,6 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'Codex',
           items: [
-            {type: 'doc', id: 'tools/codex/index', label: 'Codex：配置说明'},
             {type: 'doc', id: 'tools/codex/ccswitch', label: 'Codex：CC Switch 配置'},
             {type: 'doc', id: 'tools/codex/config-file', label: 'Codex：手动配置文件'},
           ],
@@ -32,7 +31,6 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'OpenCode',
           items: [
-            {type: 'doc', id: 'tools/opencode/index', label: 'OpenCode：配置说明'},
             {type: 'doc', id: 'tools/opencode/ccswitch', label: 'OpenCode：CC Switch 配置'},
             {type: 'doc', id: 'tools/opencode/config-file', label: 'OpenCode：手动配置'},
           ],
@@ -41,7 +39,6 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'OpenClaw',
           items: [
-            {type: 'doc', id: 'tools/openclaw/index', label: 'OpenClaw：配置说明'},
             {type: 'doc', id: 'tools/openclaw/ccswitch', label: 'OpenClaw：CC Switch 配置'},
             {type: 'doc', id: 'tools/openclaw/manual', label: 'OpenClaw：手动配置'},
           ],
@@ -50,7 +47,6 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'Claude Code',
           items: [
-            {type: 'doc', id: 'tools/claude-code/index', label: 'Claude Code：配置说明'},
             {type: 'doc', id: 'tools/claude-code/ccswitch', label: 'Claude Code：CC Switch 配置'},
             {type: 'doc', id: 'tools/claude-code/manual', label: 'Claude Code：手动配置'},
           ],
