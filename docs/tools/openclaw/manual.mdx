@@ -11,67 +11,126 @@ hide_title: true
 
 import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareChecklist, StepChecklist, SuccessCard, WindowsTip} from '@site/src/components/GuideBlocks';
 
-<PageHeader eyebrow="OpenClaw / 手动配置" title="手动配置 OpenClaw" description="这页给已经熟悉 OpenClaw 配置结构的人使用。OpenClaw 官方仓库说明包含 gateway 命令和配置文件入口；ForOpenCode 具体供应商字段仍以你当前版本配置结构为准。" meta={['进阶方式', '先备份', '需要重启 gateway']} />
+<PageHeader eyebrow="OpenClaw / 手动配置" title="手动配置 OpenClaw" description="这页按 OpenClaw 官方配置结构整理：修改 ~/.openclaw/openclaw.json，把 ForOpenCode 加到 models.providers，再把默认模型指向 foropencode/gpt-5.4。" meta={['配置文件：openclaw.json', '字段：models.providers', '默认模型：agents.defaults.model']} />
 
 <PrepareChecklist title="开始前准备" items={[
-  '先备份 OpenClaw 当前配置。',
   '准备 ForOpenCode API Key。',
-  '确认你知道当前 OpenClaw 版本的 provider 配置结构。',
-  '确认知道如何执行 `openclaw gateway restart`。',
-  '如果不能恢复旧配置，请使用 CC Switch 方式。',
+  '确认本机能执行 `openclaw` 命令。',
+  '先备份 `~/.openclaw/openclaw.json`，不要直接覆盖整份文件。',
+  '确认你愿意改 JSON / JSON5，并能在失败时恢复备份。',
+  '保存后先用 `openclaw config get` 检查配置能被读取，再重启 gateway。',
 ]} />
 
 ## 官方依据
 
 <GlossaryHint title="OpenClaw 官方入口和本页边界">
-  OpenClaw 官方仓库提供 gateway 命令和配置文件相关入口，但不同版本的 provider 字段可能变化。本页只固定 ForOpenCode 必填值：协议、端点、Key、模型、默认供应商和重启动作；不编造完整配置文件路径或结构。参考：[OpenClaw GitHub](https://github.com/CodePhiliaX/OpenClaw)。
+  OpenClaw 官方文档说明，配置文件默认读取 `~/.openclaw/openclaw.json`，自定义供应商通过 `models.providers` 添加，模型引用使用 `provider/model` 格式。本页只写 ForOpenCode 需要合并的字段，不要求你替换整个配置文件。参考：[OpenClaw Configuration](https://docs.openclaw.ai/gateway/configuration) 和 [Configuration Reference：Custom providers](https://docs.openclaw.ai/gateway/configuration-reference#custom-providers-and-base-urls)。
 </GlossaryHint>
 
 ## 跟着做
 
-<StepChecklist title="步骤 1：备份并确认配置入口" items={[
-  '关闭或暂停正在使用的 OpenClaw 会话。',
-  '找到当前版本的 providers 或供应商配置区域。',
-  '复制一份原配置，便于回退。',
-  '不要覆盖原来能用的供应商。',
-]} />
-
-<StepChecklist title="步骤 2：新增 ForOpenCode 供应商" items={[
-  '新增供应商标识，例如 `foropencode`。',
-  '供应商名称建议写 `ForOpenCode`。',
-  '协议使用 `OpenAI Completions`。',
-  '端点使用 `https://www.foropencode.com/v1`。',
-  'Key 使用自己的真实 Key，或使用当前版本支持的环境变量引用方式。',
-]} />
-
-<StepChecklist title="步骤 3：添加模型并设为默认" items={[
-  '模型 ID 使用 `gpt-5.4`。',
-  '显示名称也建议写 `gpt-5.4`。',
-  '确认模型挂在 ForOpenCode 供应商下。',
-  '把 ForOpenCode 设为默认供应商。',
-]} />
-
-<StepChecklist title="步骤 4：按你的平台重启 gateway 并验证" items={[
-  '保存配置。',
-  '执行 `openclaw gateway restart`。',
-  '重新打开 OpenClaw。',
-  '新开聊天验证，不要用旧聊天判断。',
+<StepChecklist title="步骤 1：找到并备份配置文件" items={[
+  'OpenClaw 默认配置文件是 `~/.openclaw/openclaw.json`。',
+  '如果你使用了自定义配置路径，以你自己的 `OPENCLAW_CONFIG_PATH` 为准。',
+  '备份当前配置，例如复制为 `openclaw.json.bak`。',
+  '如果文件不存在，先运行 `openclaw onboard` 或 `openclaw configure` 生成基础配置。',
 ]} />
 
 <PlatformCommandTabs
-  title="选择你的平台：重启 OpenClaw gateway"
-  description="同一个动作在三平台命令基本一致，差别主要是在哪个终端里执行。"
+  title="选择你的平台：备份并打开配置"
+  description="下面命令按默认路径写；如果你改过配置路径，请替换成实际文件。"
   commands={[
-    {label: 'Windows PowerShell', code: 'openclaw gateway restart', note: '也可以在 cmd 中执行同一条命令。执行后回到 OpenClaw 新开聊天测试。'},
-    {label: 'macOS zsh', code: 'openclaw gateway restart', note: '如果提示找不到命令，先确认 OpenClaw CLI 已加入 PATH。'},
-    {label: 'Linux bash', code: 'openclaw gateway restart', note: '如果提示权限或 PATH 问题，先确认 CLI 安装和环境变量。'},
+    {label: 'Windows PowerShell', code: 'Copy-Item "$HOME\\.openclaw\\openclaw.json" "$HOME\\.openclaw\\openclaw.json.bak"\nnotepad "$HOME\\.openclaw\\openclaw.json"', note: '如果文件不存在，先运行 `openclaw configure`。'},
+    {label: 'macOS zsh', code: 'cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak\nopen -e ~/.openclaw/openclaw.json', note: '如果文件不存在，先运行 `openclaw configure`。'},
+    {label: 'Linux bash', code: 'cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak\nnano ~/.openclaw/openclaw.json', note: '如果文件不存在，先运行 `openclaw configure`。'},
   ]}
 />
+
+<StepChecklist title="步骤 2：合并 ForOpenCode provider 字段" items={[
+  '在根级 `models.providers` 下新增 `foropencode`。',
+  '`baseUrl` 填 `https://www.foropencode.com/v1`。',
+  '`api` 填 `openai-completions`，对应 OpenAI Chat Completions 兼容接口。',
+  '`apiKey` 建议先写 `${FOROPENCODE_API_KEY}`，把真实 Key 放进环境变量或 `~/.openclaw/.env`。',
+  '在 `models.providers.foropencode.models` 数组里添加 `gpt-5.4`。',
+]} />
+
+```jsonc
+{
+  // 如果原文件已经有 env，就只新增这一行；也可以把 Key 写到 ~/.openclaw/.env
+  env: {
+    FOROPENCODE_API_KEY: "sk-你的真实Key"
+  },
+
+  models: {
+    mode: "merge",
+    providers: {
+      foropencode: {
+        baseUrl: "https://www.foropencode.com/v1",
+        api: "openai-completions",
+        auth: "api-key",
+        apiKey: "${FOROPENCODE_API_KEY}",
+        models: [
+          {
+            id: "gpt-5.4",
+            name: "gpt-5.4",
+            reasoning: true,
+            input: ["text", "image"],
+            contextWindow: 128000,
+            maxTokens: 32000
+          }
+        ]
+      }
+    }
+  },
+
+  agents: {
+    defaults: {
+      model: {
+        primary: "foropencode/gpt-5.4"
+      },
+      models: {
+        "foropencode/gpt-5.4": {
+          alias: "ForOpenCode GPT-5.4"
+        }
+      }
+    }
+  }
+}
+```
+
+<WindowsTip title="不要整份覆盖">
+  上面是要合并进去的片段。你的 `openclaw.json` 里可能已经有 `channels`、`gateway`、`agents`、`tools` 等配置，必须保留。重复字段时只合并对应子字段，例如把 `foropencode` 加到已有的 `models.providers` 里。
+</WindowsTip>
+
+<StepChecklist title="步骤 3：确认默认模型字段" items={[
+  '`agents.defaults.model.primary` 使用 `foropencode/gpt-5.4`。',
+  '`agents.defaults.models` 是模型 allowlist / 别名区域，建议加入 `foropencode/gpt-5.4`。',
+  '如果你已有多个默认模型或 fallback，只把 primary 改成 ForOpenCode，保留原来的 fallback。',
+  '如果你只想先测试 provider，也可以暂时不改默认模型，改完后在聊天里手动切换模型。',
+]} />
+
+<PlatformCommandTabs
+  title="步骤 4：校验配置并重启 gateway"
+  description="先确认配置能被 OpenClaw 读取，再重启 gateway，让新 provider 生效。"
+  commands={[
+    {label: 'Windows PowerShell', code: 'openclaw config get models.providers.foropencode\nopenclaw config get agents.defaults.model.primary\nopenclaw gateway restart\nopenclaw gateway status', note: '如果 config get 报错，先恢复备份或修正字段，不要强行重启。'},
+    {label: 'macOS zsh', code: 'openclaw config get models.providers.foropencode\nopenclaw config get agents.defaults.model.primary\nopenclaw gateway restart\nopenclaw gateway status', note: '如果提示找不到命令，先确认 OpenClaw CLI 已加入 PATH。'},
+    {label: 'Linux bash', code: 'openclaw config get models.providers.foropencode\nopenclaw config get agents.defaults.model.primary\nopenclaw gateway restart\nopenclaw gateway status', note: '如果提示权限或 PATH 问题，先确认 CLI 安装和环境变量。'},
+  ]}
+/>
+
+<StepChecklist title="步骤 5：新开会话验证" items={[
+  '重新打开 OpenClaw。',
+  '新开聊天，不要用旧聊天判断配置是否生效。',
+  '发送一个简单问题确认能正常回复。',
+  '如果仍然走旧模型，检查 `agents.defaults.model.primary` 是否仍指向旧 provider。',
+]} />
 
 <SuccessCard title="成功判定">
   <ul>
     <li>新聊天能正常回复。</li>
-    <li>默认供应商已经指向 ForOpenCode。</li>
+    <li>`agents.defaults.model.primary` 已指向 `foropencode/gpt-5.4`。</li>
+    <li>`models.providers.foropencode` 中包含 `baseUrl`、`api`、`auth`、`apiKey` 和 `models`。</li>
     <li>gateway 已重启。</li>
     <li>失败时可以恢复备份。</li>
   </ul>
@@ -79,10 +138,11 @@ import {ErrorCard, GlossaryHint, PageHeader, PlatformCommandTabs, PrepareCheckli
 
 <ErrorCard title="手动配置风险">
   <ul>
-    <li>OpenClaw 配置结构可能随版本变化，本页不写死完整文件，避免误导不同版本用户。</li>
-    <li>忘记重启 gateway 会导致旧配置继续生效。</li>
-    <li>旧聊天可能不会刷新配置，必须新开聊天验证。</li>
-    <li>协议、端点、默认供应商任意一项错误，都可能表现为“Key 不可用”。</li>
+    <li>OpenClaw 会严格校验配置。未知字段、类型错误或 JSON 语法错误可能导致 gateway 拒绝启动。</li>
+    <li>`api` 不是显示名称，而是请求适配器；ForOpenCode 这里使用 `openai-completions`。</li>
+    <li>`baseUrl` 必须带 `/v1`，否则 OpenAI 兼容请求路径可能不对。</li>
+    <li>把真实 Key 写进项目级配置时，注意不要提交到公开仓库。</li>
+    <li>旧聊天可能不会刷新模型，必须新开聊天验证。</li>
   </ul>
 </ErrorCard>
 
