@@ -1,0 +1,93 @@
+---
+title: "foropencode"
+---
+
+import { Hero } from '@/components/Hero';
+import { FeatureGrid, Feature } from '@/components/Feature';
+
+<Hero
+  name="foropencode"
+  text="AI Coding 中文配置手册"
+  tagline="Claude Code · Codex · OpenCode · OpenClaw · Hermes"
+  actions={[
+    { label: "Claude Code 快速上手", href: "/claude-code/cli/install", variant: "primary" },
+    { label: "排障", href: "/claude-code/errors", variant: "secondary" },
+  ]}
+/><FeatureGrid>
+  <Feature icon={<>🧭</>} title="Claude Code" details="CLI 与桌面版各自的安装、CC Switch 配置、手动配置。" href="/claude-code/cli/install" />
+  <Feature icon={<>⚡</>} title="Codex" details="OpenAI 深度推理编码工具，CLI 与 App 共享配置。" href="/codex/cli/install" />
+  <Feature icon={<>🌐</>} title="OpenCode" details="一个客户端调多家供应商，CLI 与桌面版（BETA）。" href="/opencode/cli/install" />
+  <Feature icon={<>🐾</>} title="OpenClaw" details="AI 代理网关，支持飞书 / TG / Discord 等通知渠道与 Web UI 多模型管理。" href="/openclaw/install" />
+  <Feature icon={<>🍒</>} title="Cherry Studio" details="桌面 LLM 客户端，300+ 助手 + 知识库 + MCP，统一接多家供应商。" href="/cherry-studio/install" />
+  <Feature icon={<>🦉</>} title="Hermes Agent" details="自学习的终端代理，含消息网关、多终端后端、MCP 集成。" href="/hermes/install" />
+  <Feature icon={<>🛠</>} title="排障" details="Claude Code 常见报错的根因、修复步骤与预防措施。" href="/claude-code/errors" />
+</FeatureGrid>
+
+## ⚠️ 安装 / 启动卡住先看这里
+
+如果安装命令无法下载，或启动后报 `ConnectionRefused` / `Connection error`，**九成是网络问题**，按这个顺序自查：
+
+1. **开了梯子的，关掉梯子**再试
+2. **没开梯子的，开启梯子**再试
+3. 仍不行，开启代理软件的**网卡 TUN 模式**（系统级代理），而非仅浏览器代理
+
+> 详细排查见 [CC-009：API Error (Connection error.)](/claude-code/errors/cc-connection-error)。
+
+## 30 秒上手
+
+按你要用的工具往下找——三条路线选一条即可。
+
+### Claude Code
+
+```bash
+# 1. 安装 Claude Code
+curl -fsSL https://claude.ai/install.sh | bash     # macOS / Linux / WSL
+irm https://claude.ai/install.ps1 | iex            # Windows PowerShell
+
+# 2. 在 CC Switch 选择 Micu 预设供应商，填入 API Key
+#    → CC Switch 会自动写入 Base URL，无需手动配置
+
+# 3. 启动
+claude
+```
+
+详细见 [Claude Code CLI 安装](/claude-code/cli/install) · [CC Switch](/cc-switch)
+
+### Codex CLI
+
+```bash
+# 1. 装 Node.js 22+（必须），然后安装 Codex CLI
+npm install -g @openai/codex
+
+# 2. 在 CC Switch 选择 Micu 预设（框架选 Codex），填入 API Key
+#    model 推荐填 gpt-5.5
+
+# 3. 启动
+codex
+```
+
+详细见 [Codex CLI 安装](/codex/cli/install)
+
+### OpenClaw
+
+```bash
+# 1. 装 Node.js 24+（必须），然后安装 OpenClaw
+npm install -g openclaw@latest
+
+# 2. 初始化向导（一次性）
+openclaw onboard --install-daemon
+
+# 3. 浏览器打开 http://127.0.0.1:18789/ 完成配置
+```
+
+详细见 [OpenClaw 安装](/openclaw/install)
+
+> `MICUCODELINE` 状态栏工具仅适用于 Claude Code，可额外执行 `npm install -g @zuolan/micucodeline`。详见 [推荐工具](/tools)。
+
+## 令牌分组速查
+
+> 全部 21 个分组按用途分类。**最新倍率与可用模型以 [模型广场](https://foropencode.com/pricing) 为准**——本表只列分组用途，不写倍率，避免和广场不一致。
+
+<TokenGroupFilter />
+
+> **逆向分组**可能存在各类使用问题，需要稳定请勿选择，优先用上面的官方 / 号池分组。外接调用时除了选分组，还要按接入类型补 `User-Agent`，详见 [OpenClaw 手动配置 · UA 规则](/openclaw/manual)。

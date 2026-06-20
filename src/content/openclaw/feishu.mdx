@@ -1,0 +1,101 @@
+---
+title: "OpenClaw × 飞书渠道配置"
+---
+
+# OpenClaw × 飞书渠道配置
+
+<VersionBadge version="2026.5.20" date="2026-05-20" license="MIT" />
+
+> 官方文档：[https://docs.openclaw.ai/channels/feishu](https://docs.openclaw.ai/channels/feishu)
+
+---
+
+## 步骤一：创建飞书机器人应用
+
+1. 前往 [open.feishu.cn](https://open.feishu.cn/app?lang=zh-CN)，创建一个企业自建应用
+
+![创建应用](/img/openclaw/image-20260302194859504.webp)
+2. 在应用内添加机器人能力
+
+![添加机器人](/img/openclaw/image-20260302194952841.webp)
+3. 开通权限：在权限管理中筛选 `im`，全选相关权限
+
+![开通权限](/img/openclaw/image-20260302195107963.webp)
+4. 创建版本并发布
+
+![创建版本](/img/openclaw/image-20260302195143565.webp)
+
+![发布版本](/img/openclaw/image-20260302195210691.webp)
+5. 记录 **App ID** 和 **App Secret**
+
+![获取凭证](/img/openclaw/image-20260302195321124.webp)
+
+---
+
+## 步骤二：填写渠道配置
+
+将 App ID 和 App Secret 填入 OpenClaw 的引导界面：
+
+![填写配置](/img/openclaw/image-20260302195531135.webp)
+
+或通过命令行直接写入：
+
+```bash
+openclaw config set -- channels.feishu.appId "你的AppID"
+openclaw config set -- channels.feishu.appSecret "你的AppSecret"
+```
+
+选择提供商时选 **feishu china**：
+
+![选择提供商](/img/openclaw/image-20260302195631082.webp)
+
+群组消息响应策略（根据需求选择）：
+
+| 选项 | 说明 |
+| --- | --- |
+| 第一项 | 所有消息均回复 |
+| 第二项 | 仅 @ 机器人时回复 |
+| 第三项 | 不在群组中回复 |
+
+![群组策略](/img/openclaw/image-20260302195650250.webp)
+
+---
+
+## 步骤三：配置飞书订阅事件
+
+> 此步骤需要 OpenClaw 处于运行状态。可通过 `openclaw gateway` 手动启动。
+
+1. 在飞书开放平台，进入应用的事件配置页面
+
+![事件配置](/img/openclaw/image-20260302200451645.webp)
+2. 添加"接收消息"事件
+
+![添加事件](/img/openclaw/image-20260302200532462.webp)
+3. **重新创建一个版本并发布**，否则订阅事件不生效
+
+![重新发布](/img/openclaw/image-20260302200614958.webp)
+
+---
+
+## 步骤四：测试与配对
+
+1. 在飞书工作台找到刚创建的机器人，发送任意消息
+
+![找到机器人](/img/openclaw/image-20260302200716915.webp)
+2. 机器人会返回一个**配对码**，记录该配对码
+
+![获取配对码](/img/openclaw/image-20260302203000704.webp)
+3. 在对话中选择打开 Bot（选择 Web UI 方式）
+
+![打开 Web UI](/img/openclaw/image-20260302201035998.webp)
+4. 新开终端，执行配对命令：
+
+```bash
+openclaw pairing approve feishu 你的配对码
+```
+
+![执行配对](/img/openclaw/image-20260302203037727.webp)
+
+5. 在飞书中发送消息验证配置是否成功
+
+![测试通过](/img/openclaw/image-20260302203125273.webp)

@@ -1,0 +1,185 @@
+---
+title: "推荐工具"
+description: "围绕本站使用的常用工具，按重要性分四档：必装 / 可选 / 辅助 / 服务。"
+---
+
+# 推荐工具
+
+<Callout type="info">按使用优先级分四档。**必装**是本站的默认配置入口；**可选**按需补；**辅助**用于历史会话与排障；**服务**只需要在排障前先看一眼。</Callout>
+
+---
+
+## 🟢 必装
+
+### CC Switch
+
+<Callout type="tip">桌面端 API 切换器，可在一个界面里管理 **Claude Code、Claude Desktop、Codex、Gemini CLI、OpenCode、OpenClaw、Hermes Agent** 七个客户端的供应商和密钥。本站默认配置入口。</Callout>
+
+- **项目地址**：[github.com/farion1231/cc-switch](https://github.com/farion1231/cc-switch)
+- **当前版本**：v3.16.3（2026-06-14）
+- **许可证**：MIT
+
+#### 核心功能
+
+- 在一个 GUI 里集中管理 7 个客户端的供应商
+- 内置 50+ 供应商预设（含 AWS Bedrock、NVIDIA NIM 以及多家社区中转）
+- 自动写入对应工具的配置文件，无需手动编辑
+- Claude Code 支持热切换，其它客户端切换后需重启终端
+- 自动备份与回滚（保留最近 10 份）
+
+#### 安装
+
+<Tabs defaultValue="win">
+  <Tab label="Windows" value="win">
+    到 [Releases](https://github.com/farion1231/cc-switch/releases) 下载 MSI 安装包或便携版 ZIP。要求 Windows 10 及以上。
+  </Tab>
+  <Tab label="macOS" value="mac">
+    Homebrew Cask（macOS 12 Monterey 及以上）：
+
+    ```bash
+    brew install --cask cc-switch
+    ```
+
+    升级：
+
+    ```bash
+    brew upgrade --cask cc-switch
+    ```
+
+    或从 Releases 下载 `.dmg`（推荐，已签名公证）/ `.zip`。
+  </Tab>
+  <Tab label="Linux" value="linux">
+    要求 Ubuntu 22.04+ / Debian 11+ / Fedora 34+。
+
+    - Arch（AUR）：`paru -S cc-switch-bin`
+    - Debian / Ubuntu：从 Releases 下载 `.deb`
+    - Fedora / RHEL：下载 `.rpm`
+    - 通用：下载 `.AppImage`
+  </Tab>
+</Tabs>
+
+<Callout type="info">完整步骤、渠道与模型对应关系、`vip_2_cc` 的模型说明见 [CC Switch](/cc-switch)；外接调用的 `User-Agent` 规则见 [OpenClaw 手动配置](/openclaw/manual)。</Callout>
+
+---
+
+## 🟡 可选
+
+按你的使用强度决定要不要装。
+
+### ZCF
+
+零配置初始化工具，用于快速完成 Claude Code 初始化，常用 MCP 服务器和提示词模板一并配好。
+
+- **项目地址**：[github.com/UfoMiao/zcf](https://github.com/UfoMiao/zcf)
+- **运行**：
+
+```bash
+npx zcf
+```
+
+适合首次配置，或需要重新整理 Claude Code 环境的用户。
+
+---
+
+### MICUCODELINE
+
+米醋站点特供的 Claude Code 状态栏工具，在终端底部实时显示令牌消耗和当前模型信息。
+
+- **项目地址**：[github.com/zuoliangyu/MICUCODELINE](https://github.com/zuoliangyu/MICUCODELINE)
+
+#### 安装
+
+```bash
+npm install -g @zuolan/micucodeline
+```
+
+#### 配置
+
+在 `~/.claude/settings.json` 中添加 `statusLine` 字段。
+
+<Callout type="warning">`MICUCODELINE` 当前版本会从 `settings.json` 的 `env` 中读取 `ANTHROPIC_AUTH_TOKEN` 和 `ANTHROPIC_BASE_URL`。这里保留 `ANTHROPIC_AUTH_TOKEN` 是该工具的专用要求，并非站内主文档统一改名。如果你当前主配置里用的是 `ANTHROPIC_API_KEY`，可在 `MICUCODELINE` 场景下额外补一份同值的 `ANTHROPIC_AUTH_TOKEN`，或通过 CC Switch 一并写入 `statusLine` 和对应 `env`。</Callout>
+
+<Tabs defaultValue="win">
+  <Tab label="Windows" value="win">
+    ```json
+    {
+      "env": {
+        "ANTHROPIC_AUTH_TOKEN": "sk-你的API密钥",
+        "ANTHROPIC_BASE_URL": "https://foropencode.com"
+      },
+      "statusLine": {
+        "command": "C:/Users/<USERNAME>/.claude/micucodeline/micucodeline.exe",
+        "padding": 0,
+        "type": "command"
+      }
+    }
+    ```
+  </Tab>
+  <Tab label="macOS / Linux" value="mac">
+    ```json
+    {
+      "env": {
+        "ANTHROPIC_AUTH_TOKEN": "sk-你的API密钥",
+        "ANTHROPIC_BASE_URL": "https://foropencode.com"
+      },
+      "statusLine": {
+        "command": "/home/<USERNAME>/.claude/micucodeline/micucodeline",
+        "padding": 0,
+        "type": "command"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+![状态栏效果展示](/img/claude-code/statusline-preview.webp)
+
+---
+
+## 🔵 辅助
+
+排障 / 翻历史 / 看用量时再用。
+
+### AI Session Viewer
+
+可视化浏览 Claude Code 和 Codex CLI 的历史会话记录。
+
+- **项目地址**：[github.com/zuoliangyu/AI-Session-Viewer](https://github.com/zuoliangyu/AI-Session-Viewer)
+
+#### 用途
+
+- 查看完整会话历史
+- 全局搜索会话内容
+- Token 用量统计
+- 一键恢复历史会话
+
+---
+
+## ⚪ 服务
+
+不需要装，但**遇到异常前先打开看一眼**。
+
+### 状态监测站
+
+用于查看米醋站点服务状态、可用性与异常波动。
+
+- **访问地址**：[foropencode.com/monitoring](https://foropencode.com/monitoring)
+
+#### 什么时候先打开
+
+- 请求突然大量报错
+- 响应速度明显变慢
+- 某个分组短时间内连续不可用
+- 需要先判断是站点波动还是本地配置问题
+
+---
+
+## 接入相关
+
+把 Claude、Codex、Grok 或国产模型接到 IDE、网关或第三方客户端时建议先看：
+
+| 场景 | 文档 |
+| --- | --- |
+| 网关接入 | [OpenClaw 安装](/openclaw/install) · [CC Switch 配置](/openclaw/cc-switch) · [手动配置 / UA 规则](/openclaw/manual) |
+| 终端代理（多供应商） | [OpenCode CLI 安装](/opencode/cli/install) · [Hermes Agent 安装](/hermes/install) |
+| 搜索增强 | [Grok Search MCP 配置](/claude-code/grok-search-mcp) |

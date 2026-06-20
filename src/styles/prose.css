@@ -1,0 +1,189 @@
+/* =========================================================================
+ * Article prose — applied via the .prose class on the article container.
+ * Type: 15.5px body, 1.78 line-height, 720px max width for slightly more
+ * breathing room on wide screens while staying within Chinese-friendly
+ * reading width.
+ * ========================================================================= */
+
+.prose {
+  color: var(--c-text);
+  font-size: 15.5px;
+  line-height: 1.78;
+  letter-spacing: 0.01em;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.prose h1 {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 28px;
+  letter-spacing: -0.015em;
+}
+
+.prose h2 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 64px 0 18px;
+  padding-top: 28px;
+  border-top: 1px solid var(--c-border-soft, var(--c-border));
+  letter-spacing: -0.01em;
+}
+
+.prose h3 {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 36px 0 12px;
+  letter-spacing: -0.005em;
+}
+
+.prose h4 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 26px 0 8px;
+}
+
+.prose p {
+  margin: 18px 0;
+}
+
+.prose ul,
+.prose ol {
+  margin: 16px 0;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin: 8px 0;
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin: 6px 0;
+}
+
+.prose ul li::marker {
+  color: var(--c-text-subtle);
+}
+
+.prose ol li::marker {
+  color: var(--c-text-subtle);
+  font-weight: 600;
+}
+
+.prose blockquote {
+  background: var(--c-quote-bg);
+  border-left: 2px solid var(--c-quote-border);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--c-text-muted);
+  margin: 24px 0;
+  padding: 14px 22px;
+}
+
+.prose blockquote > :first-child {
+  margin-top: 0;
+}
+
+.prose blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--c-border);
+  margin: 40px 0;
+}
+
+.prose a {
+  color: var(--c-brand);
+  text-decoration: underline;
+  text-decoration-color: rgba(30, 136, 229, 0.3);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--t-fast);
+}
+
+.prose a:hover {
+  text-decoration-color: var(--c-brand);
+}
+
+.prose :not(pre) > code {
+  background: var(--c-code-bg);
+  border: 1px solid var(--c-border-soft, transparent);
+  border-radius: var(--radius-sm);
+  color: var(--c-code-text);
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 1px 6px;
+}
+
+.prose table {
+  border: 1px solid var(--c-border);
+  border-collapse: collapse;
+  border-radius: var(--radius-md);
+  display: block;
+  margin: 24px 0;
+  max-width: 100%;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.prose thead {
+  background: var(--c-bg-soft);
+}
+
+.prose tbody tr:nth-child(even) {
+  background: rgba(148, 163, 184, 0.04);
+}
+
+:global(html.dark) .prose tbody tr:nth-child(even) {
+  background: rgba(148, 163, 184, 0.05);
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--c-border-soft, var(--c-border));
+  font-size: 14px;
+  padding: 11px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  font-weight: 600;
+}
+
+.prose img {
+  border-radius: var(--radius-md);
+  margin: 16px auto;
+}
+
+/* Heading anchor link */
+.prose .header-anchor {
+  color: var(--c-text-subtle);
+  display: inline-block;
+  font-weight: 400;
+  margin-left: 8px;
+  opacity: 0;
+  text-decoration: none;
+  transition: opacity var(--t-fast);
+}
+
+.prose .header-anchor::before {
+  content: "#";
+}
+
+.prose h1:hover .header-anchor,
+.prose h2:hover .header-anchor,
+.prose h3:hover .header-anchor,
+.prose h4:hover .header-anchor {
+  opacity: 1;
+}
+
+/* Heading scroll-margin so anchor jumps land below the fixed nav */
+.prose :is(h1, h2, h3, h4, h5, h6) {
+  scroll-margin-top: var(--layout-scroll-offset);
+}

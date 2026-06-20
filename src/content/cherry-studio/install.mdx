@@ -1,0 +1,122 @@
+---
+title: "Cherry Studio · 安装"
+description: "下载并安装 Cherry Studio 桌面客户端。支持 Windows、macOS、Linux。"
+---
+
+# Cherry Studio · 安装
+
+<VersionBadge version="v1.9.11" date="2026-06-07" license="AGPL-3.0" github="https://github.com/CherryHQ/cherry-studio" />
+
+<PageHeader
+  useCase="用桌面 GUI 访问 60+ LLM 供应商，内置知识库、MCP 和 300+ 助手模板"
+  audience="不习惯终端、需要本地知识库 / 文件对话 / 图文生成的用户"
+  tldr="从官方 Releases 下载安装包，双击安装，无需任何命令行"
+/>
+
+> Cherry Studio **只有桌面客户端**（Windows / macOS / Linux），没有 CLI 版本。
+
+---
+
+## 有什么能力？
+
+| 功能 | 说明 |
+| --- | --- |
+| 多供应商支持 | 50+ Provider 预设（Anthropic、OpenAI、Google、DeepSeek、Groq 等）+ 自定义 |
+| 300+ 助手模板 | 内置翻译、写作、代码审查等各类助手，可直接调用 |
+| 本地知识库 | 拖入 PDF / Word / 网页，AI 基于本地文档回答 |
+| MCP 支持 | 内置 MCP 协议，可调用文件系统、搜索、浏览器等工具 |
+| 多模态 | 支持图片输入、图像生成（需对应模型） |
+| 数据本地化 | 所有对话、知识库、配置均存本地，不上传第三方 |
+
+---
+
+## 下载
+
+从官方 Releases 页获取对应平台安装包（当前最新：**v1.9.11**，2026-06-07）：
+
+[**→ GitHub Releases 下载页**](https://github.com/CherryHQ/cherry-studio/releases/latest)
+
+| 平台 | 文件名 | 大小（约） |
+| --- | --- | --- |
+| Windows x64 | `Cherry-Studio-1.9.11-x64-setup.exe` | ~140 MB |
+| Windows ARM64 | `Cherry-Studio-1.9.11-arm64-setup.exe` | ~130 MB |
+| macOS Apple Silicon | `Cherry-Studio-1.9.11-arm64.dmg` | ~160 MB |
+| macOS Intel | `Cherry-Studio-1.9.11-x64.dmg` | ~165 MB |
+| Linux | `Cherry-Studio-1.9.11-x86_64.AppImage` | ~170 MB |
+
+---
+
+## 安装
+
+<Tabs defaultValue="win">
+  <Tab label="Windows" value="win">
+    双击下载的 `.exe` 文件，一路 Next 即可。安装完桌面会出现 Cherry Studio 快捷方式。
+  </Tab>
+  <Tab label="macOS" value="mac">
+    1. 打开 `.dmg`，拖入 **Applications** 文件夹
+    2. 首次启动若被 Gatekeeper 拦截，进 **系统设置 → 隐私与安全性**，点「仍要打开」
+
+    <Callout type="info">Apple Silicon（M1/M2/M3/M4）用户下载 `arm64` 版，Intel Mac 下载 `x64` 版——大小和性能都有差异。</Callout>
+  </Tab>
+  <Tab label="Linux" value="linux">
+    ```bash
+    chmod +x Cherry-Studio-*.AppImage
+    ./Cherry-Studio-*.AppImage
+    ```
+
+    推荐用 [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher) 把它集成到系统菜单和文件关联里。
+  </Tab>
+</Tabs>
+
+---
+
+## 首次启动
+
+<Steps>
+  <Step title="打开 Cherry Studio">
+    第一次启动会进入欢迎页，**不强制要求账号登录**——本地配置即可使用所有功能。
+  </Step>
+  <Step title="选择主题与语言">
+    左下角设置图标 → **常规设置** → 主题（亮 / 暗 / 跟随系统）+ 语言选「简体中文」。
+  </Step>
+  <Step title="进入「模型服务」准备配 API">
+    左下角设置 → **模型服务**。可以看到 62 个已预设的 Provider，点击对应供应商填入 API Key 即可激活。
+  </Step>
+</Steps>
+
+---
+
+## 验证
+
+主界面能切换 Provider 和模型、成功发出一条消息并收到回复，即说明安装完成。下一步：
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/cherry-studio/cc-switch', hint: '用 CC Switch 一键导入中转 API 配置（推荐）' },
+    { route: '/cherry-studio/manual', hint: '直接在界面里填 API 地址和 Key' },
+  ]}
+/>
+
+---
+
+## 常见问题
+
+<Callout type="warning" title="启动报缺 GLIBC / OpenSSL（Linux）">
+AppImage 内嵌运行时，但部分系统库仍依赖宿主 glibc。如果启动报错：
+
+- 升级到 Ubuntu 22.04+ / Debian 12+ / Fedora 38+（内核 5.15+）
+- 或编译构建（参考仓库 `BUILD.md`）
+</Callout>
+
+<Callout type="info" title="数据存哪？">
+Cherry Studio 的所有数据都在本地用户目录：
+
+| 平台 | 数据目录 |
+| --- | --- |
+| macOS | `~/Library/Application Support/CherryStudio` |
+| Windows | `%APPDATA%\CherryStudio` |
+| Linux | `~/.config/CherryStudio` |
+
+对话历史、知识库索引、Provider 配置、助手模板自定义都在这里——迁移电脑时直接复制此目录即可。
+</Callout>

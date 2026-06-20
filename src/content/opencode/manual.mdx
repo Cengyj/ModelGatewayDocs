@@ -1,0 +1,257 @@
+﻿---
+title: "OpenCode · 手动配置"
+description: "~/.config/opencode/opencode.json JSONC 格式 + 项目级覆盖。"
+---
+
+# OpenCode · 手动配置
+
+<VersionBadge version="v1.17.8" date="2026-06-17" license="MIT" github="https://github.com/anomalyco/opencode" />
+
+<PageHeader
+  useCase="直接改 opencode.json 配 provider 与 model；项目级覆盖用户级"
+  audience="一个供应商要接多模型；项目仓库要锁定模型/参数"
+  tldr="provider 写 providers.<name>；model 字段格式 <name>/<model-id>"
+/>
+
+<Callout type="info">CLI 和桌面版 **共享同一份** `~/.config/opencode/opencode.json`。改一边两边都生效。</Callout>
+
+---
+
+## 配置文件位置
+
+| 范围 | 路径 |
+| --- | --- |
+| 全局（推荐） | `~/.config/opencode/opencode.json` |
+| 终端 UI 偏好 | `~/.config/opencode/tui.json` |
+| 项目级（覆盖全局） | 仓库根目录 `opencode.json` |
+| 缓存的鉴权信息 | `~/.local/share/opencode/auth.json` |
+| 系统级（管理员部署） | macOS `/Library/Application Support/opencode/`、Linux `/etc/opencode/`、Windows `%ProgramData%\opencode` |
+
+Windows 上 `~/.config/` 对应 `%APPDATA%`；`~/.local/share/` 对应 `%LOCALAPPDATA%`。
+
+文件**格式是 JSONC**——可以写 `//` 注释。
+
+---
+
+## 最小可用模板
+
+```json
+{
+  "providers": {
+    "foropencode": {
+      "options": {
+        "baseURL": "https://foropencode.com/v1",
+        "apiKey": "{env:OPENAI_API_KEY}"
+      }
+    }
+  },
+  "model": "foropencode/gpt-5.5"
+}
+```
+
+然后导出 Key：
+
+```bash
+export OPENAI_API_KEY=sk-xxx
+```
+
+启动 `opencode`。
+
+---
+
+## 顶层字段
+
+| 字段 | 含义 |
+| --- | --- |
+| `providers` | 所有供应商的字典 |
+| `model` | 默认用哪个模型，格式 `<provider 名>/<model ID>` |
+| `theme` | TUI 主题 |
+| `keybinds` | 自定义快捷键 |
+| `mcp` | MCP server 配置 |
+| `agent` | 自定义 agent 行为（继承 `build` / `plan`） |
+| `references` | 上下文引用文件列表（`reference` 已废弃，用 `references`） |
+
+---
+
+## `providers.<name>` 段
+
+```json
+{
+  "providers": {
+    "foropencode": {
+      "options": {
+        "baseURL": "https://foropencode.com/v1",
+        "apiKey": "{env:OPENAI_API_KEY}"
+      }
+    },
+    "anthropic-direct": {
+      "options": {
+        "baseURL": "https://foropencode.com",
+        "apiKey": "{env:ANTHROPIC_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+| 子字段 | 含义 |
+| --- | --- |
+| `options.baseURL` | API 根地址；OpenAI 兼容端点带 `/v1`，Anthropic 端点不带 |
+| `options.apiKey` | API Key；可用 `{env:VAR}` 引用环境变量 |
+| `options.headers` | 额外 HTTP 头，例如外接场景的 UA |
+| `disabled` | `true` 时该 provider 不出现在选择器 |
+
+`{env:VAR}` 和 `{file:PATH}` 是 OpenCode 的占位语法，启动时解析。这样 Key 不进配置文件，安全些。
+
+---
+
+## `providers.<name>.models.<id>` 段
+
+在 provider 下可为每个模型单独配置推理档位和 I/O 能力：
+
+```json
+{
+  "providers": {
+    "foropencode": {
+      "options": {
+        "baseURL": "https://foropencode.com/v1",
+        "apiKey": "{env:OPENAI_API_KEY}"
+      },
+      "models": {
+        "gpt-5.5": {
+          "variants": {
+            "low":    { "reasoningEffort": "low" },
+            "medium": { "reasoningEffort": "medium" },
+            "high":   { "reasoningEffort": "high" }
+          },
+          "modalities": {
+            "input":  ["text", "image"],
+            "output": ["text", "image"]
+          }
+        },
+        "gpt-5.4": {
+          "modalities": {
+            "input":  ["text", "image"],
+            "output": ["text", "image"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+| 字段 | 含义 |
+| --- | --- |
+| `variants` | 推理深度档位；每个 key 是一个档位名，值为 `{ "reasoningEffort": "low\|medium\|high" }` |
+| `modalities.input` | 模型接受的输入类型，可填 `text`、`image`、`audio`、`video`、`pdf` |
+| `modalities.output` | 模型可输出的类型，可填 `text`、`image`、`audio` |
+
+`variants` 和 `modalities` 均可省略——省略时 OpenCode 自动推断，但显式声明可让模型选择器显示档位切换和附件支持提示。
+
+<Callout type="warning">**gpt-5.5 实际有效上下文约 270K**——若在对话中遇到 `context_length_exceeded`，说明上下文超出限制，开新会话即可。</Callout>
+
+---
+
+## 多 provider + model 前缀
+
+```json
+{
+  "providers": {
+    "fc-claude": {
+      "options": {
+        "baseURL": "https://foropencode.com",
+        "apiKey": "{env:ANTHROPIC_KEY}"
+      }
+    },
+    "fc-gpt": {
+      "options": {
+        "baseURL": "https://foropencode.com/v1",
+        "apiKey": "{env:OPENAI_KEY}"
+      }
+    }
+  },
+  "model": "fc-gpt/gpt-5.5"
+}
+```
+
+`model` 字段的前缀必须对应 `providers` 里某个 ID。切换模型时改前缀即可：
+
+```json
+{ "model": "fc-claude/claude-sonnet-4-6" }
+```
+
+---
+
+## 项目级覆盖
+
+仓库根放一个 `opencode.json`：
+
+```json
+{
+  "model": "fc-claude/claude-haiku-4-5"
+}
+```
+
+启动 `opencode` 时项目级会**合并**到全局上，**项目级优先**。
+
+适用场景：
+
+- 团队仓库锁定模型（避免大家随便切）
+- 不同项目用不同 Key（项目级覆盖 `providers.<name>.options.apiKey`）
+- CI 里跑 OpenCode，项目里直接写好
+
+---
+
+## 环境变量覆盖
+
+| 变量 | 作用 |
+| --- | --- |
+| `OPENCODE_CONFIG` | 指定单个配置文件路径 |
+| `OPENCODE_CONFIG_DIR` | 指定配置目录 |
+| `OPENCODE_CONFIG_CONTENT` | 直接把 JSON 内容塞进环境变量 |
+| `OPENCODE_TUI_CONFIG` | 终端 UI 配置 |
+| `OPENCODE_MODEL` | 本次会话用的模型，覆盖配置文件 |
+
+```bash
+OPENCODE_MODEL="fc-claude/claude-opus-4-7" opencode
+```
+
+---
+
+## CLI vs 桌面版 的差异
+
+| 维度 | CLI | 桌面版 |
+| --- | --- | --- |
+| 配置文件 | `~/.config/opencode/opencode.json` | **同一个** |
+| 项目级覆盖 | 自动读 cwd 下的 `opencode.json` | 同 |
+| 当前稳定度 | 主线稳定 | BETA |
+| 完全独立配置 | 用 `OPENCODE_CONFIG_DIR` 指向另一个目录 | 给桌面版单独建启动脚本传 env |
+
+改完 config：
+
+- CLI：重启 `opencode`
+- 桌面版：完全退出 + 重启
+
+---
+
+## 常见排查
+
+| 现象 | 检查 |
+| --- | --- |
+| 启动报 `model not found` | `model` 前缀是不是 `providers` 里某个 ID |
+| `apiKey is empty` | `{env:VAR}` 引用的环境变量是否真的有值 |
+| 桌面版读不到 config | 完全退出（含菜单栏图标）再启动；BETA 期偶有缓存问题 |
+| `reference is deprecated` | 把 `reference` 改成 `references`（v1.17.0+ breaking change） |
+
+<Callout type="tip" title="v1.17.0 项目初始化">
+在项目目录跑 `/init`（会话内命令），OpenCode 会自动生成 `AGENTS.md` —— 建议 git commit 这个文件，团队共用。
+</Callout>
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/opencode/cc-switch', hint: '回到 CC Switch 流程' },
+    { route: '/opencode/cli/install', hint: '装客户端' },
+  ]}
+/>

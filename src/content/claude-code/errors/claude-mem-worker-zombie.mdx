@@ -1,0 +1,106 @@
+---
+title: "CM-002：claude-mem Worker 假死导致 Claude Code 卡死"
+---
+
+# CM-002：claude-mem Worker 假死导致 Claude Code 卡死
+
+<ErrorMeta
+  component="claude-mem、Claude Code CLI"
+  version="claude-mem v5.x → v10.5.2 升级后"
+  platform="Windows 11，Claude Code v2.1.71"
+  date="2026-03-12"
+  owner="天程君（QQ：2459221653）"
+/>
+---
+
+## 问题现象
+
+- 输入命令后终端不报错，长时间无返回（几秒到数十秒）
+- Claude Code 响应越来越慢，但看不到任何错误提示
+- `curl http://127.0.0.1:37777/api/health` TCP 可连通，但 HTTP 响应永不返回
+- `Get-NetTCPConnection -LocalPort 37777` 显示端口在监听，但反查 PID 在 tasklist 中不存在
+
+---
+
+## 根因分析
+
+**根本原因：升级导致 worker 挂死，端口残留未清，进程处于假活状态。**
+
+```text
+升级 claude-mem 版本
+  → 旧 worker 进程挂死（无响应）
+    → 端口 37777 残留占用，但进程已死
+      → 新 worker 启动时误判"端口被占"，反复重启失败
+        → hook 每次工具调用都尝试连 worker
+          → 连接超时拖慢整个 CLI
+            → Claude Code 看起来"变慢了"
+```
+
+**两个常见弯路：**
+
+| 弯路 | 错误做法 | 正确做法 |
+| --- | --- | --- |
+| 直接启动 worker | `python -m claude_mem.worker` | 进插件目录用 npm 命令启动 |
+| 进错目录执行命令 | 进 `cache/` 目录执行 `npm run worker:status` | 进 `marketplaces/` 目录 |
+
+---
+
+## 修复步骤
+
+**1. 确认 worker 是否假活**
+
+```powershell
+# TCP 能连通但 HTTP 不返回 = 假活
+curl.exe -m 8 -sv http://127.0.0.1:37777/api/health
+```
+
+**2. 清理残留进程和端口**
+
+在 PowerShell 中查找并结束占用 37777 端口的进程：
+
+```powershell
+# 查看占用端口的 PID
+Get-NetTCPConnection -LocalPort 37777 | Select-Object OwningProcess
+
+# 结束对应进程（替换 <PID>）
+Stop-Process -Id <PID> -Force
+```
+
+如果 Stop-Process 提示进程不存在，直接在任务管理器里结束所有 `node.exe` 和 `python.exe` 残留进程。
+
+**3. 进正确目录重启 worker**
+
+```bash
+# ✅ 正确：marketplaces 目录
+cd ~/.claude/plugins/marketplaces/thedotmack
+npm run worker:status
+npm run worker:restart
+```
+
+> ❌ 不要进 `cache/thedotmack/claude-mem/版本号/` 目录，那里没有 worker 脚本。
+
+**4. 验证修复**
+
+```powershell
+curl.exe -m 5 -sv http://127.0.0.1:37777/api/health
+```
+
+正常返回：
+
+```json
+HTTP/1.1 200 OK
+{ "status": "ok", "initialized": true, "mcpReady": true }
+```
+
+---
+
+## 预防措施
+
+- **Claude Code 变慢先查 worker**，不要先怀疑 API 或模型
+- 升级 claude-mem 后主动验证 health 接口，别等症状出现
+- 区分两个目录：
+
+| 目录 | 用途 | 有 worker 脚本 |
+| --- | --- | --- |
+| `~/.claude/plugins/marketplaces/thedotmack` | 插件主目录 | ✅ 有 |
+| `~/.claude/plugins/cache/thedotmack/claude-mem/` | 运行时依赖缓存 | ❌ 没有 |

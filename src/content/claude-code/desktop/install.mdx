@@ -1,0 +1,186 @@
+﻿---
+title: "Claude 桌面版 · 安装"
+description: "下载 Claude 桌面客户端并通过 CC Switch 或 Developer Mode 接入第三方中转平台，无需 Anthropic 账号。"
+---
+
+# Claude 桌面版 · 安装
+
+<VersionBadge version="v1.13576.4" date="2026-06-19" license="Proprietary" github="https://claude.com/download" />
+
+<PageHeader
+  useCase="用 Claude 桌面客户端接入第三方 API，图形化界面，无需终端"
+  audience="不习惯命令行的用户，想在桌面 GUI 里用 Claude 模型"
+  tldr='CC Switch 写好配置 → 启动桌面版 → 登录界面选 "Continue with Gateway"'
+/>
+
+<Callout type="tip" title="桌面版同样不需要 Anthropic 账号">
+Claude 桌面版（Cowork 3P 模式）**无需注册或登录 Anthropic 账号**。通过 CC Switch 配好第三方中转平台后，启动时在登录界面直接点 **"Continue with Gateway"** 即可——API 请求全部走你配置的中转站。
+
+> 官方文档原文："Do not sign in or create an Anthropic account."
+</Callout>
+
+---
+
+## 系统要求
+
+| 平台 | 最低版本 | 说明 |
+| --- | --- | --- |
+| macOS | 11 Big Sur | Universal Binary，原生支持 Apple Silicon + Intel |
+| Windows | 10 | 支持 x86_64 |
+| Linux | **不支持** | 请改用 [Claude Code CLI](/claude-code/cli/install) |
+| iOS / Android | 随版本更新 | 移动端不支持 Cowork 3P 模式 |
+
+**硬件**：4 GB RAM（推荐 8 GB）、2 GB 可用磁盘。
+
+---
+
+## 步骤一：下载并安装 Claude 桌面版
+
+从官方下载页取得安装包：**[https://claude.com/download](https://claude.com/download)**
+
+<Tabs defaultValue="mac">
+  <Tab label="macOS" value="mac">
+    下载 `.dmg`，打开后将 **Claude** 拖入 Applications 文件夹。
+
+    首次启动如弹"无法验证开发者"——进 **系统设置 → 隐私与安全性** 点"仍然打开"。
+  </Tab>
+  <Tab label="Windows" value="win">
+    下载 `.exe` 安装程序，双击按向导默认安装。
+
+    SmartScreen 弹窗时点"更多信息 → 仍要运行"。
+  </Tab>
+</Tabs>
+
+---
+
+## 步骤二：配置中转
+
+有两种配置方式，推荐 CC Switch：
+
+<Tabs defaultValue="ccswitch">
+  <Tab label="CC Switch（推荐）" value="ccswitch">
+    CC Switch 会直接写入桌面版的 3P 配置文件，**不需要手动开 Developer Mode**。
+
+    <Steps>
+      <Step title="安装并打开 CC Switch">
+        从 [ccswitch.io](https://ccswitch.io) 下载安装，或用 Homebrew：
+
+        ```bash
+        brew tap farion1231/ccswitch && brew install --cask cc-switch
+        ```
+      </Step>
+      <Step title="切换到 Claude Desktop 面板">
+        左侧应用切换器选 **Claude Desktop**（图标右下角有桌面版标识，与 Claude Code 区分）。
+      </Step>
+      <Step title="添加供应商">
+        点 **+** 新建，选预设或自定义：
+
+        | 字段 | 填写 |
+        | --- | --- |
+        | Base URL | `https://foropencode.com` |
+        | API Key | `sk-xxx` |
+        | 模型 | `claude-sonnet-4-6`（可选） |
+
+        <Callout type="warning">Base URL **不加 `/v1`** 后缀——桌面版用 Anthropic 原生协议，不是 OpenAI 兼容端点。</Callout>
+      </Step>
+      <Step title="点击启用">
+        在供应商卡片上点 **Enable**，CC Switch 写入配置文件。
+      </Step>
+      <Step title="完全退出 Claude 并重新启动">
+        确保彻底退出（macOS 需 Cmd+Q，不能只关窗口）。
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab label="手动 Developer Mode" value="manual">
+    不用 CC Switch，直接在桌面版里手动配置。
+
+    <Callout type="warning">**停在登录界面，不要点登录或注册。** Developer Mode 要在登录前开。</Callout>
+
+    <Steps>
+      <Step title="启动 Claude 桌面版，停在登录界面">
+        不登录、不注册，保持在初始登录界面。
+      </Step>
+      <Step title="打开 Help → Troubleshooting">
+        - **macOS**：顶部菜单栏 → **Help → Troubleshooting → Enable Developer Mode**
+        - **Windows**：登录界面左上角 ☰ 菜单 → **Help → Troubleshooting → Enable Developer Mode**
+      </Step>
+      <Step title="启用 Developer Mode">
+        勾选 **Enable Developer Mode**，页面或菜单栏出现 **Developer** 入口。
+      </Step>
+      <Step title="配置第三方中转平台">
+        点 **Developer → Configure Third-Party Inference…**，填入：
+
+        | 字段 | 填写 |
+        | --- | --- |
+        | Base URL | `https://foropencode.com` |
+        | API Key | `sk-xxx` |
+        | Models（可选） | `claude-sonnet-4-6` |
+      </Step>
+      <Step title="Apply Locally">
+        点 **Apply Locally**，桌面版自动重启。
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+---
+
+## 步骤三：以第三方中转模式启动
+
+配置完成后，启动 Claude 桌面版时登录界面会出现新按钮：
+
+| 按钮文字 | 含义 |
+| --- | --- |
+| **Continue with Gateway** | 使用你配置的第三方 API（最常见，本站用这个） |
+| Start in Cowork on 3P | 企业 MDM 部署的入口，含义相同 |
+
+点 **Continue with Gateway**，进入后即为第三方中转模式。界面与正常 Claude 一样，API 请求走你的中转站，**不需要也不会走 Anthropic 官方账号**。
+
+![Continue with Gateway 登录界面](/img/claude-code/desktop/02-gateway-login.webp)
+
+---
+
+## 下一步
+
+<RelatedPages
+  title="已进入 Gateway 模式，接下来"
+  items={[
+    { route: '/claude-code/desktop/cc-switch', hint: '用 CC Switch 管理多个供应商 / 切换模型' },
+    { route: '/claude-code/desktop/manual', hint: '手动调整 Developer Mode 表单里的字段' },
+  ]}
+/>
+
+---
+
+## 常见问题
+
+<Callout type="info" title="登录界面看不到 Continue with Gateway？">
+1. 确认 CC Switch 已点 Enable 并写入了配置
+2. 确认 Claude 是**完全退出**后重启的（macOS：Cmd+Q；Windows：系统托盘右键退出）
+3. 如果用手动方式，确认点了 **Apply Locally**（不是只填了字段没保存）
+</Callout>
+
+<Callout type="info" title="Apple Silicon Mac 有原生版本吗？">
+有。Claude 桌面版是 Universal Binary，同时包含 ARM64（Apple Silicon）和 x86_64（Intel），无需 Rosetta 2。
+</Callout>
+
+<Callout type="info" title="Linux 怎么办？">
+Claude 桌面版**不支持 Linux**。请使用 [Claude Code CLI](/claude-code/cli/install)，API Key 配置方式完全一样，只是没有图形界面。
+</Callout>
+
+<Callout type="warning" title="进入后报 401 / 403？">
+1. Base URL 不含 `/v1`
+2. API Key 对应分组支持 Claude 模型（典型：`vip_5`）
+3. 完全退出 + 重启桌面版
+4. 查 [Claude Code 常见报错](/claude-code/errors)
+</Callout>
+
+<Callout type="info" title="桌面版 vs CLI 的区别">
+| | 桌面版 | CLI |
+| --- | --- | --- |
+| 界面 | 图形化 GUI | 终端命令行 |
+| Anthropic 账号 | **不需要** | **不需要** |
+| 配置文件 | `Claude-3p/` 目录 | `~/.claude/settings.json` |
+| Linux 支持 | ✗ | ✓ |
+| 热切换 | 需重启 | CC Switch 热切换 |
+</Callout>

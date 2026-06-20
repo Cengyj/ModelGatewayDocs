@@ -1,0 +1,99 @@
+---
+title: "Claude Code · 排障"
+description: "Claude Code 与相关插件常见报错按症状分类，每条都有真实根因和修复步骤。"
+---
+
+# Claude Code · 排障
+
+<Callout type="info">本页按**症状分类**索引所有 CC-xxx 与 CM-xxx。每篇详细页统一采用「**现象 → 根因 → 修复步骤 → 预防措施**」结构。先按症状定位类别，再点编号进入详细页。</Callout>
+
+---
+
+## 🌐 网络 / 连接类
+
+请求未到达服务器、超时、被拦截。**先确认网络与代理，再排查配置**。
+
+| 编号 | 现象 | 根因 | 状态 |
+| --- | --- | --- | --- |
+| [CC-005](/claude-code/errors/cc-onboarding-connection-block) | 首次启动即报 Unable to connect to Anthropic services | `hasCompletedOnboarding` 字段缺失，Onboarding 探测绕过中转直连官方端点失败 | ✅ 已解决 |
+| [CC-009](/claude-code/errors/cc-connection-error) | API Error (Connection error.) | 本地到服务器链路不通，代理节点失效或网络路由异常 | 常见 |
+| [CC-010](/claude-code/errors/cc-request-timed-out) | API Error (Request timed out.) | 网络延迟过高（情况 A）或上下文 token 过多处理超时（情况 B） | 常见 |
+| [CC-017](/claude-code/errors/cc-webfetch-preflight-fail) | WebFetch 报错，目标网站可访问但联网失效 | CC 抓取前向 claude.ai 发预检请求，国内网络拦截 claude.ai 导致预检失败 | ✅ 已解决 |
+| CC-008 | 403 / Missing API Key | 配置冲突或 settings.json 被意外修改，推荐用 CC Switch 重新写入 | 常见 |
+| CC-012 | Overloaded / 500 | 官方服务过载或故障，查 [status.anthropic.com](https://status.anthropic.com) 确认状态 | 常见 |
+
+---
+
+## 🔑 认证 / Key 类
+
+返回 401 / Invalid API Key / 鉴权失败。**优先排查配置覆盖关系**：环境变量 > settings.json > CC Switch。
+
+| 编号 | 现象 | 根因 | 状态 |
+| --- | --- | --- | --- |
+| CC-002 | 401 / Invalid API Key | 中转 API 的 `ANTHROPIC_BASE_URL` 未正确配置，请求打到官方端点 | 常见 |
+| [CC-007](/claude-code/errors/cc-401-ide-mcp-conflict) | 401 无效令牌（sk 开头令牌） | IDE 插件或 MCP 服务器覆盖了 settings.json 中的 apiKey / baseURL | 常见 |
+| [CC-016](/claude-code/errors/cc-401-leftover-env) | 无效令牌（曾买过第三方服务后切换） | 旧服务遗留的环境变量覆盖了新配置 | ✅ 已解决 |
+| [CC-018](/claude-code/errors/cc-oauth-conflict) | 登录过官网后 API Key 失效 | OAuth 令牌写入 `~/.claude.json`，优先级高于 settings.json | ✅ 已解决 |
+| [CC-021](/claude-code/errors/cc-invalid-key-format) | 401 Invalid API Key format，Key 目视正确仍报错 | 从 PDF / 网页 / 截图复制 Key 时混入零宽空格、换行符等不可见字符 | 常见 |
+
+---
+
+## 📦 请求 / 配置类
+
+返回 400 / 413 / Invalid model name / 请求格式异常。**通常是某个 Beta 头或参数不被对端支持**。
+
+| 编号 | 现象 | 根因 | 状态 |
+| --- | --- | --- | --- |
+| [CC-006](/claude-code/errors/cc-400-experimental-betas) | 请求返回 400，与内容无关 | CC 附加了实验性 Beta 请求头，中转服务不支持 | ✅ 已解决 |
+| CC-011 | API Error 400（非内容原因） | CC 本身 bug 导致请求体格式异常，重发或 `/compact` 后通常恢复 | 常见 |
+| CC-013 | Command timed out after 2m 0.0s | CC 等待 shell 命令返回超时，与 API 请求无关，可手动执行对应命令 | 常见 |
+| [CC-014](/claude-code/errors/cc-413-invalid-model) | 413 请求体过大 / 400 Invalid model name | 上下文超限（413）或 Opus 并发配额不足（400） | 常见 |
+| CC-015 | API Error: response exceeded the 32000 | 单次回复超出默认输出 token 上限，设置 `CLAUDE_CODE_MAX_OUTPUT_TOKENS=32000` 解决 | ✅ 已解决 |
+| [CC-024](/claude-code/errors/cc-024-third-party-system-role-400) | 第三方 / 国产模型 400 `messages[].role: unknown variant system` | CC 启用 `mid_conversation_system` Beta，第三方端点未跟进，仍只接受 user / assistant 两种 role | ✅ 已解决 |
+| CC-003 | 503 model_not_found | 所选模型在当前渠道下线或不可用 | 常见 |
+| CC-004 | context window 超限，对话被截断 | 单次会话积累 token 过多，未及时 `/compact` 或新开会话 | 常见 |
+
+---
+
+## 🚦 权限 / 速率类
+
+操作被拒绝、429、Plan 模式异常。**优先看额度、权限和配置开关**。
+
+| 编号 | 现象 | 根因 | 状态 |
+| --- | --- | --- | --- |
+| [CC-019](/claude-code/errors/cc-429-rate-limit) | 429 Rate Limit Exceeded，重试无效 | 额度耗尽（insufficient_quota，需充值） | 常见 |
+| [CC-020](/claude-code/errors/cc-permission-denied) | Permission denied，文件读写被拒 | 系统文件权限不足、CC Permission 设置为拒绝、或 .claudeignore 规则误匹配 | 常见 |
+| [CC-023](/claude-code/errors/cc-023-skip-auto-permission-prompt-plan-fail) | 加入 `skipAutoPermissionPrompt` 后 Plan 模式无法执行 | 跳过自动权限提示相关流程后，Plan 模式执行阶段无法继续推进 | 常见 |
+
+---
+
+## 💰 缓存 / 计费类
+
+| 编号 | 现象 | 根因 | 状态 |
+| --- | --- | --- | --- |
+| [CC-022](/claude-code/errors/cc-022-duplicate-cache-billing) | 重复创建缓存，单场重复收费 | 备用负载切号后二次转发携带相关请求头，误路由触发重复建缓存 | ✅ 已解决 |
+
+---
+
+## 🧠 claude-mem（持久化记忆）类
+
+| 编号 | 现象 | 根因 | 状态 |
+| --- | --- | --- | --- |
+| CC-001 | 响应极慢，像卡住 | hook 持续尝试连挂死的 worker，每次超时拖慢 CLI | ✅ 已解决 |
+| [CM-001](/claude-code/errors/claude-mem-data-loss) | 知识库连续 4 天无产出，pending_messages 堆积 1637 条 | worker 模型通道下线（503 死循环），积压数据被误判为垃圾清空 | ✅ 已解决 |
+| [CM-002](/claude-code/errors/claude-mem-worker-zombie) | Claude Code 命令卡死不返回，终端无报错 | 升级后 worker 挂死，端口残留，进程假活 | ✅ 已解决 |
+
+---
+
+## 不知道是哪一类？
+
+按你看到的关键字搜索本页（`Ctrl+F` 或顶部搜索框）：
+
+- 出现 `401` → 认证 / Key 类
+- 出现 `429` → 权限 / 速率类
+- 出现 `Connection error` / `timed out` → 网络 / 连接类
+- 出现 `400 Invalid model name` / `unknown variant` → 请求 / 配置类
+- 出现 `Permission denied` / `skipAutoPermissionPrompt` → 权限 / 速率类
+- 出现 `pending_messages` / `worker` → claude-mem 类
+
+实在找不到的，先回 [CC Switch 配置](/claude-code/cli/cc-switch) 检查 Base URL / Key / 模型。

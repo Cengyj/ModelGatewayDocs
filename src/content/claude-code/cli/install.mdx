@@ -1,0 +1,124 @@
+---
+title: "Claude Code CLI · 安装"
+description: "在终端里安装 Anthropic 官方的 Claude Code CLI。支持 macOS、Linux、WSL、Windows。"
+---
+
+# Claude Code CLI · 安装
+
+<VersionBadge version="v2.1.183" date="2026-06-19" license="Proprietary" github="https://github.com/anthropics/claude-code" />
+
+<PageHeader
+  useCase="在终端跑 claude 命令、AI 辅助写代码"
+  audience="用 Claude 模型写代码、不想折腾 IDE 插件的开发者"
+  tldr="原生脚本一行装完 → claude --version 验证"
+/>
+
+<Callout type="tip" title="安装完成后无需登录 Anthropic 账号">
+Claude Code **不强制要求** Anthropic 账号登录。只要配置了 `ANTHROPIC_BASE_URL` + `ANTHROPIC_API_KEY`（通过 CC Switch 或手动写 `settings.json`），直接运行 `claude` 即可使用——不需要完成 OAuth 流程。
+
+**推荐流程：装好 → CC Switch 配置 → `claude` 启动**
+</Callout>
+
+> 下一步配 API：[CC Switch 配置](/claude-code/cli/cc-switch)（推荐）或 [手动配置](/claude-code/cli/manual)。
+
+---
+
+## 系统要求
+
+<Callout type="info" title="环境要求">
+- **Node.js** 18+（官方推荐，用于扩展能力；核心功能不需要）
+- **操作系统**：macOS 10.15+、Ubuntu 20.04+、Windows 10 1903+（含 WSL2）
+- **Windows 原生**：需要 Git for Windows 提供 bash 环境
+- **磁盘**：约 200 MB
+</Callout>
+
+---
+
+## 准备 Git（仅 Windows 原生需要）
+
+Claude Code 在 Windows 原生环境下依赖 Git for Windows 提供 bash。WSL / macOS / Linux 系统自带或自己装好即可。
+
+下载：[Git for Windows](https://git-scm.com/install/windows)，默认选项一路下一步。
+
+```powershell
+git --version
+```
+
+---
+
+## 安装
+
+官方推荐用原生安装脚本——装好后 `claude update` 命令可自动维护更新。包管理器渠道（brew / winget）是社区维护，可能稍有滞后。
+
+<Tabs defaultValue="mac">
+  <Tab label="macOS / Linux / WSL" value="mac">
+    ```bash
+    curl -fsSL https://claude.ai/install.sh | bash
+    ```
+
+    安装完重新加载 shell 或新开终端：
+
+    ```bash
+    source ~/.bashrc   # bash 用户
+    source ~/.zshrc    # zsh 用户
+    ```
+  </Tab>
+  <Tab label="Windows PowerShell" value="ps">
+    ```powershell
+    irm https://claude.ai/install.ps1 | iex
+    ```
+  </Tab>
+  <Tab label="Windows CMD" value="cmd">
+    ```cmd
+    curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
+    ```
+  </Tab>
+  <Tab label="Homebrew (macOS)" value="brew">
+    ```bash
+    brew install --cask claude-code
+    ```
+  </Tab>
+  <Tab label="WinGet (Windows)" value="winget">
+    ```powershell
+    winget install Anthropic.ClaudeCode
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## 验证
+
+```bash
+claude --version
+# 输出示例：Claude Code 2.1.183
+```
+
+能输出版本号即装好了。下一步配 API：
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/claude-code/cli/cc-switch', hint: '用 CC Switch 一键配（推荐）' },
+    { route: '/claude-code/cli/manual', hint: '直接改 settings.json' },
+  ]}
+/>
+
+---
+
+## 常见问题
+
+<Callout type="info" title="之前用 npm 安装的怎么迁移？">
+早期文档提到的 `npm install -g @anthropic-ai/claude-code` 已不在 Anthropic 官方推荐安装方式之列。如果你已经用 npm 装过：
+
+1. 先卸载：`npm uninstall -g @anthropic-ai/claude-code`
+2. 再用上面的原生脚本重装，即可获得自动更新能力
+</Callout>
+
+<Callout type="warning" title="安装命令下不动？">
+**先看 [CC-005 启动连不上 Anthropic](/claude-code/errors/cc-onboarding-connection-block)**。九成是网络问题，按这个顺序自查：
+
+1. 开了梯子的，关掉梯子再试
+2. 没开梯子的，开启梯子再试
+3. 仍不行，开启代理软件的**网卡 TUN 模式**（系统级代理），而非仅浏览器代理
+</Callout>

@@ -1,0 +1,253 @@
+.wrap {
+  background: var(--c-bg-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  margin: 20px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Hover toolbar — only visible on hover/focus-within (or always when expanded). */
+.toolbar {
+  align-items: center;
+  background: linear-gradient(180deg, var(--c-bg-soft) 0%, rgba(241, 245, 249, 0) 100%);
+  display: flex;
+  gap: 8px;
+  height: 36px;
+  justify-content: space-between;
+  left: 0;
+  opacity: 1;
+  padding: 0 12px;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 2;
+}
+
+.toolbar .lang,
+.toolbar .actions {
+  pointer-events: auto;
+}
+
+.lang {
+  color: var(--c-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: opacity var(--t-fast), transform var(--t-base);
+}
+
+.wrap:hover .actions,
+.wrap:focus-within .actions,
+.expanded .actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.actionBtn {
+  align-items: center;
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  color: var(--c-text-muted);
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  position: relative;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+  width: 28px;
+}
+
+.actionBtn:hover {
+  background: var(--c-brand-soft);
+  border-color: var(--c-brand);
+  color: var(--c-brand);
+}
+
+.copy:global(.copied)::after {
+  background: var(--c-text);
+  border-radius: var(--radius-sm);
+  color: var(--c-bg);
+  content: "已复制";
+  font-size: 11px;
+  padding: 2px 6px;
+  position: absolute;
+  right: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.pre {
+  background: var(--c-bg-soft);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+  overflow-x: auto;
+  padding: 38px 18px 16px;
+}
+
+.code {
+  background: transparent;
+  font-family: inherit;
+}
+
+/* Expanded (fullscreen) mode */
+.expanded {
+  border-radius: var(--radius-lg);
+  bottom: 5vh;
+  left: 5vw;
+  max-height: none;
+  position: fixed;
+  right: 5vw;
+  top: 5vh;
+  z-index: var(--z-modal);
+  box-shadow: 0 30px 80px -20px rgba(15, 23, 42, 0.4);
+}
+
+.expanded .pre {
+  height: 100%;
+  overflow: auto;
+}
+
+.expandedBackdrop {
+  background: rgba(15, 23, 42, 0.55);
+  bottom: 0;
+  cursor: zoom-out;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: -1;
+}
+
+/* rehype-pretty-code line + token styling */
+.code :global([data-line]) {
+  display: inline-block;
+  min-width: 100%;
+  padding-right: 1ch;
+  position: relative;
+}
+
+.code :global([data-highlighted-line]) {
+  background: var(--c-brand-soft);
+  border-left: 2px solid var(--c-brand);
+  margin: 0 -18px;
+  padding: 0 16px;
+}
+
+.code :global([data-highlighted-chars]) {
+  background: var(--c-brand-soft);
+  border-radius: var(--radius-sm);
+  padding: 1px 4px;
+}
+
+.code :global(.diff) {
+  display: inline-block;
+  min-width: 100%;
+  padding-left: 16px;
+  position: relative;
+}
+
+.code :global(.diff.add),
+.code :global([data-line][class~="add"]) {
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.code :global(.diff.remove),
+.code :global([data-line][class~="remove"]) {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.code :global(.diff.add)::before,
+.code :global([data-line][class~="add"])::before {
+  color: #16a34a;
+  content: "+";
+  font-weight: 600;
+  left: 4px;
+  position: absolute;
+}
+
+.code :global(.diff.remove)::before,
+.code :global([data-line][class~="remove"])::before {
+  color: #dc2626;
+  content: "-";
+  font-weight: 600;
+  left: 4px;
+  position: absolute;
+}
+
+:global(html.dark) .code :global(.diff.add),
+:global(html.dark) .code :global([data-line][class~="add"]) {
+  background: rgba(34, 197, 94, 0.12);
+}
+
+:global(html.dark) .code :global(.diff.remove),
+:global(html.dark) .code :global([data-line][class~="remove"]) {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+:global(html.dark) .code :global(.diff.add)::before,
+:global(html.dark) .code :global([data-line][class~="add"])::before {
+  color: #4ade80;
+}
+
+:global(html.dark) .code :global(.diff.remove)::before,
+:global(html.dark) .code :global([data-line][class~="remove"])::before {
+  color: #f87171;
+}
+
+/* Token coloring — shiki emits --shiki-light and --shiki-dark CSS vars per token. */
+.code :global(span[style*="--shiki-light"]) {
+  color: var(--shiki-light);
+}
+
+.code :global(span[style*="--shiki-light:#6A737D"]) {
+  color: #5b6470;
+}
+
+:global(html.dark) .code :global(span[style*="--shiki-dark"]) {
+  color: var(--shiki-dark);
+}
+
+:global(html.dark) .wrap {
+  background: #0b1220;
+  border-color: #1e293b;
+}
+
+:global(html.dark) .pre {
+  background: #0b1220;
+}
+
+:global(html.dark) .toolbar {
+  background: linear-gradient(180deg, #0b1220 0%, rgba(11, 18, 32, 0) 100%);
+}
+
+:global(html.dark) .actionBtn {
+  background: rgba(241, 245, 249, 0.04);
+  border-color: rgba(241, 245, 249, 0.1);
+}
+
+:global(html.dark) .actionBtn:hover {
+  background: rgba(76, 154, 255, 0.18);
+  border-color: var(--c-brand);
+  color: var(--c-brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actions {
+    transition: none;
+    transform: none;
+  }
+}

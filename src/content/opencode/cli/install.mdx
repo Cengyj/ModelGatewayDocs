@@ -1,0 +1,142 @@
+---
+title: "OpenCode CLI · 安装"
+description: "OpenCode 开源终端 AI 编码代理的安装方式。支持 75+ 供应商。"
+---
+
+# OpenCode CLI · 安装
+
+<VersionBadge version="v1.17.8" date="2026-06-17" license="MIT" github="https://github.com/anomalyco/opencode" />
+
+<PageHeader
+  useCase="用一个客户端调 Claude / OpenAI / DeepSeek / Ollama 等 75+ 供应商"
+  audience="想自由组合模型的开发者；想在本地跑 Ollama 或低成本试 DeepSeek 的用户"
+  tldr="curl 一行装好 → opencode --version 验证"
+/>
+
+> CLI 与桌面版**配置共享** `~/.config/opencode/opencode.json`，但**安装入口不同**。桌面版安装见 [OpenCode 桌面版 · 安装](/opencode/desktop/install)。
+
+---
+
+## 支持哪些供应商？
+
+OpenCode 内置 75+ 供应商适配，覆盖主流国际服务和国产中转：
+
+| 类别 | 示例 |
+| --- | --- |
+| 官方大厂 | Anthropic (Claude)、OpenAI、Google Gemini、AWS Bedrock、Azure OpenAI |
+| 高性价比 | DeepSeek、Groq、Mistral、Together AI |
+| 国内中转 | OpenRouter、自建 API Gateway、各类兼容 OpenAI 格式的接口 |
+| 本地部署 | Ollama（完全离线，免 API key） |
+
+配置供应商时，只需在 `opencode.json` 的 `providers` 字段指定端点和 key；CC Switch 会自动生成此配置，无需手填。
+
+---
+
+## 系统要求
+
+<Callout type="info" title="环境要求">
+- **Node.js** 20+（npm 安装时需要）
+- **操作系统**：macOS、Linux（含 WSL2）、Windows（Scoop / Chocolatey）、Arch Linux
+- **磁盘**：约 100 MB
+</Callout>
+
+---
+
+## 安装
+
+<Tabs defaultValue="curl">
+  <Tab label="curl 一键脚本" value="curl">
+    官方推荐，自动检测平台、安装最新版本：
+
+    ```bash
+    curl -fsSL https://opencode.ai/install | bash
+    ```
+
+    安装结束后重新加载 shell：
+
+    ```bash
+    source ~/.bashrc   # bash 用户
+    source ~/.zshrc    # zsh 用户
+    ```
+  </Tab>
+  <Tab label="npm" value="npm">
+    ```bash
+    npm i -g opencode-ai@latest
+    ```
+
+    注意包名是 `opencode-ai`，不是 `opencode`。
+  </Tab>
+  <Tab label="Homebrew (macOS)" value="brew">
+    官方 tap（优先，始终最新）：
+
+    ```bash
+    brew install anomalyco/tap/opencode
+    ```
+
+    或直接：
+
+    ```bash
+    brew install opencode
+    ```
+  </Tab>
+  <Tab label="Windows" value="win">
+    Scoop：
+
+    ```powershell
+    scoop install opencode
+    ```
+
+    Chocolatey：
+
+    ```powershell
+    choco install opencode
+    ```
+  </Tab>
+  <Tab label="Arch Linux" value="arch">
+    官方仓库：
+
+    ```bash
+    sudo pacman -S opencode
+    ```
+
+    AUR（社区构建二进制）：
+
+    ```bash
+    paru -S opencode-bin
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## 验证
+
+```bash
+opencode --version
+# 输出示例：1.17.8
+```
+
+能输出版本号即装好。下一步配 API：
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/opencode/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/opencode/manual', hint: '直接改 opencode.json' },
+    { route: '/opencode/desktop/install', hint: '想用 GUI？装桌面版（BETA）' },
+  ]}
+/>
+
+---
+
+## 常见问题
+
+<Callout type="warning" title="旧版本升级注意">
+如果你安装的是早于 0.1.x 的旧版本，官方要求**先完全卸载再重装**，不能直接覆盖升级：
+
+```bash
+# 卸载旧版（npm 安装的情况）
+npm uninstall -g opencode-ai
+# 再按上面的 curl 脚本重装
+```
+</Callout>

@@ -1,0 +1,96 @@
+---
+title: "CC-018：登录过官网后 API Key 失效，无法使用中转服务"
+---
+
+# CC-018：登录过官网后 API Key 失效，无法使用中转服务
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="Linux（CentOS / Ubuntu 高发）/ macOS"
+  date="2026-03-14"
+  owner="🐻（QQ：2305401331）"
+/>
+---
+
+## 问题现象
+
+曾在终端执行过 `claude` 并通过官网完成了 OAuth 登录（浏览器跳转授权），之后切换到中转 API 时，Claude Code 忽略配置的 API Key，持续使用 OAuth 令牌向官方端点请求，表现为：
+
+- 401 / 认证失败
+- 请求绕过中转直连 `api.anthropic.com`
+- 修改 `settings.json` 或环境变量后仍无效
+
+在服务器环境（CentOS / Ubuntu）下尤为常见，因为初次配置时容易误触 OAuth 流程。
+
+---
+
+## 根因分析
+
+```text
+用户执行 claude，触发 OAuth 登录流程
+  → ~/.claude.json 中写入 OAuth 令牌（primaryApiKey / oauthToken）
+  → OAuth 令牌优先级高于 settings.json 中的 ANTHROPIC_API_KEY
+  → Claude Code 始终使用 OAuth 令牌请求官方端点
+  → 中转 API Key 配置被完全忽略
+  → 401 / 连接失败
+```
+
+---
+
+## 修复步骤
+
+### 第一步：退出 OAuth 登录
+
+```bash
+claude auth logout
+```
+
+执行后终端提示登出成功。
+
+### 第二步：写入中转 API 配置
+
+**方式一（推荐）：直接覆盖 `~/.claude/settings.json`**
+
+```bash
+cat > ~/.claude/settings.json << 'EOF'
+{
+  "env": {
+    "ANTHROPIC_API_KEY": "sk-你的API密钥",
+    "ANTHROPIC_BASE_URL": "https://foropencode.com"
+  }
+}
+EOF
+```
+
+**方式二：用命令行设置**
+
+```bash
+claude config set apiKey sk-你的API密钥
+```
+
+### 第三步：验证配置写入成功
+
+```bash
+cat ~/.claude/settings.json
+```
+
+确认输出中 `ANTHROPIC_API_KEY` 和 `ANTHROPIC_BASE_URL` 字段正确。
+
+### 第四步：重新启动 Claude Code
+
+```bash
+claude
+```
+
+正常进入交互界面即修复成功。
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 服务器环境初次运行 `claude` 前先写好 `settings.json`，避免触发 OAuth 流程 | OAuth 令牌写入后覆盖 API Key 配置 |
+| 切换到中转 API 时先执行 `claude auth logout` 清除 OAuth 状态 | 残留 OAuth 令牌静默覆盖新配置 |
+| 配置完成后用 `cat ~/.claude/settings.json` 确认字段正确 | 写入失败但误以为配置已生效 |

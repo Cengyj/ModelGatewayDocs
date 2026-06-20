@@ -1,0 +1,63 @@
+﻿---
+title: "Claude 桌面版 · CC Switch 配置"
+description: "用 CC Switch 把本站中转接到 Claude 桌面客户端。"
+---
+
+# Claude 桌面版 · CC Switch 配置
+
+<VersionBadge version="桌面版" date="2026-06-19" license="Proprietary" github="https://claude.com/download" />
+
+<PageHeader
+  useCase="可视化配置 Claude 桌面版的第三方中转入口"
+  audience="已在 CC Switch 装好的 Claude 桌面版用户"
+  tldr="CC Switch 主界面 → 第二个 Claude 图标 → 填 Key 与请求地址 → 重启桌面版直接用"
+/>
+
+> 前置：桌面客户端已装好并启用 Developer Mode → 见 [桌面版 · 安装](/claude-code/desktop/install)。
+
+<Callout type="warning">Claude 桌面版的第三方中转入口**仅接受 HTTPS 域名**，IP + 端口、HTTP 协议、带 `/v1` 后缀的都会被拒。</Callout>
+
+---
+
+## 配置步骤
+
+<Walkthrough title="CC Switch · 配置 Claude Desktop">
+  <Frame step="1" title="选中 Claude Desktop 图标，点击添加"
+    image="/img/cc-switch/cc-switch-desktop-main-add.png"
+    imageAlt="CC Switch 主界面：选中第二个 Claude 图标（Claude Desktop），点右上角添加按钮">
+    打开 CC Switch，顶部工具栏选中**第二个 Claude 图标**（Claude Desktop，带屏幕的那个）。点右上角 **＋** 按钮新建一项。
+  </Frame>
+
+  <Frame step="2" title="填写供应商信息"
+    image="/img/cc-switch/cc-switch-add-provider-form.png"
+    imageAlt="添加新供应商表单：名称、API Key、请求地址">
+    弹出「添加新供应商」表单，按顺序填写：
+
+    - **供应商名称**：随便取，如 `for`
+    - **API Key**：你在 [foropencode.com](https://foropencode.com) 创建的 `sk-xxx`
+    - **请求地址**：点击右侧图标复制后粘贴
+
+    <CommandTable header={false} rows={[
+      { cmd: 'https://foropencode.com', desc: '必须 HTTPS、不带 /v1 结尾' },
+    ]} />
+
+    填好后点右下角 **添加**。
+  </Frame>
+
+  <Frame step="3" title="确认「使用中」，重启桌面版"
+    image="/img/cc-switch/cc-switch-active-status.png"
+    imageAlt="鼠标悬停在配置行上，显示「使用中」表示配置成功">
+    鼠标悬停在刚添加的配置行上，显示 **「使用中」** 即表示配置已写入。关闭 CC Switch，**完全重启** Claude 桌面版后即可直接使用。
+  </Frame>
+</Walkthrough>
+
+---
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/claude-code/desktop/manual', hint: '不用 CC Switch，直接在桌面版填表单' },
+    { route: '/claude-code/cli/cc-switch', hint: '终端版的 CC Switch 配置' },
+    { route: '/claude-code/errors', hint: '遇到 401 / 403 等报错' },
+  ]}
+/>

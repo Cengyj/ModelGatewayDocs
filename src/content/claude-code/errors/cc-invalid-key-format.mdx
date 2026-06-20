@@ -1,0 +1,106 @@
+---
+title: "CC-021：401 Invalid API Key format（Key 含不可见字符）"
+---
+
+# CC-021：401 Invalid API Key format（Key 含不可见字符）
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="全平台"
+  date="2026-03-16"
+/>
+---
+
+## 问题现象
+
+API Key 已写入配置，目视检查看起来正确，但请求仍返回以下错误之一：
+
+```text
+Invalid API Key format
+```
+
+```text
+API Error: 401 Unauthorized
+```
+
+重新填写 Key 后问题依然复现。
+
+---
+
+## 根因分析
+
+```text
+用户从 PDF / 网页 / 截图获取 Key
+  → 复制过程中混入不可见字符（零宽空格、不换行空格、\r 换行符等）
+  → 或 OCR 识别将相似字符误读（0/O、1/l/I）
+  → 写入环境变量时字符串被污染
+  → API 服务端对 Key 格式校验失败 → 401 / Invalid format
+```
+
+常见污染来源：
+
+| 来源 | 典型污染字符 |
+| --- | --- |
+| 从 PDF 复制 | 零宽空格（U+200B）、不换行空格（U+00A0） |
+| 从网页复制 | HTML 实体残留、换行符 |
+| 截图 OCR 识别 | 字符误识别（如 `0` → `O`，`l` → `1`） |
+| 粘贴到终端 | 末尾混入 `\r`（Windows 换行符） |
+
+> 本条目与 CC-002（ANTHROPIC_BASE_URL 未配置）、CC-016（旧服务遗留环境变量覆盖）属于不同根因。
+
+---
+
+## 修复步骤
+
+**第一步：检测 Key 是否含有不可见字符**
+
+```bash
+echo "$ANTHROPIC_API_KEY" | cat -A
+```
+
+正常输出示例（行尾只有 `$`）：
+
+```text
+sk-ant-api03-xxxxxxx$
+```
+
+异常示例（行尾出现多余字符）：
+
+```text
+sk-ant-api03-xxxxxxx ^M$
+```
+
+**第二步：重新获取干净的 Key**
+
+前往 [console.anthropic.com/settings/apiKeys](https://console.anthropic.com/settings/apiKeys)，点击"复制"按钮直接获取，不要手动输入，不要经由 PDF 或截图中转。
+
+**第三步：重新写入环境变量**
+
+```bash
+# 编辑配置文件
+nano ~/.zshrc   # macOS/Linux，或对应的 ~/.bashrc
+
+# 删除旧行，粘贴新行（不加引号）
+export ANTHROPIC_API_KEY=sk-ant-api03-你的key
+
+# 使配置生效
+source ~/.zshrc
+```
+
+**第四步：验证**
+
+```bash
+echo "$ANTHROPIC_API_KEY" | cat -A
+# 正常：行尾只有一个 $，无其他字符
+```
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 始终从 Console 的复制按钮获取 Key | 避免手打或 OCR 引入字符错误 |
+| 环境变量赋值不加引号（`export KEY=value`） | 避免引号在某些 Shell 配置下被纳入变量值 |
+| 配置完成后用 `cat -A` 验证变量内容 | 在使用前发现不可见字符问题 |

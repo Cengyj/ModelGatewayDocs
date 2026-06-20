@@ -1,0 +1,175 @@
+---
+title: "Codex · 手动配置"
+description: "~/.codex/config.toml + auth.json；CLI 与 App 共享。"
+---
+
+# Codex · 手动配置
+
+<VersionBadge version="v0.141.0" date="2026-06-18" license="Apache-2.0" github="https://github.com/openai/codex" />
+
+<PageHeader
+  useCase="不用 CC Switch，直接改 ~/.codex/config.toml 与 auth.json"
+  audience="多供应商要手写 TOML；想用 Profile / 项目级覆盖"
+  tldr="config.toml 写 model_providers 段 → auth.json 存 Key → 重启 codex"
+/>
+
+<Callout type="info">CLI 和 Codex App **共享同一份** `~/.codex/config.toml`。改一边两边都生效。</Callout>
+
+---
+
+## 配置文件位置
+
+| 范围 | 路径 |
+| --- | --- |
+| 用户级（默认） | `~/.codex/config.toml` |
+| 项目级（覆盖用户级） | 项目根目录 `.codex/config.toml` |
+| Profile 切换 | `$CODEX_HOME/<profile-name>.config.toml` |
+| 鉴权 | `~/.codex/auth.json` |
+
+Windows 路径中 `~` = `%USERPROFILE%`。`CODEX_HOME` 环境变量可改默认目录。
+
+---
+
+## config.toml 最小模板
+
+```toml
+model_provider = "foropencode"
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+disable_response_storage = true
+
+[model_providers.foropencode]
+name = "foropencode"
+base_url = "https://foropencode.com/v1"
+wire_api = "responses"
+requires_openai_auth = true
+```
+
+<Callout type="warning">Codex 的 `base_url` **必须**带 `/v1` 后缀，和 Claude Code 反着。漏了会 404。</Callout>
+
+---
+
+## auth.json
+
+```json
+{
+  "OPENAI_API_KEY": "sk-xxx"
+}
+```
+
+文件存在但字段空 = Codex 启动时报 401。Codex 文档把这个文件叫 `cli_auth_credentials_store`，实际文件名是 `auth.json`。
+
+---
+
+## 顶层字段
+
+| 字段 | 含义 | 可选值 |
+| --- | --- | --- |
+| `model_provider` | 当前用哪个 provider ID | 必须对应下面 `[model_providers.<id>]` |
+| `model` | 用哪个模型 | 见上方模型表 |
+| `model_reasoning_effort` | 推理深度 | `minimal` / `low` / `medium` / `high` / `xhigh` |
+| `model_context_window` | 上下文 token 数 | 整数；具体值看供应商支持 |
+| `model_auto_compact_token_limit` | 自动压缩阈值 | 整数，应小于上面 |
+| `disable_response_storage` | 关闭响应存储 | `true` 推荐 |
+| `wire_api` | API 协议 | 在 provider 段里设 |
+
+---
+
+## `[model_providers.<id>]` 段
+
+```toml
+[model_providers.foropencode]
+name = "foropencode"
+base_url = "https://foropencode.com/v1"
+wire_api = "responses"
+requires_openai_auth = true
+```
+
+| 字段 | 含义 |
+| --- | --- |
+| `name` | provider 显示名 |
+| `base_url` | API 根地址（含 `/v1`） |
+| `wire_api` | `responses` / `chat_completions` |
+| `requires_openai_auth` | `true` = 需要 OpenAI API Key |
+
+内置 provider ID：`openai`（默认）、`ollama`、`lmstudio`。开源 / 本地模型走 `oss_provider`，取值 `lmstudio` 或 `ollama`。
+
+---
+
+## 多 provider / 多分组
+
+```toml
+model_provider = "foropencode-codex"
+
+[model_providers.foropencode-codex]
+name = "foropencode (Codex 分组)"
+base_url = "https://foropencode.com/v1"
+wire_api = "responses"
+requires_openai_auth = true
+
+[model_providers.foropencode-image]
+name = "foropencode (Image 分组)"
+base_url = "https://foropencode.com/v1"
+wire_api = "responses"
+requires_openai_auth = true
+```
+
+切 provider 时改 `model_provider` 字段，重启 `codex` 即可。
+
+---
+
+## Profile 切换（不改主 config）
+
+```bash
+CODEX_PROFILE=profile-a codex
+```
+
+Profile 文件放 `$CODEX_HOME/<name>.config.toml`，结构与 `config.toml` 一样。适合多账号 / 多分组场景。
+
+---
+
+## 1M 上下文
+
+```toml
+model_context_window = 1000000
+model_auto_compact_token_limit = 900000
+```
+
+`model_context_window` 是 OpenAI 文档定义的字段，但具体写多少**取决于供应商和模型支持**。本站某些分组支持 1M，其它分组写了也没用。
+
+`model_auto_compact_token_limit` 在接近上限前提前触发压缩，避免对话直接撞满。
+
+---
+
+## CLI vs App 的差异
+
+| 维度 | CLI | App |
+| --- | --- | --- |
+| 配置文件 | `~/.codex/config.toml` | **同一个文件** |
+| 鉴权 | `~/.codex/auth.json` 或 OAuth | 同 |
+| 切 provider | 改 `model_provider` + 重启终端 | App 内 UI 切，或同样改 config 重启 App |
+| Profile | `CODEX_PROFILE=<name>` | UI 不支持，要走 env |
+
+改完 config：
+
+- **CLI**：重启终端
+- **App**：**完全退出**（菜单栏图标关一次，不只是关窗口），再启动
+
+---
+
+## 常见排查
+
+| 现象 | 检查 |
+| --- | --- |
+| 启动报 401 | `auth.json` 是否存在，Key 是否对 |
+| 启动报 404 | `base_url` 是否带 `/v1` |
+| 推理慢 | 把 `model_reasoning_effort` 调低 |
+| App 改 config 后不生效 | 完全退出菜单栏图标，不是关窗口 |
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/codex/cc-switch', hint: '回到 CC Switch 流程' },
+    { route: '/codex/cli/install', hint: '装客户端' },
+  ]}
+/>

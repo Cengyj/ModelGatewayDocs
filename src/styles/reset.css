@@ -1,0 +1,75 @@
+/* =========================================================================
+ * Minimal reset — only what's needed for predictable layout on top of
+ * modern browser defaults. We intentionally don't reset typography here;
+ * each component owns its own type rules.
+ * ========================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  scroll-padding-top: calc(var(--layout-nav-h) + 20px);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  margin: 0;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--c-brand);
+  text-decoration: none;
+  transition: color var(--t-fast);
+}
+
+a:hover {
+  color: var(--c-brand-hover);
+}
+
+button {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+/* Screen-reader-only utility */
+.visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* Focus visibility */
+:focus-visible {
+  outline: 2px solid var(--c-brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

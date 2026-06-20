@@ -1,0 +1,34 @@
+# Node
+node_modules
+*.tsbuildinfo
+next-env.d.ts
+
+# Next.js build output
+/.next
+/out
+/build
+
+# Env
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Audit / screenshot output (regenerated)
+/output
+/validation-screenshots
+
+# Local tooling
+/.tools
+/.sisyphus
+
+# Legacy Docusaurus stack — archived at cut-over 2026-06-19, kept on disk but
+# excluded from version control (315M; the active stack is the Next.js app at repo root)
+/legacy-docusaurus

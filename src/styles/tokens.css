@@ -1,0 +1,117 @@
+/* =========================================================================
+ * Design tokens — single source of truth for color, type, spacing, layout.
+ * Light theme is the default; .dark on <html> swaps the palette.
+ * ========================================================================= */
+
+:root {
+  /* Brand */
+  --c-brand: #0d6fc4;
+  --c-brand-hover: #0a5aa3;
+  --c-brand-soft: rgba(13, 111, 196, 0.12);
+  --c-brand-bright: #1e88e5;
+
+  /* Surfaces */
+  --c-bg: #fafbfc;
+  --c-bg-soft: #f1f5f9;
+  --c-bg-elevated: #ffffff;
+
+  /* Text */
+  --c-text: #0f172a;
+  --c-text-muted: #475569;
+  --c-text-subtle: #94a3b8;
+
+  /* Borders */
+  --c-border: #e2e8f0;
+  --c-border-soft: #f1f5f9;
+
+  /* Code */
+  --c-code-bg: #f1f5f9;
+  --c-code-text: #0f172a;
+
+  /* Callouts */
+  --c-quote-bg: #f8fafc;
+  --c-quote-border: var(--c-brand);
+
+  /* Type */
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Layout */
+  --layout-max: 1440px;
+  --layout-home-max: 1152px;
+  --layout-doc-max: 720px;
+  --layout-sidebar-w: 272px;
+  --layout-toc-w: 240px;
+  --layout-gap: 64px;
+  --layout-nav-h: 64px;
+  --layout-scroll-offset: 134px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Z-index */
+  --z-nav: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+
+  /* Motion */
+  --t-fast: 0.15s ease;
+  --t-base: 0.25s ease;
+  --t-slow: 0.35s ease;
+
+  color-scheme: light;
+}
+
+html.dark {
+  --c-brand: #4c9aff;
+  --c-brand-hover: #6cb1ff;
+  --c-brand-soft: rgba(76, 154, 255, 0.18);
+
+  --c-bg: #0b1220;
+  --c-bg-soft: #161f33;
+  --c-bg-elevated: #1a2540;
+
+  --c-text: #e2e8f0;
+  --c-text-muted: #b4c0d0;
+  --c-text-subtle: #7d8b9e;
+
+  --c-border: #1e293b;
+  --c-border-soft: #1a2540;
+
+  --c-code-bg: #161f33;
+  --c-code-text: #e2e8f0;
+
+  --c-quote-bg: rgba(30, 41, 59, 0.5);
+
+  color-scheme: dark;
+}
+
+/* View Transitions: smooth crossfade when toggling theme. The hook wraps the
+   class toggle in document.startViewTransition() when supported. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.28s;
+    animation-timing-function: ease;
+  }
+}
+
+/* Fallback for browsers without view transitions: tween the root colors. */
+@media (prefers-reduced-motion: no-preference) {
+  html, body {
+    transition: background-color var(--t-base), color var(--t-base);
+  }
+}
+
+/* Page-jump anti-flash:
+ *   1. `color-scheme` already set per palette so the browser paints the chrome
+ *      and any unstyled area in the right base color (no white box during load).
+ *   2. `<html>` background painted before React hydrates (handled by reset.css).
+ *   3. Disable browser's default cross-document fade-in that flashes white. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "foropencode · AI Coding 中文配置手册",
+  "short_name": "foropencode",
+  "description": "Claude Code、Codex、OpenCode、OpenClaw、Hermes 中文配置手册",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafbfc",
+  "theme_color": "#0d6fc4",
+  "lang": "zh-CN",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

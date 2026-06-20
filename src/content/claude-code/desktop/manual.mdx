@@ -1,0 +1,109 @@
+---
+title: "Claude 桌面版 · 手动配置"
+description: "直接编辑 Claude-3p 目录下的配置文件，不依赖 CC Switch。"
+---
+
+# Claude 桌面版 · 手动配置
+
+<VersionBadge version="v1.13576.4" date="2026-06-19" license="Proprietary" github="https://claude.com/download" />
+
+<PageHeader
+  useCase="不装 CC Switch，直接手动编辑桌面版的 JSON 配置文件"
+  audience="临时机器、排障、或想精确控制配置内容的用户"
+  tldr="找到 Claude-3p 目录 → 编辑 claude_desktop_config.json → 完全重启桌面版"
+/>
+
+<Callout type="info">推荐用 <a href="/claude-code/desktop/cc-switch">CC Switch</a> 写入配置——它写的就是这里的文件。手动改适合排障或无法安装额外工具的场景。</Callout>
+
+---
+
+## 配置文件位置
+
+Claude 桌面版（Cowork 3P 模式）的第三方中转配置存在 `Claude-3p` 目录下：
+
+| 系统 | 路径 |
+| --- | --- |
+| macOS | `~/Library/Application Support/Claude-3p/claude_desktop_config.json` |
+| Windows | `%LOCALAPPDATA%\Claude-3p\claude_desktop_config.json` |
+
+<Callout type="tip">快速定位：macOS 按 <kbd>⌘ Shift G</kbd> 打开「前往文件夹」，粘贴路径；Windows 在地址栏粘贴 `%LOCALAPPDATA%\Claude-3p\` 回车。</Callout>
+
+---
+
+## 配置文件内容
+
+`claude_desktop_config.json` 是标准 JSON 格式。最小可用模板：
+
+```json
+{
+  "thirdPartyApiInfo": {
+    "baseUrl": "https://foropencode.com",
+    "apiKey": "sk-xxx"
+  }
+}
+```
+
+字段说明：
+
+| 字段 | 说明 |
+| --- | --- |
+| `baseUrl` | 中转站根地址，**不带 `/v1`、不带斜杠结尾** |
+| `apiKey` | 你在 [foropencode.com](https://foropencode.com) 生成的 `sk-xxx` |
+
+`baseUrl` 快捷复制：
+
+<CommandTable header={false} rows={[
+  { cmd: 'https://foropencode.com', desc: '不带 /v1，不带斜杠结尾' },
+]} />
+
+---
+
+## 修改步骤
+
+<Steps>
+  <Step title="完全退出 Claude 桌面版">
+    **macOS**：菜单栏 `Claude → Quit Claude`（或 <kbd>⌘ Q</kbd>），确保 Dock 里没有残留进程。
+
+    **Windows**：系统托盘右键图标 → **退出**，不能只关窗口。
+  </Step>
+  <Step title="打开或创建配置文件">
+    导航到上方路径。如果 `Claude-3p` 目录不存在，手动创建该文件夹，再在里面新建 `claude_desktop_config.json`。
+  </Step>
+  <Step title="填写并保存">
+    把上方模板粘进去，替换 `apiKey` 为你的真实 Key，保存文件（UTF-8 无 BOM 编码）。
+  </Step>
+  <Step title="重启 Claude 桌面版">
+    重新启动，登录界面会出现 **Continue with Gateway** 按钮，点击即进入第三方中转模式。
+  </Step>
+</Steps>
+
+---
+
+## 常见问题
+
+<Callout type="warning" title="登录界面没有 Continue with Gateway？">
+1. 确认文件路径正确，名字是 `claude_desktop_config.json`（不是 `.txt`）
+2. 确认 JSON 格式合法——可用 [jsonlint.com](https://jsonlint.com) 验证
+3. 确认是**完全退出**后重启，不是只关窗口
+</Callout>
+
+<Callout type="warning" title="保存后报 401？">
+1. `baseUrl` 不带 `/v1`、不带末尾 `/`
+2. `apiKey` 正确且有余额
+3. 完全退出 + 重启桌面版再试
+</Callout>
+
+<Callout type="info" title="如何验证配置是否被 CC Switch 覆盖？">
+CC Switch 写入的就是这个文件。如果你手改后 CC Switch 又 Enable 了某个供应商，文件内容会被覆盖。两者选一套用即可。
+</Callout>
+
+---
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/claude-code/desktop/cc-switch', hint: '用 CC Switch 自动写入配置' },
+    { route: '/claude-code/desktop/install', hint: '桌面版安装与首次启动' },
+    { route: '/claude-code/errors', hint: '遇到 401 / 403 等报错' },
+  ]}
+/>

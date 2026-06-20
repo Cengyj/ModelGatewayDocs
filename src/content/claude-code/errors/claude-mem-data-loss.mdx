@@ -1,0 +1,113 @@
+---
+title: "CM-001：pending_messages 误删导致知识原材料丢失"
+---
+
+# CM-001：pending_messages 误删导致知识原材料丢失
+
+<ErrorMeta
+  component="claude-mem"
+  version="claude-mem v5.x"
+  platform="Windows 11"
+  date="2026-03-12"
+  owner="天程君（QQ：2459221653）"
+/>
+---
+
+## 问题现象
+
+- `observations` 表为 0 条，使用 4 天没有提取出任何知识点
+- `pending_messages` 堆积 1637 条，status 全为 `pending`
+- `sdk_sessions` 无任何 `completed` 记录（active: 6，failed: 18）
+- `worker_port` 全为 `None`
+
+---
+
+## 根因分析
+
+**根本原因：worker 模型通道下线，SDK 子进程持续 503 崩溃。**
+
+```text
+配置文件中 CLAUDE_MEM_MODEL = "claude-sonnet-4-5"
+  → 该模型通道下线，每次调用返回 503 model_not_found
+    → SDK 子进程启动即崩，标记 failed，间隔重试
+      → pending_messages 持续积压，无一条被处理
+        → 积压被误判为"消息队列垃圾"，一键清空
+          → 4 天知识原材料永久丢失
+```
+
+claude-mem v5.x 关闭了自动队列恢复，模型通道恢复后积压也不会重处理。
+
+---
+
+## 修复步骤
+
+**1. 确认管道状态（清理前必查）**
+
+```python
+python -u -c "
+import sqlite3, sys
+sys.stdout.reconfigure(encoding='utf-8')
+conn = sqlite3.connect(r'C:/Users/<USERNAME>/.claude-mem/claude-mem.db')
+cur = conn.cursor()
+
+cur.execute('SELECT COUNT(*) FROM observations')
+print(f'observations: {cur.fetchone()[0]}')
+
+cur.execute('SELECT status, COUNT(*) FROM pending_messages GROUP BY status')
+for row in cur.fetchall():
+    print(f'  pending_messages [{row[0]}]: {row[1]}')
+
+cur.execute('SELECT status, COUNT(*) FROM sdk_sessions GROUP BY status')
+for row in cur.fetchall():
+    print(f'  sdk_sessions [{row[0]}]: {row[1]}')
+
+conn.close()
+"
+```
+
+**2. 修改模型配置**
+
+编辑 `~/.claude-mem/settings.json`，将模型改为当前可用的稳定版本：
+
+```json
+{
+  "CLAUDE_MEM_MODEL": "claude-haiku-4-5-20251001"
+}
+```
+
+> worker 后台不需要最强模型，稳定和低成本优先。
+
+**3. 重启 worker**
+
+```bash
+# 删除旧 PID 文件，下次 hook 触发自动用新配置重启
+rm ~/.claude-mem/worker.pid
+```
+
+**4. 安全清理（仅删已完成/已失败的）**
+
+```python
+cur.execute("DELETE FROM pending_messages WHERE status IN ('completed', 'failed')")
+conn.commit()
+```
+
+---
+
+## 预防措施
+
+- **清库前先看输出端**：`observations` 为 0 说明管道坏了，不是"该清理了"的信号
+- **pending 全堆积 = 异常信号**：不要删，先查 worker 为什么没处理
+- **定期检查 sdk_sessions**：`completed` 为 0 即告警
+
+---
+
+## 表结构速查
+
+| 表 | 作用 | 注意 |
+| --- | --- | --- |
+| `pending_messages` | 知识提取输入队列（原材料） | **别当垃圾删** |
+| `observations` | 提取出的知识点（输出） | 为 0 说明管道坏了 |
+| `sdk_sessions` | 子进程会话状态 | `worker_port` 全 None 即异常 |
+| `session_summaries` | 会话总结 | 同 observations |
+
+Windows 上运行 Python 记得加 `sys.stdout.reconfigure(encoding='utf-8')`，否则中文报 GBK 错误。

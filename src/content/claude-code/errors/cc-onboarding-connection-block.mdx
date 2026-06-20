@@ -1,0 +1,106 @@
+---
+title: "CC-005：首次启动即报 Unable to connect to Anthropic services"
+---
+
+# CC-005：首次启动即报 Unable to connect to Anthropic services
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="claude-code ≥ 1.x（2025-07 前后版本）"
+  platform="Linux / macOS / Windows（均可复现）"
+  date="2025-09-21"
+  owner="GordonCC（博客园）"
+/>
+---
+
+## 问题现象
+
+Claude Code 安装完成后，第一次执行 `claude` 或第一次登录时，终端立即打印以下错误并退出，无法进入交互界面：
+
+```text
+Unable to connect to Anthropic services
+Failed to connect to api.anthropic.com: ERR_BAD_REQUEST
+Please check your internet connection and network settings.
+Note: Claude Code might not be available in your country.
+Check supported countries at https://anthropic.com/supported-countries
+```
+
+网络正常，代理/中转 URL 配置无误，但错误依旧出现。
+
+示例截图：
+
+![首次启动报错示例](/img/errors/cc-onboarding-connection-block.webp)
+
+---
+
+## 根因分析
+
+```text
+Claude Code 启动
+  → 检查 ~/.claude.json 中 hasCompletedOnboarding 字段
+  → 字段缺失（首次安装默认不写入）
+  → 触发 Onboarding 流程
+  → Onboarding 流程向 api.anthropic.com 发起连通性校验
+  → 国内网络或中转配置在 Onboarding 阶段不生效
+  → 请求失败 → ERR_BAD_REQUEST
+  → 报错退出，拒绝进入正常交互
+```
+
+关键点：`hasCompletedOnboarding: true` 缺失时，Claude Code 会在进入正常会话前额外执行一次官方端点探测，该探测不受 `ANTHROPIC_BASE_URL` 等环境变量影响，导致使用中转地址的用户也会被拦住。
+
+---
+
+## 修复步骤
+
+**第一步：找到配置文件**
+
+文件路径为 `~/.claude.json`（Windows 为 `C:\Users\\.claude.json`）。
+
+**第二步：在 JSON 最外层添加这一行**
+
+用文本编辑器打开文件，在最外层 JSON 对象中补上：
+
+```json
+"hasCompletedOnboarding": true
+```
+
+如果你需要参考完整写法，可以写成：
+
+```json
+{
+  "installMethod": "unknown",
+  "autoUpdates": true,
+  "firstStartTime": "2025-07-14T06:11:03.877Z",
+  "userID": "...",
+  "projects": { ... },
+  "hasCompletedOnboarding": true
+}
+```
+
+> 注意：`projects` 字段末尾的 `}` 后面要加英文逗号 `,`，再写新字段，否则 JSON 格式非法。
+
+**第三步：验证 JSON 合法性（可选）**
+
+```bash
+cat ~/.claude.json | python3 -m json.tool
+```
+
+无报错即表示格式正确。
+
+**第四步：重新启动 Claude Code**
+
+```bash
+claude
+```
+
+正常进入交互界面即修复成功。
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 安装后立即在 `~/.claude.json` 手动写入 `"hasCompletedOnboarding": true` | 首次启动因 Onboarding 探测失败而无法进入交互 |
+| 使用中转 API 时确认代理/环境变量在 shell 初始化阶段即已生效 | Onboarding 阶段因代理未加载导致连接被拒 |
+| 修改 JSON 后用 `python3 -m json.tool` 或在线工具校验格式 | 手动编辑引入语法错误导致 Claude Code 无法读取配置 |

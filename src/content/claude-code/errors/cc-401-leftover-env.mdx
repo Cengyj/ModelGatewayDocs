@@ -1,0 +1,115 @@
+---
+title: "CC-016：无效令牌（曾购买过第三方服务后切换）"
+---
+
+# CC-016：无效令牌（曾购买过第三方服务后切换）
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="Linux / macOS / Windows"
+  date="2026-03-14"
+/>
+---
+
+## 问题现象
+
+曾使用过其他第三方中转服务，切换到新服务后，Claude Code 持续返回：
+
+```text
+API Error: 401 {"error":{"type":"authentication_error","message":"invalid x-api-key"}}
+```
+
+新配置已正确填写，但错误依旧。
+
+---
+
+## 根因分析
+
+```text
+旧服务遗留了系统环境变量
+  → ANTHROPIC_BASE_URL 指向旧服务地址
+  → ANTHROPIC_API_KEY / ANTHROPIC_API_TOKEN 保存旧令牌
+  → 环境变量优先级高于配置文件
+  → Claude Code 忽略新配置，向旧端点发送旧令牌
+  → 旧端点拒绝 → 401 认证失败
+```
+
+---
+
+## 修复步骤
+
+### Windows 用户
+
+**第一步：打开环境变量编辑器**
+
+按 `Win + R`，输入 `sysdm.cpl`，回车。点击「高级」选项卡 → 「环境变量」。
+
+也可以在任务栏搜索「环境变量」直接打开。
+
+**第二步：分别在「用户变量」和「系统变量」中删除以下三个变量**
+
+```text
+ANTHROPIC_BASE_URL
+ANTHROPIC_API_KEY
+ANTHROPIC_API_TOKEN
+```
+
+**第三步：保存退出，重新打开 cmd 或 PowerShell**
+
+```cmd
+claude
+```
+
+**如果仍然报错，删除 Claude Code 配置文件：**
+
+```text
+C:\Users\<USERNAME>\.claude\claude.json
+C:\Users\<USERNAME>\.claude\claude.json.backup
+```
+
+删除后重新配置 Base URL 和 API Key（推荐使用 CC Switch）。
+
+---
+
+### macOS / Linux 用户
+
+**第一步：编辑 Shell 配置文件**
+
+```bash
+# zsh 用户
+vi ~/.zshrc
+
+# bash 用户
+vi ~/.bashrc
+```
+
+**第二步：找到并删除以下三行（有几行删几行）**
+
+```bash
+export ANTHROPIC_BASE_URL=...
+export ANTHROPIC_API_KEY=...
+export ANTHROPIC_API_TOKEN=...
+```
+
+**第三步：使配置生效**
+
+```bash
+source ~/.zshrc   # 或 source ~/.bashrc
+```
+
+**第四步：重新打开终端，启动 Claude Code**
+
+```bash
+claude
+```
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 切换服务时优先检查并清理旧环境变量 | 旧变量静默覆盖新配置导致认证失败 |
+| 使用 CC Switch 统一管理配置，减少手动设置环境变量 | 多处配置冲突难以定位 |
+| 切换完成后执行 `claude --version` 验证连通性 | 切换后未及时发现配置冲突 |

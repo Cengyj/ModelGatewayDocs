@@ -1,0 +1,346 @@
+---
+title: "OpenClaw · 手动配置"
+description: "~/.openclaw/openclaw.json 网关配置 + 多 provider + UA。"
+---
+
+# OpenClaw · 手动配置
+
+<VersionBadge version="2026.5.20" date="2026-05-20" license="MIT" />
+
+<PageHeader
+  useCase="直接改 openclaw.json 配多个 provider 与 UA"
+  audience="同时接 Claude / Codex / 国产模型；要程序化生成配置"
+  tldr="provider 写 models.providers.<name>；UA 必须按类型填；改完 pkill 再启"
+/>
+
+<Callout type="warning">OpenClaw 守护进程**不会自动重读** `openclaw.json`，改完必须 `pkill -f openclaw` 再起。</Callout>
+
+---
+
+## 配置文件位置
+
+| 平台 | 路径 |
+| --- | --- |
+| macOS / Linux | `~/.openclaw/openclaw.json` |
+| Windows | `%USERPROFILE%\.openclaw\openclaw.json` |
+| 工作区 | `~/.openclaw/workspace/`（agent 工作目录） |
+| Agents | `~/.openclaw/agents/<id>/` |
+
+文件**严格 JSON**，不能写注释。
+
+---
+
+## 顶层结构
+
+```json
+{
+  "agents": { },
+  "channels": { },
+  "commands": { },
+  "gateway": { },
+  "hooks": { },
+  "messages": { },
+  "models": { "providers": { } },
+  "plugins": { },
+  "session": { },
+  "tools": { }
+}
+```
+
+本页只讲 `models.providers.*` —— 其它段（飞书 / Hooks / Skills）按 OpenClaw 自己的 onboarding 流程走，详见 [OpenClaw 安装](/openclaw/install)。
+
+---
+
+## `models.providers.<name>` 段
+
+每个 provider 一段。下面是三种典型模板。
+
+### Claude 模型
+
+```json
+{
+  "models": {
+    "providers": {
+      "foropencode-claude": {
+        "api": "anthropic-messages",
+        "apiKey": "sk-xxx",
+        "baseUrl": "https://foropencode.com",
+        "headers": {
+          "Authorization": "Bearer sk-xxx",
+          "User-Agent": "claude-cli/2.0.76 (external, cli)"
+        },
+        "models": [
+          { "id": "claude-sonnet-4-6", "name": "claude-sonnet-4-6" },
+          { "id": "claude-opus-4-7", "name": "claude-opus-4-7" }
+        ]
+      }
+    }
+  }
+}
+```
+
+### Codex / GPT 模型
+
+```json
+{
+  "models": {
+    "providers": {
+      "foropencode-codex": {
+        "api": "openai-responses",
+        "apiKey": "sk-xxx",
+        "baseUrl": "https://foropencode.com/v1",
+        "headers": {
+          "Authorization": "Bearer sk-xxx",
+          "User-Agent": "codex_cli_rs/0.77.0 (Windows 10.0.26100; x86_64) WindowsTerminal"
+        },
+        "models": [
+          { "id": "gpt-5.5", "name": "gpt-5.5" },
+          { "id": "gpt-5.4", "name": "gpt-5.4" }
+        ]
+      }
+    }
+  }
+}
+```
+
+### 国产模型
+
+```json
+{
+  "models": {
+    "providers": {
+      "foropencode-cn": {
+        "api": "openai-responses",
+        "apiKey": "sk-xxx",
+        "baseUrl": "https://foropencode.com/v1",
+        "headers": {
+          "Authorization": "Bearer sk-xxx",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0"
+        },
+        "models": [
+          { "id": "deepseek-chat", "name": "deepseek" }
+        ]
+      }
+    }
+  }
+}
+```
+
+---
+
+## 字段说明
+
+| 字段 | 含义 |
+| --- | --- |
+| `api` | API 协议；`anthropic-messages` / `openai-responses` / `openai-chat-completions` |
+| `apiKey` | API Key |
+| `baseUrl` | API 根地址；Anthropic 不带 `/v1`，OpenAI 兼容带 `/v1` |
+| `headers.Authorization` | 必须重复一遍 `Bearer <apiKey>` |
+| `headers.User-Agent` | **关键**，外接场景必填，缺会 403 |
+| `models` | 该 provider 暴露给 OpenClaw 的模型列表 |
+| `models[].id` | 真实模型 ID（请求里用） |
+| `models[].name` | 在 OpenClaw UI 显示的名字 |
+| `models[].contextWindow` | 上下文窗口（可选，影响 UI 显示） |
+| `models[].maxTokens` | 单次最大输出（可选） |
+| `models[].cost` | 计费信息（可选；本站走 Key 余额，留 0） |
+
+---
+
+## User-Agent 规则
+
+外接场景下 OpenClaw 不带或带错 UA 就会报 `403 block`：
+
+| API 类型 | UA 类型 | 示例 |
+| --- | --- | --- |
+| Claude（外接） | claude-cli | `claude-cli/2.0.76 (external, cli)` |
+| Codex / GPT | codex_cli_rs | `codex_cli_rs/0.77.0 (Windows 10.0.26100; x86_64) WindowsTerminal` |
+| 国产模型 | 浏览器 | `Mozilla/5.0 (...) Firefox/149.0` |
+| Gemini | gemini-cli | 按版本写 |
+
+**不能复用** —— Claude UA 配到 Codex provider 上 = 403。
+
+---
+
+## 切 provider / 多分组
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "foropencode-codex/gpt-5.5"
+      }
+    }
+  }
+}
+```
+
+格式：`<provider 名>/<model ID>`。改完重启守护进程。
+
+---
+
+## 完整配置 JSON 参考
+
+<details>
+<summary>展开查看 ~/.openclaw/openclaw.json 示例</summary>
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "model": {
+        "primary": "foropencode-codex/gpt-5.4"
+      },
+      "subagents": {
+        "maxConcurrent": 8
+      },
+      "workspace": "C:\\Users\\\\.openclaw\\workspace"
+    },
+    "list": [
+      {
+        "agentDir": "C:\\Users\\\\.openclaw\\agents\\main\\agent",
+        "id": "main",
+        "name": "main",
+        "workspace": "C:\\Users\\\\.openclaw\\workspace"
+      }
+    ]
+  },
+  "channels": {
+    "feishu": {
+      "appId": "",
+      "appSecret": "",
+      "domain": "feishu",
+      "enabled": true,
+      "groupPolicy": "disabled"
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "ownerDisplay": "raw",
+    "restart": true
+  },
+  "gateway": {
+    "auth": {
+      "mode": "token",
+      "token": ""
+    },
+    "bind": "loopback",
+    "mode": "local",
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "calendar.add",
+        "contacts.add",
+        "reminders.add"
+      ]
+    },
+    "port": 18789,
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "session-memory": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "foropencode-claude": {
+        "api": "anthropic-messages",
+        "apiKey": "sk-xxx",
+        "baseUrl": "https://foropencode.com",
+        "headers": {
+          "Authorization": "Bearer sk-xxx",
+          "User-Agent": "claude-cli/2.0.76 (external, cli)"
+        },
+        "models": [
+          { "id": "claude-sonnet-4-6", "name": "claude-sonnet-4-6" },
+          { "id": "claude-opus-4-7", "name": "claude-opus-4-7" }
+        ]
+      },
+      "foropencode-codex": {
+        "api": "openai-responses",
+        "apiKey": "sk-xxx",
+        "baseUrl": "https://foropencode.com/v1",
+        "headers": {
+          "Authorization": "Bearer sk-xxx",
+          "User-Agent": "codex_cli_rs/0.77.0 (Windows 10.0.26100; x86_64) WindowsTerminal"
+        },
+        "models": [
+          { "id": "gpt-5.5", "name": "gpt-5.5" },
+          { "id": "gpt-5.4", "name": "gpt-5.4" }
+        ]
+      }
+    }
+  },
+  "plugins": {
+    "entries": {
+      "feishu": { "enabled": true }
+    }
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "tools": {
+    "profile": "coding"
+  }
+}
+```
+
+</details>
+
+---
+
+## 改完之后
+
+OpenClaw 守护进程不会自动重读：
+
+```bash
+# Linux / macOS
+pkill -f openclaw
+openclaw onboard --install-daemon
+
+# Windows PowerShell
+Get-Process | Where-Object { $_.ProcessName -like "*openclaw*" } | Stop-Process -Force
+openclaw onboard --install-daemon
+```
+
+验证：浏览器打开 `http://127.0.0.1:18789/`，模型选择列表里能看到新 provider 即 OK。
+
+---
+
+## 常见排查
+
+| 现象 | 检查 |
+| --- | --- |
+| 403 block / 403 Forbidden | UA 是不是按 API 类型对应 |
+| `provider not found` | `agents.defaults.model.primary` 的 provider 名拼错 |
+| 改 JSON 不生效 | `pkill` 守护进程没真杀掉，`ps aux \| grep openclaw` 确认 |
+| 端口被占 | `18789` 被别的进程占了，改 `gateway.port` |
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/openclaw/cc-switch', hint: '回到 CC Switch 流程' },
+    { route: '/openclaw/install', hint: '装客户端 + onboard 向导' },
+    { route: '/openclaw/feishu', hint: '飞书渠道配置' },
+  ]}
+/>
