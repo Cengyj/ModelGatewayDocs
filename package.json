@@ -8,7 +8,7 @@
     "dev": "next dev --port 3020 --hostname 127.0.0.1",
     "prebuild": "node scripts/gen-content-manifest.mjs && node scripts/build-search-index.mjs",
     "build": "next build",
-    "start": "next start --port 3020 --hostname 127.0.0.1",
+    "start": "next start --port 3020 --hostname 0.0.0.0",
     "pretypecheck": "node scripts/gen-content-manifest.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "next lint"
