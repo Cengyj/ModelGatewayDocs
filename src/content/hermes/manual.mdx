@@ -1,11 +1,12 @@
 ---
 title: "Hermes Agent · 手动配置"
 description: "config.yaml + HERMES_HOME；三种 API 模式。"
+navLabel: "手动配置"
 ---
 
 # Hermes Agent · 手动配置
 
-<VersionBadge version="v0.16.0" date="2026-06-05" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
+<VersionBadge version="v2026.6.19" date="2026-06-19" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
 
 <PageHeader
   useCase="不用 CC Switch，直接改 Hermes 的 YAML 配置 / 用 hermes config 命令"
@@ -73,6 +74,19 @@ hermes config set default.model gpt-5.5
 
 ---
 
+## 可用模型规格
+
+| 模型 | 上下文窗口 | 最大输出 | api_mode |
+| --- | --- | --- | --- |
+| `gpt-5.5` | 270,000（普通渠道）/ 1,050,000（Pro/Plus Codex） | 128,000 | `chat_completions` |
+| `gpt-5.4` | 1,050,000 | 128,000 | `chat_completions` |
+| `gpt-5.4-mini` | 400,000 | 128,000 | `chat_completions` |
+| `claude-opus-4-8` | 1,000,000 | 128,000 | `anthropic_messages` |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 | `anthropic_messages` |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 | `anthropic_messages` |
+
+---
+
 ## 直接改 YAML
 
 ```yaml
@@ -83,7 +97,8 @@ providers:
     api_key: sk-xxx
     models:
       - claude-sonnet-4-6
-      - claude-opus-4-7
+      - claude-opus-4-8
+      - claude-haiku-4-5-20251001
 
   foropencode-codex:
     api_mode: chat_completions
@@ -92,6 +107,7 @@ providers:
     models:
       - gpt-5.5
       - gpt-5.4
+      - gpt-5.4-mini
 
 default:
   provider: foropencode-codex

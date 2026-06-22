@@ -1,6 +1,7 @@
 ---
 title: "Claude Code CLI · 手动配置"
 description: "直接改 ~/.claude/settings.json 与系统环境变量。"
+navLabel: "手动配置"
 ---
 
 # Claude Code CLI · 手动配置
@@ -56,9 +57,15 @@ description: "直接改 ~/.claude/settings.json 与系统环境变量。"
 
 | 变量 | 用途 |
 | --- | --- |
-| `ANTHROPIC_API_KEY` | API Key |
-| `ANTHROPIC_AUTH_TOKEN` | 备用 Token，部分中转 / 状态栏工具用这个名 |
+| `ANTHROPIC_API_KEY` | 作为 `x-api-key` 请求头发送。中转站若校验标准 Anthropic Key，用这个 |
+| `ANTHROPIC_AUTH_TOKEN` | 作为 `Authorization: Bearer` 请求头发送。**很多第三方网关用的是这个**，不是 `ANTHROPIC_API_KEY` |
 | `ANTHROPIC_BASE_URL` | 请求目标地址。本站填 `https://foropencode.com`（**不带 `/v1`**） |
+
+<Callout type="tip" title="API_KEY 还是 AUTH_TOKEN？">
+两者发送的请求头不同：`ANTHROPIC_API_KEY` → `x-api-key`，`ANTHROPIC_AUTH_TOKEN` → `Authorization: Bearer`。**配了 Key 还一直 401,就换成 `ANTHROPIC_AUTH_TOKEN` 再试**——你的网关大概率只认 Bearer。两个都填时 `ANTHROPIC_AUTH_TOKEN` 优先。
+
+来源：[Claude Code LLM Gateway 官方文档](https://code.claude.com/docs/en/llm-gateway)（2026-06 核对）
+</Callout>
 
 ### 模型选择
 

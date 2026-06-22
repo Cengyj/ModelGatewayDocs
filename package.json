@@ -1,15 +1,17 @@
 {
-  "name": "micuapi-docs",
+  "name": "foropencode-docs",
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "gen": "node scripts/gen-content-manifest.mjs",
+    "predev": "node scripts/gen-content-manifest.mjs",
     "dev": "next dev --port 3020 --hostname 127.0.0.1",
-    "build": "node scripts/build-search-index.mjs && next build",
+    "prebuild": "node scripts/gen-content-manifest.mjs && node scripts/build-search-index.mjs",
+    "build": "next build",
     "start": "next start --port 3020 --hostname 127.0.0.1",
+    "pretypecheck": "node scripts/gen-content-manifest.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "next lint",
-    "convert:html-to-mdx": "node scripts/convert-html-to-mdx.mjs",
-    "sync:from-source": "node scripts/sync-from-source.mjs"
+    "lint": "next lint"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
@@ -34,6 +36,7 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
+    "github-slugger": "^2.0.0",
     "playwright": "^1.61.0",
     "typescript": "^5.7.2"
   }

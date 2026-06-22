@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import '@/styles/global.css';
-import { ThemeScript } from '@/components/ThemeScript';
-import { AppShell } from '@/components/AppShell';
-import { PersistentDocFrame } from '@/components/PersistentDocFrame';
+import { ThemeScript } from '@/components/layout/ThemeScript';
+import { AppShell } from '@/components/layout/AppShell';
+import { PersistentDocFrame } from '@/components/layout/PersistentDocFrame';
 import { site } from '@/lib/site';
 
 export const metadata: Metadata = {

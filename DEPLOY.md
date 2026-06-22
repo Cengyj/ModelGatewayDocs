@@ -21,8 +21,8 @@
 ## 1. 上传项目
 
 ```bash
-mkdir -p /opt/micuapi-docs
-cd /opt/micuapi-docs
+mkdir -p /opt/foropencode-docs
+cd /opt/foropencode-docs
 ```
 
 用 `git clone`、`scp`、SFTP 或面板同步代码都可以。
@@ -38,7 +38,7 @@ cp .env.container.example .env
 按需修改 `.env`：
 
 ```dotenv
-IMAGE_NAME=micuapi-docs
+IMAGE_NAME=foropencode-docs
 IMAGE_TAG=latest
 HOST_PORT=8081
 ```

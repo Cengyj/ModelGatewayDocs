@@ -1,6 +1,7 @@
-﻿---
+---
 title: "OpenCode · 手动配置"
 description: "~/.config/opencode/opencode.json JSONC 格式 + 项目级覆盖。"
+navLabel: "手动配置"
 ---
 
 # OpenCode · 手动配置
@@ -10,7 +11,7 @@ description: "~/.config/opencode/opencode.json JSONC 格式 + 项目级覆盖。
 <PageHeader
   useCase="直接改 opencode.json 配 provider 与 model；项目级覆盖用户级"
   audience="一个供应商要接多模型；项目仓库要锁定模型/参数"
-  tldr="provider 写 providers.<name>；model 字段格式 <name>/<model-id>"
+  tldr="provider 写 provider.<name>；model 字段格式 <name>/<model-id>"
 />
 
 <Callout type="info">CLI 和桌面版 **共享同一份** `~/.config/opencode/opencode.json`。改一边两边都生效。</Callout>
@@ -37,7 +38,7 @@ Windows 上 `~/.config/` 对应 `%APPDATA%`；`~/.local/share/` 对应 `%LOCALAP
 
 ```json
 {
-  "providers": {
+  "provider": {
     "foropencode": {
       "options": {
         "baseURL": "https://foropencode.com/v1",
@@ -63,7 +64,7 @@ export OPENAI_API_KEY=sk-xxx
 
 | 字段 | 含义 |
 | --- | --- |
-| `providers` | 所有供应商的字典 |
+| `provider` | 所有供应商的字典 |
 | `model` | 默认用哪个模型，格式 `<provider 名>/<model ID>` |
 | `theme` | TUI 主题 |
 | `keybinds` | 自定义快捷键 |
@@ -73,11 +74,11 @@ export OPENAI_API_KEY=sk-xxx
 
 ---
 
-## `providers.<name>` 段
+## `provider.<name>` 段
 
 ```json
 {
-  "providers": {
+  "provider": {
     "foropencode": {
       "options": {
         "baseURL": "https://foropencode.com/v1",
@@ -103,53 +104,220 @@ export OPENAI_API_KEY=sk-xxx
 
 `{env:VAR}` 和 `{file:PATH}` 是 OpenCode 的占位语法，启动时解析。这样 Key 不进配置文件，安全些。
 
+<Callout type="tip" title="自定义 provider 要不要写 npm 字段？">
+OpenCode 基于 AI SDK 选适配器。如果你的 provider ID **复用内置名**（如 `anthropic`、`openai`），只填 `options.baseURL` 覆盖即可。但如果是**全新的自定义 ID**（如本站 `foropencode`），OpenAI 兼容端点建议显式加 `"npm": "@ai-sdk/openai-compatible"`，Anthropic 端点用 `"npm": "@ai-sdk/anthropic"`，OpenCode 才知道该用哪个适配器去请求。
+
+来源：[OpenCode Providers 官方文档](https://opencode.ai/docs/providers/)（2026-06 核对）
+</Callout>
+
 ---
 
-## `providers.<name>.models.<id>` 段
+## 模型规格速查
 
-在 provider 下可为每个模型单独配置推理档位和 I/O 能力：
+| 模型 | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `gpt-5.5` | 270,000（普通渠道）/ 1,050,000（Pro/Plus Codex） | 128,000 |
+| `gpt-5.4` | 1,050,000 | 128,000 |
+| `gpt-5.4-mini` | 400,000 | 128,000 |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
 
-```json
-{
-  "providers": {
-    "foropencode": {
-      "options": {
-        "baseURL": "https://foropencode.com/v1",
-        "apiKey": "{env:OPENAI_API_KEY}"
-      },
-      "models": {
-        "gpt-5.5": {
-          "variants": {
-            "low":    { "reasoningEffort": "low" },
-            "medium": { "reasoningEffort": "medium" },
-            "high":   { "reasoningEffort": "high" }
+---
+
+## `provider.<name>.models.<id>` 段
+
+在 provider 下可为每个模型单独声明上下文窗口、最大输出、推理档位和 I/O 能力，OpenCode 会据此在模型选择器里显示档位切换和附件支持提示。
+
+<Tabs defaultValue="gpt55">
+  <Tab label="gpt-5.5" value="gpt55">
+    ```json
+    {
+      "provider": {
+        "foropencode": {
+          "options": {
+            "baseURL": "https://foropencode.com/v1",
+            "apiKey": "{env:OPENAI_API_KEY}"
           },
-          "modalities": {
-            "input":  ["text", "image"],
-            "output": ["text", "image"]
-          }
-        },
-        "gpt-5.4": {
-          "modalities": {
-            "input":  ["text", "image"],
-            "output": ["text", "image"]
+          "models": {
+            "gpt-5.5": {
+              "options": {
+                "contextLength": 270000,
+                "maxTokens": 128000
+              },
+              "variants": {
+                "low":    { "reasoningEffort": "low" },
+                "medium": { "reasoningEffort": "medium" },
+                "high":   { "reasoningEffort": "high" }
+              },
+              "modalities": {
+                "input":  ["text", "image"],
+                "output": ["text", "image"]
+              }
+            }
           }
         }
       }
     }
-  }
-}
-```
+    ```
+    > 普通渠道上下文 270K；Pro/Plus Codex 账号可将 `contextLength` 改为 `1050000`。
+  </Tab>
+  <Tab label="gpt-5.4" value="gpt54">
+    ```json
+    {
+      "provider": {
+        "foropencode": {
+          "options": {
+            "baseURL": "https://foropencode.com/v1",
+            "apiKey": "{env:OPENAI_API_KEY}"
+          },
+          "models": {
+            "gpt-5.4": {
+              "options": {
+                "contextLength": 1050000,
+                "maxTokens": 128000
+              },
+              "variants": {
+                "low":    { "reasoningEffort": "low" },
+                "medium": { "reasoningEffort": "medium" },
+                "high":   { "reasoningEffort": "high" }
+              },
+              "modalities": {
+                "input":  ["text", "image"],
+                "output": ["text"]
+              }
+            }
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab label="gpt-5.4-mini" value="gpt54mini">
+    ```json
+    {
+      "provider": {
+        "foropencode": {
+          "options": {
+            "baseURL": "https://foropencode.com/v1",
+            "apiKey": "{env:OPENAI_API_KEY}"
+          },
+          "models": {
+            "gpt-5.4-mini": {
+              "options": {
+                "contextLength": 400000,
+                "maxTokens": 128000
+              },
+              "variants": {
+                "low":    { "reasoningEffort": "low" },
+                "medium": { "reasoningEffort": "medium" },
+                "high":   { "reasoningEffort": "high" }
+              },
+              "modalities": {
+                "input":  ["text", "image"],
+                "output": ["text"]
+              }
+            }
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab label="claude-opus-4-8" value="opus48">
+    ```json
+    {
+      "provider": {
+        "foropencode": {
+          "options": {
+            "baseURL": "https://foropencode.com",
+            "apiKey": "{env:ANTHROPIC_API_KEY}"
+          },
+          "models": {
+            "claude-opus-4-8": {
+              "options": {
+                "contextLength": 1000000,
+                "maxTokens": 128000
+              },
+              "modalities": {
+                "input":  ["text", "image"],
+                "output": ["text"]
+              }
+            }
+          }
+        }
+      }
+    }
+    ```
+    > Anthropic 端点 baseURL **不带 `/v1`**。
+  </Tab>
+  <Tab label="claude-sonnet-4-6" value="sonnet46">
+    ```json
+    {
+      "provider": {
+        "foropencode": {
+          "options": {
+            "baseURL": "https://foropencode.com",
+            "apiKey": "{env:ANTHROPIC_API_KEY}"
+          },
+          "models": {
+            "claude-sonnet-4-6": {
+              "options": {
+                "contextLength": 1000000,
+                "maxTokens": 64000
+              },
+              "modalities": {
+                "input":  ["text", "image"],
+                "output": ["text"]
+              }
+            }
+          }
+        }
+      }
+    }
+    ```
+    > Anthropic 端点 baseURL **不带 `/v1`**。
+  </Tab>
+  <Tab label="claude-haiku-4-5" value="haiku45">
+    ```json
+    {
+      "provider": {
+        "foropencode": {
+          "options": {
+            "baseURL": "https://foropencode.com",
+            "apiKey": "{env:ANTHROPIC_API_KEY}"
+          },
+          "models": {
+            "claude-haiku-4-5-20251001": {
+              "options": {
+                "contextLength": 200000,
+                "maxTokens": 64000
+              },
+              "modalities": {
+                "input":  ["text", "image"],
+                "output": ["text"]
+              }
+            }
+          }
+        }
+      }
+    }
+    ```
+    > Anthropic 端点 baseURL **不带 `/v1`**。
+  </Tab>
+</Tabs>
 
 | 字段 | 含义 |
 | --- | --- |
-| `variants` | 推理深度档位；每个 key 是一个档位名，值为 `{ "reasoningEffort": "low\|medium\|high" }` |
+| `options.contextLength` | 上下文窗口 Token 数 |
+| `options.maxTokens` | 单次最大输出 Token 数 |
+| `variants` | 推理深度档位；每个 key 是档位名，值为 `{ "reasoningEffort": "low\|medium\|high" }` |
 | `modalities.input` | 模型接受的输入类型，可填 `text`、`image`、`audio`、`video`、`pdf` |
 | `modalities.output` | 模型可输出的类型，可填 `text`、`image`、`audio` |
 
-`variants` 和 `modalities` 均可省略——省略时 OpenCode 自动推断，但显式声明可让模型选择器显示档位切换和附件支持提示。
+以上字段均可省略——省略时 OpenCode 自动推断，但显式声明可让选择器正确显示档位和附件支持。
 
-<Callout type="warning">**gpt-5.5 实际有效上下文约 270K**——若在对话中遇到 `context_length_exceeded`，说明上下文超出限制，开新会话即可。</Callout>
+<Callout type="warning">**gpt-5.5 普通渠道有效上下文约 270K**——超出后遇到 `context_length_exceeded` 时开新会话即可；Pro/Plus Codex 账号可将 `contextLength` 改为 `1050000`。</Callout>
 
 ---
 
@@ -157,7 +325,7 @@ export OPENAI_API_KEY=sk-xxx
 
 ```json
 {
-  "providers": {
+  "provider": {
     "fc-claude": {
       "options": {
         "baseURL": "https://foropencode.com",
@@ -175,7 +343,7 @@ export OPENAI_API_KEY=sk-xxx
 }
 ```
 
-`model` 字段的前缀必须对应 `providers` 里某个 ID。切换模型时改前缀即可：
+`model` 字段的前缀必须对应 `provider` 里某个 ID。切换模型时改前缀即可：
 
 ```json
 { "model": "fc-claude/claude-sonnet-4-6" }
@@ -198,7 +366,7 @@ export OPENAI_API_KEY=sk-xxx
 适用场景：
 
 - 团队仓库锁定模型（避免大家随便切）
-- 不同项目用不同 Key（项目级覆盖 `providers.<name>.options.apiKey`）
+- 不同项目用不同 Key（项目级覆盖 `provider.<name>.options.apiKey`）
 - CI 里跑 OpenCode，项目里直接写好
 
 ---
@@ -239,7 +407,7 @@ OPENCODE_MODEL="fc-claude/claude-opus-4-7" opencode
 
 | 现象 | 检查 |
 | --- | --- |
-| 启动报 `model not found` | `model` 前缀是不是 `providers` 里某个 ID |
+| 启动报 `model not found` | `model` 前缀是不是 `provider` 里某个 ID |
 | `apiKey is empty` | `{env:VAR}` 引用的环境变量是否真的有值 |
 | 桌面版读不到 config | 完全退出（含菜单栏图标）再启动；BETA 期偶有缓存问题 |
 | `reference is deprecated` | 把 `reference` 改成 `references`（v1.17.0+ breaking change） |

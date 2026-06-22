@@ -1,6 +1,7 @@
 ---
 title: "Codex · CC Switch 配置"
 description: "用 CC Switch 一键配 Codex CLI / App（共享同一份配置）。"
+navLabel: "CC Switch 配置"
 ---
 
 # Codex · CC Switch 配置
@@ -70,16 +71,16 @@ description: "用 CC Switch 一键配 Codex CLI / App（共享同一份配置）
 
 ---
 
-## 当前可选模型
+## 可用模型
 
-OpenAI 官方文档列出的推荐使用模型：
+Codex 仅支持 OpenAI 格式（`OpenAI Responses`），Base URL 填 `https://foropencode.com/v1`：
 
-| 模型 | 备注 |
-| --- | --- |
-| `gpt-5.5` | OpenAI 当前推荐起点 |
-| `gpt-5.4` | 上一代主力 |
-| `gpt-5.4-mini` | 轻量级 |
-| `gpt-5.3-codex-spark` | Codex 专用线路 |
+| 模型 ID | 上下文窗口 | 最大输出 | 备注 |
+| --- | --- | --- | --- |
+| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 | OpenAI 当前推荐起点 |
+| `gpt-5.4` | 1,050,000 | 128,000 | 上一代主力 |
+| `gpt-5.4-mini` | 400,000 | 128,000 | 轻量级 |
+| `gpt-5.3-codex-spark` | — | — | Codex 专用线路 |
 
 OpenAI 标注以下模型对**用 ChatGPT 登录**的用户已弃用：`gpt-5.2`、`gpt-5.3-codex`。
 
@@ -96,6 +97,17 @@ OpenAI 标注以下模型对**用 ChatGPT 登录**的用户已弃用：`gpt-5.2`
 | `medium` | 日常开发任务（推荐） |
 | `high` | 复杂算法、架构设计 |
 | `xhigh` | 仅 Responses API 路径下、且模型支持时可用 |
+
+---
+
+## 配置写到哪
+
+CC Switch 将配置写入 `~/.codex/config.toml`（CLI 与 Codex App 共用同一文件）：
+
+| 平台 | 路径 |
+| --- | --- |
+| macOS / Linux | `~/.codex/config.toml` |
+| Windows | `%USERPROFILE%\.codex\config.toml` |
 
 ---
 

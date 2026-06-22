@@ -1,6 +1,7 @@
 ---
 title: "Claude Code CLI · CC Switch 配置"
 description: "用 CC Switch 给 Claude Code CLI 一键配 API。"
+navLabel: "CC Switch 配置"
 ---
 
 # Claude Code CLI · CC Switch 配置
@@ -65,12 +66,36 @@ description: "用 CC Switch 给 Claude Code CLI 一键配 API。"
   </Frame>
 </Walkthrough>
 
+---
+
+## 可用模型
+
+Claude Code CLI 使用 **Anthropic 格式**，请求地址填 `https://foropencode.com`（不带 `/v1`）：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+
+---
+
+## 配置写到哪
+
+CC Switch 将供应商配置写入 `~/.claude/settings.json`：
+
+| 平台 | 路径 |
+| --- | --- |
+| macOS / Linux | `~/.claude/settings.json` |
+| Windows | `%USERPROFILE%\.claude\settings.json` |
+
+---
 
 <RelatedPages
   title="下一步"
   items={[
     { route: '/claude-code/cli/manual', hint: '想看 CC Switch 写了什么 / 自己手改' },
-    { route: '/claude-code/advanced', hint: 'CLAUDE.md、MCP、Hooks 等进阶功能' },
+    { route: '/claude-code/cli/usage', hint: '熟悉日常命令、slash 命令、自动化' },
     { route: '/claude-code/errors', hint: '遇到 401 / 429 等报错' },
   ]}
 />

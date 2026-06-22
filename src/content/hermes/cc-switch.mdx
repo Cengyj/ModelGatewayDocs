@@ -1,11 +1,12 @@
 ---
 title: "Hermes Agent · CC Switch 配置"
 description: "用 CC Switch 一键配 Hermes Agent。"
+navLabel: "CC Switch 配置"
 ---
 
 # Hermes Agent · CC Switch 配置
 
-<VersionBadge version="v0.16.0" date="2026-06-05" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
+<VersionBadge version="v2026.6.19" date="2026-06-19" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
 
 <PageHeader
   useCase="可视化配置 Hermes 的 provider；GPT / Claude 两条路径均支持"
@@ -62,10 +63,11 @@ description: "用 CC Switch 一键配 Hermes Agent。"
     5. 展开模型条目，从下拉列表选择 **模型 ID**（如 `gpt-5.4`、`gpt-5.5`）
     6. 填写 **上下文长度**：
 
-    | 模型 | 上下文长度 |
-    | --- | --- |
-    | `gpt-5.4` | `1050000` |
-    | `gpt-5.5` | `270000` |
+    | 模型 | 上下文长度 | 最大输出 |
+    | --- | --- | --- |
+    | `gpt-5.5` | `270000` | `128000` |
+    | `gpt-5.4` | `1050000` | `128000` |
+    | `gpt-5.4-mini` | `400000` | `128000` |
 
     <Callout type="warning">**gpt-5.5 实际有效上下文约 270K**——填 1M 会触发 `context_length_exceeded`，建议上下文长度填 `270000`。</Callout>
 
@@ -81,6 +83,30 @@ description: "用 CC Switch 一键配 Hermes Agent。"
     **重启终端**，下次跑 `hermes` 即读取新配置。
   </Frame>
 </Walkthrough>
+
+---
+
+## 可用模型
+
+### OpenAI 模型
+
+API 协议选 `OpenAI Responses`，API 端点填 `https://foropencode.com/v1`：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 |
+| `gpt-5.4` | 1,050,000 | 128,000 |
+| `gpt-5.4-mini` | 400,000 | 128,000 |
+
+### Anthropic 模型
+
+API 协议选 `Anthropic Messages`，API 端点填 `https://foropencode.com`（**不带 `/v1`**）：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
 
 ---
 

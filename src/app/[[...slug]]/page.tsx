@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getContentByRoute } from '@/lib/content';
-import { loadMdx, routeToImporter } from '@/lib/mdx-map';
-import { HomeLayout } from '@/components/HomeLayout';
-import { Breadcrumbs } from '@/components/Breadcrumbs';
-import { Pager } from '@/components/Pager';
-import { PublishToc } from '@/components/TocContext';
-import styles from '@/components/DocLayout.module.css';
+import { getContentByRoute, loadMdx, routeToImporter } from '@/lib/content';
+import { site } from '@/lib/site';
+import { HomeLayout } from '@/components/layout/HomeLayout';
+import { Breadcrumbs } from '@/components/docs/Breadcrumbs';
+import { Pager } from '@/components/docs/Pager';
+import { PublishToc } from '@/components/layout/TocContext';
+import styles from '@/components/docs/DocLayout.module.css';
 
 type Params = { slug?: string[] };
 
@@ -22,20 +22,27 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const meta = getContentByRoute(route);
   if (!meta) return {};
   const url = route === '/' ? '/' : route;
-  const description = meta.description ?? meta.rawText.slice(0, 160);
+  const description = meta.description ?? meta.descriptionFallback;
+  // Home: use an absolute title so the layout's "%s · {name}" template doesn't
+  // produce "foropencode · foropencode". Inner pages keep the template.
+  const isHome = route === '/';
+  const title = isHome
+    ? { absolute: `${site.name} · ${site.tagline}` }
+    : meta.title;
+  const ogTitle = isHome ? `${site.name} · ${site.tagline}` : meta.title;
   return {
-    title: meta.title,
+    title,
     description,
     alternates: { canonical: url },
     openGraph: {
       type: 'article',
-      title: meta.title,
+      title: ogTitle,
       description,
       url,
     },
     twitter: {
       card: 'summary',
-      title: meta.title,
+      title: ogTitle,
       description,
     },
   };
@@ -54,6 +61,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   if (!meta || !Mod) notFound();
 
   if (route === '/') {
+    // Hero + FeatureGrid render full-bleed; the markdown body wraps itself in
+    // <HomeProse> inside the MDX so it gets the centered prose container.
     return (
       <HomeLayout>
         <Mod />

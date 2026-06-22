@@ -1,0 +1,85 @@
+---
+title: "Claude Code CLI · 使用 GPT 模型"
+description: "通过 CC Switch 路由功能，在 Claude Code CLI / VSCode 扩展中接入 gpt-5.5 / gpt-5.4 / gpt-5.4-mini 等 GPT 系列模型。"
+navLabel: "使用 GPT 模型"
+---
+
+# Claude Code CLI · 使用 GPT 模型
+
+<PageHeader
+  useCase="在 Claude Code CLI / VSCode 扩展中切换到 GPT 系列模型（gpt-5.5 / gpt-5.4 / gpt-5.4-mini）"
+  audience="想体验 GPT 模型的 Claude Code 用户"
+  tldr="CC Switch → 选对图标 → 添加供应商（OpenAI Responses API）→ 设置 → 路由 → 开启总开关 + Claude 开关"
+/>
+
+<Callout type="info" title="需要 gpt_plus 分组密钥">
+  GPT 系列模型归属 `gpt_plus` 分组。请先[创建一个绑定 gpt_plus 分组的 API 密钥](/get-key/create)，再继续以下步骤。
+</Callout>
+
+---
+
+## 配置步骤
+
+<Walkthrough>
+  <Frame
+    title="① 在 CC Switch 中选择图标并添加"
+    image="/img/cc-switch/cc-switch-cli-main-add.png"
+    imageAlt="CC Switch 主界面：顶部工具栏选中 Claude Code 图标，点右上角添加按钮"
+    caption="在 CC Switch 顶部工具栏选中对应图标，点右上角 ＋ 新建供应商。"
+  />
+
+  <Frame
+    title="② 填写供应商信息（选 OpenAI Responses API）"
+    image="/img/claude-code/gpt-model/step-01-add-supplier.png"
+    imageAlt="CC Switch 添加新供应商：填写名称、API Key、请求地址，展开高级选项选择 OpenAI Responses API"
+    caption="按图示标注填写五项，最后点右下角「添加」。"
+  >
+    - **① 供应商名称**：随便取，如 `for`
+    - **② API Key**：绑定 `gpt_plus` 分组的 `sk-xxx` 密钥
+    - **③ 请求地址**：`https://foropencode.com/v1`
+    - **④ 展开高级选项**
+    - **⑤ API 格式** 选 **OpenAI Responses API（需开启路由）**
+  </Frame>
+
+  <Frame
+    title="③ 点击左上角设置"
+    image="/img/claude-code/gpt-model/step-02-cc-switch-main.png"
+    imageAlt="CC Switch 主界面：供应商显示「需要路由」标签，步骤1 指向左上角齿轮图标"
+    caption="添加完成后回到主界面，供应商会显示「需要路由」标签。点击左上角齿轮图标进入设置。"
+  />
+
+  <Frame
+    title="④ 开启路由"
+    image="/img/claude-code/gpt-model/step-03-routing.png"
+    imageAlt="CC Switch 设置 → 路由：开启路由总开关，打开 Claude 应用开关"
+    caption="进入「路由」标签页：打开路由总开关，再打开 Claude 开关。"
+  >
+    <Callout type="warning" title="不要退出 CC Switch">
+      路由服务需要 CC Switch 保持运行。关闭窗口会中断路由，建议最小化到系统托盘。
+    </Callout>
+  </Frame>
+</Walkthrough>
+
+---
+
+## 可用 GPT 模型
+
+配置完成后，在 Claude Code 中使用 `/model` 命令切换模型：
+
+| 模型 ID | 说明 |
+| --- | --- |
+| `gpt-5.5` | 旗舰推理模型（推荐） |
+| `gpt-5.4` | 标准版 |
+| `gpt-5.4-mini` | 轻量版，速度更快 |
+
+---
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/get-key/create', label: '创建密钥', hint: '创建绑定 gpt_plus 分组的密钥' },
+    { route: '/get-key/groups', label: '令牌分组', hint: '查看 gpt_plus 分组倍率' },
+    { route: '/claude-code/cli/cc-switch', label: 'CC Switch 配置', hint: 'Claude 模型的基础配置' },
+    { route: '/gpt-image', label: 'GPT Image 2', hint: '使用 gpt-image-2 生成图片' },
+  ]}
+/>

@@ -1,11 +1,12 @@
 ---
 title: "OpenClaw · 安装"
 description: "网关型 AI Agent 客户端的安装与初始化向导。支持 23+ 通讯渠道。"
+navLabel: "安装"
 ---
 
 # OpenClaw · 安装
 
-<VersionBadge version="2026.5.20" date="2026-05-20" license="MIT" />
+<VersionBadge version="v2026.6.8" date="2026-06-08" license="自定义" github="https://github.com/openclaw/openclaw" />
 
 <PageHeader
   useCase="用 OpenClaw 把 Discord / Telegram / 飞书等 23 个渠道接到统一 AI 代理"
@@ -85,7 +86,7 @@ openclaw onboard --install-daemon
 | --- | --- | --- |
 | Telegram | ⭐ 最简单 | 找 [@BotFather](https://t.me/BotFather) 新建 bot 拿 Token |
 | Discord | ⭐⭐ 较简单 | Discord Developer Portal 创建应用 |
-| 飞书 | ⭐⭐⭐ 步骤多 | [详细配置 →](/openclaw/feishu) |
+| 飞书 | ⭐⭐⭐ 步骤多 | [OpenClaw 飞书渠道官方文档 →](https://docs.openclaw.ai/zh-CN/channels) |
 | 微信 / 企业微信 | ⭐⭐⭐ 需企业认证 | 企业微信接入更稳定 |
 | Slack / Teams / Matrix | ⭐⭐ | 参考 [OpenClaw 官方文档](https://docs.openclaw.ai/zh-CN/channels) |
 
@@ -118,6 +119,5 @@ openclaw onboard --install-daemon
   items={[
     { route: '/openclaw/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
     { route: '/openclaw/manual', hint: '直接改 openclaw.json' },
-    { route: '/openclaw/feishu', hint: '配飞书渠道' },
   ]}
 />

@@ -1,11 +1,12 @@
 ---
 title: "OpenClaw · 手动配置"
 description: "~/.openclaw/openclaw.json 网关配置 + 多 provider + UA。"
+navLabel: "手动配置"
 ---
 
 # OpenClaw · 手动配置
 
-<VersionBadge version="2026.5.20" date="2026-05-20" license="MIT" />
+<VersionBadge version="v2026.6.8" date="2026-06-08" license="自定义" github="https://github.com/openclaw/openclaw" />
 
 <PageHeader
   useCase="直接改 openclaw.json 配多个 provider 与 UA"
@@ -51,6 +52,19 @@ description: "~/.openclaw/openclaw.json 网关配置 + 多 provider + UA。"
 
 ---
 
+## 可用模型规格
+
+| 模型 | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `gpt-5.5` | 270,000（普通渠道）/ 1,050,000（Pro/Plus Codex） | 128,000 |
+| `gpt-5.4` | 1,050,000 | 128,000 |
+| `gpt-5.4-mini` | 400,000 | 128,000 |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+
+---
+
 ## `models.providers.<name>` 段
 
 每个 provider 一段。下面是三种典型模板。
@@ -70,8 +84,9 @@ description: "~/.openclaw/openclaw.json 网关配置 + 多 provider + UA。"
           "User-Agent": "claude-cli/2.0.76 (external, cli)"
         },
         "models": [
-          { "id": "claude-sonnet-4-6", "name": "claude-sonnet-4-6" },
-          { "id": "claude-opus-4-7", "name": "claude-opus-4-7" }
+          { "id": "claude-sonnet-4-6", "name": "claude-sonnet-4-6", "contextWindow": 1000000, "maxTokens": 64000 },
+          { "id": "claude-opus-4-8",   "name": "claude-opus-4-8",   "contextWindow": 1000000, "maxTokens": 128000 },
+          { "id": "claude-haiku-4-5-20251001", "name": "claude-haiku-4-5-20251001", "contextWindow": 200000, "maxTokens": 64000 }
         ]
       }
     }
@@ -94,8 +109,9 @@ description: "~/.openclaw/openclaw.json 网关配置 + 多 provider + UA。"
           "User-Agent": "codex_cli_rs/0.77.0 (Windows 10.0.26100; x86_64) WindowsTerminal"
         },
         "models": [
-          { "id": "gpt-5.5", "name": "gpt-5.5" },
-          { "id": "gpt-5.4", "name": "gpt-5.4" }
+          { "id": "gpt-5.5",      "name": "gpt-5.5",      "contextWindow": 270000,  "maxTokens": 128000 },
+          { "id": "gpt-5.4",      "name": "gpt-5.4",      "contextWindow": 1050000, "maxTokens": 128000 },
+          { "id": "gpt-5.4-mini", "name": "gpt-5.4-mini", "contextWindow": 400000,  "maxTokens": 128000 }
         ]
       }
     }
@@ -341,6 +357,5 @@ openclaw onboard --install-daemon
   items={[
     { route: '/openclaw/cc-switch', hint: '回到 CC Switch 流程' },
     { route: '/openclaw/install', hint: '装客户端 + onboard 向导' },
-    { route: '/openclaw/feishu', hint: '飞书渠道配置' },
   ]}
 />

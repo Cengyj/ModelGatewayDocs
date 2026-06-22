@@ -1,6 +1,6 @@
 services:
   docs:
-    image: ${IMAGE_NAME:-micuapi-docs}:${IMAGE_TAG:-latest}
+    image: ${IMAGE_NAME:-foropencode-docs}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile

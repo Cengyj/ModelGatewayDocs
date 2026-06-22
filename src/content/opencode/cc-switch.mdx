@@ -1,6 +1,7 @@
 ---
 title: "OpenCode · CC Switch 配置"
 description: "用 CC Switch 一键配 OpenCode CLI / 桌面版（共享同一份配置）。"
+navLabel: "CC Switch 配置"
 ---
 
 # OpenCode · CC Switch 配置
@@ -101,10 +102,43 @@ description: "用 CC Switch 一键配 OpenCode CLI / 桌面版（共享同一份
 
 ---
 
+## 可用模型
+
+### OpenAI 模型
+
+接口格式选 `OpenAI Responses`，Base URL 填 `https://foropencode.com/v1`：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 |
+| `gpt-5.4` | 1,050,000 | 128,000 |
+| `gpt-5.4-mini` | 400,000 | 128,000 |
+
+### Anthropic 模型
+
+接口格式选 `Anthropic`，Base URL 填 `https://foropencode.com`（**不带 `/v1`**）：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+
+---
+
+## 配置写到哪
+
+CC Switch 将供应商信息写入 `~/.config/opencode/opencode.json`。CLI 和桌面版共享同一份文件，配置一次两边都生效。
+
+| 平台 | 路径 |
+| --- | --- |
+| Linux / macOS | `~/.config/opencode/opencode.json` |
+| Windows | `%APPDATA%\opencode\opencode.json` |
+
 <RelatedPages
   title="下一步"
   items={[
-    { route: '/opencode/manual', hint: '看 CC Switch 写了什么 / 自己手改' },
-    { route: '/cc-switch', hint: 'CC Switch 工具本身' },
+    { route: '/opencode/manual', hint: '手动编辑配置文件 / 查看完整字段说明' },
+    { route: '/cc-switch', hint: 'CC Switch 安装与其他工具向导' },
   ]}
 />

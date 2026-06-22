@@ -1,6 +1,7 @@
-﻿---
+---
 title: "Claude 桌面版 · CC Switch 配置"
 description: "用 CC Switch 把本站中转接到 Claude 桌面客户端。"
+navLabel: "CC Switch 配置"
 ---
 
 # Claude 桌面版 · CC Switch 配置
@@ -50,6 +51,29 @@ description: "用 CC Switch 把本站中转接到 Claude 桌面客户端。"
     鼠标悬停在刚添加的配置行上，显示 **「使用中」** 即表示配置已写入。关闭 CC Switch，**完全重启** Claude 桌面版后即可直接使用。
   </Frame>
 </Walkthrough>
+
+---
+
+## 可用模型
+
+Claude 桌面版使用 **Anthropic 格式**，请求地址填 `https://foropencode.com`（必须 HTTPS 域名，不带 `/v1`）：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+
+---
+
+## 配置写到哪
+
+CC Switch 将配置写入 `~/.claude/settings.json`（CLI 与桌面版共用同一文件）：
+
+| 平台 | 路径 |
+| --- | --- |
+| macOS / Linux | `~/.claude/settings.json` |
+| Windows | `%USERPROFILE%\.claude\settings.json` |
 
 ---
 

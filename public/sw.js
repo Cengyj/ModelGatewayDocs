@@ -1,5 +1,5 @@
 /**
- * micuapi docs — offline cache.
+ * foropencode docs — offline cache.
  *
  * Strategy:
  *   - Navigations (HTML)            : network-first, falls back to cache, finally to /offline page in cache
@@ -10,10 +10,10 @@
  * Cache key is versioned. On activate, we drop old caches.
  */
 
-const CACHE_VERSION = 'v1-2026-06-19';
-const CACHE_HTML = `micu-html-${CACHE_VERSION}`;
-const CACHE_STATIC = `micu-static-${CACHE_VERSION}`;
-const CACHE_IMG = `micu-img-${CACHE_VERSION}`;
+const CACHE_VERSION = 'v2-2026-06-21';
+const CACHE_HTML = `foropencode-html-${CACHE_VERSION}`;
+const CACHE_STATIC = `foropencode-static-${CACHE_VERSION}`;
+const CACHE_IMG = `foropencode-img-${CACHE_VERSION}`;
 
 const KEEP = new Set([CACHE_HTML, CACHE_STATIC, CACHE_IMG]);
 

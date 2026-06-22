@@ -1,6 +1,7 @@
 ---
 title: "CC Switch · 安装与概览"
 description: "CC Switch 一键管理 7 个 AI 客户端的 API 配置。安装后选对应工具的配置向导。"
+navLabel: "安装与概览"
 ---
 
 # CC Switch
@@ -51,7 +52,7 @@ description: "CC Switch 一键管理 7 个 AI 客户端的 API 配置。安装�
 
 ---
 
-## 按工具选配置向导
+## 选配置向导
 
 安装完成后，顶部工具栏点击对应客户端图标，跟着向导填表单即可。
 
@@ -68,7 +69,31 @@ description: "CC Switch 一键管理 7 个 AI 客户端的 API 配置。安装�
 
 ---
 
-## CC Switch 数据位置
+## 可用模型
+
+### OpenAI 模型
+
+接口格式选 `OpenAI` / `OpenAI Responses`，Base URL 填 `https://foropencode.com/v1`：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 |
+| `gpt-5.4` | 1,050,000 | 128,000 |
+| `gpt-5.4-mini` | 400,000 | 128,000 |
+
+### Anthropic 模型
+
+接口格式选 `Anthropic`，Base URL 填 `https://foropencode.com`（**不带 `/v1`**）：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+
+---
+
+## 数据位置
 
 | 路径 | 用途 |
 | --- | --- |

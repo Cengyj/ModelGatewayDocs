@@ -1,6 +1,7 @@
 ---
 title: "Codex · 手动配置"
 description: "~/.codex/config.toml + auth.json；CLI 与 App 共享。"
+navLabel: "手动配置"
 ---
 
 # Codex · 手动配置
@@ -47,6 +48,12 @@ requires_openai_auth = true
 
 <Callout type="warning">Codex 的 `base_url` **必须**带 `/v1` 后缀，和 Claude Code 反着。漏了会 404。</Callout>
 
+<Callout type="tip" title="wire_api 填 responses 还是 chat？">
+`wire_api` 只有两个合法值：**`"responses"`**（走 OpenAI `/responses` 端点）和 **`"chat"`**（走 `/chat/completions`）。不少第三方网关**只支持 Chat Completions**，这时填 `responses` 会失败——请改成 `wire_api = "chat"`。本站分组支持 `responses`，所以模板用它；接别的网关前先确认对方支持哪个端点。
+
+> 注意是 `"chat"` 不是 `"chat_completions"`。以上取值经本机已装的 Codex `v0.141.0` 二进制核对（serde 枚举值）。
+</Callout>
+
 ---
 
 ## auth.json
@@ -89,7 +96,7 @@ requires_openai_auth = true
 | --- | --- |
 | `name` | provider 显示名 |
 | `base_url` | API 根地址（含 `/v1`） |
-| `wire_api` | `responses` / `chat_completions` |
+| `wire_api` | `responses`（默认）或 `chat`——见上方说明，**不是 `chat_completions`** |
 | `requires_openai_auth` | `true` = 需要 OpenAI API Key |
 
 内置 provider ID：`openai`（默认）、`ollama`、`lmstudio`。开源 / 本地模型走 `oss_provider`，取值 `lmstudio` 或 `ollama`。
@@ -163,6 +170,7 @@ model_auto_compact_token_limit = 900000
 | --- | --- |
 | 启动报 401 | `auth.json` 是否存在，Key 是否对 |
 | 启动报 404 | `base_url` 是否带 `/v1` |
+| 请求报错 / 端点不支持 | 网关只支持 Chat Completions？把 `wire_api` 改成 `"chat"` |
 | 推理慢 | 把 `model_reasoning_effort` 调低 |
 | App 改 config 后不生效 | 完全退出菜单栏图标，不是关窗口 |
 
