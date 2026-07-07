@@ -1,0 +1,81 @@
+---
+title: "CC-017：WebFetch 工具报错，目标网站可访问但仍失败"
+hidden: true
+---
+
+# CC-017：WebFetch 工具报错，目标网站可访问但仍失败
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="Linux / macOS / Windows（国内网络环境下高发）"
+  date="2026-03-14"
+/>
+---
+
+## 问题现象
+
+Claude Code 调用 WebFetch 工具抓取网页时报错，表现为搜索失败或联网功能异常，但手动用浏览器访问目标网站完全正常，代理也已开启全局模式。
+
+---
+
+## 根因分析
+
+```text
+Claude Code 调用 WebFetch
+  → 抓取目标页面前先向 claude.ai 发起预检请求
+  → 请求地址：https://claude.ai/api/web/domain_info?domain=目标域名
+  → 国内网络 / 企业防火墙拦截 claude.ai
+  → 预检失败
+  → WebFetch 整体报错，目标页面从未被实际请求
+```
+
+关键点：即使目标网站可以访问，只要 `claude.ai` 本身被拦截，预检就会失败，导致 WebFetch 完全不可用。全局代理若未正确处理 `claude.ai` 的请求，同样触发此问题。
+
+---
+
+## 修复步骤
+
+**第一步：打开 `~/.claude/settings.json`**
+
+| 平台 | 路径 |
+| --- | --- |
+| Windows | `C:\Users\\.claude\settings.json` |
+| macOS / Linux | `~/.claude/settings.json` |
+
+**第二步：添加 `skipWebFetchPreflight` 字段**
+
+```json
+{
+  "skipWebFetchPreflight": true
+}
+```
+
+若文件中已有其他字段，合并写入：
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://foropencode.com",
+    "ANTHROPIC_API_KEY": "sk-xxx"
+  },
+  "skipWebFetchPreflight": true
+}
+```
+
+**第三步：重启 Claude Code**
+
+```bash
+claude
+```
+
+重启后 WebFetch 跳过预检，直接请求目标页面。
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 初次配置时在 `settings.json` 中写入 `"skipWebFetchPreflight": true` | 国内网络环境下 WebFetch 默认不可用 |
+| 代理切换后若 WebFetch 再次失败，优先检查此字段是否存在 | 误以为是代理或网络问题反复排查 |

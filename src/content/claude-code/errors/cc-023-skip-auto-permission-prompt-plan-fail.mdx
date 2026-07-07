@@ -1,0 +1,99 @@
+---
+title: "CC-023：加入 skipAutoPermissionPrompt 后 Plan 模式无法执行"
+hidden: true
+---
+
+# CC-023：加入 skipAutoPermissionPrompt 后 Plan 模式无法执行
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="全版本"
+  platform="Windows"
+  date="2026-04-13"
+  owner="寂月止水（问题发现者）"
+/>
+---
+
+## 问题现象
+
+在 `~/.claude/settings.json` 中加入 `"skipAutoPermissionPrompt": true` 后，Claude Code 的 Plan 模式无法正常执行，移除该字段或改回默认状态后恢复。
+
+```json
+{
+  "skipAutoPermissionPrompt": true
+}
+```
+
+---
+
+## 根因分析
+
+当前已确认的触发链如下：
+
+```text
+settings.json 中加入 "skipAutoPermissionPrompt": true
+  → Claude Code 跳过自动权限提示相关流程
+  → Plan 模式执行阶段无法继续推进
+  → 表现为 Plan 模式不可执行或执行即中断
+```
+
+现阶段可确认的是：该字段与故障存在直接关联。若后续拿到官方说明或更完整日志，再补充更底层的实现原因。
+
+---
+
+## 修复步骤
+
+**第一步：打开配置文件**
+
+#### macOS / Linux
+
+```bash
+cat ~/.claude/settings.json
+```
+
+#### Windows
+
+```powershell
+Get-Content "$env:USERPROFILE\.claude\settings.json"
+```
+
+**第二步：删除 `skipAutoPermissionPrompt` 字段**
+
+如果当前配置中存在该字段，直接删除整行，避免保留为 `true`。
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://foropencode.com",
+    "ANTHROPIC_API_KEY": "sk-xxx"
+  }
+}
+```
+
+**第三步：重新打开终端并再次进入 Claude Code**
+
+#### macOS / Linux
+
+```bash
+claude
+```
+
+#### Windows
+
+```powershell
+claude
+```
+
+**第四步：再次验证 Plan 模式**
+
+移除该字段后重新进入 Plan 模式，确认流程已可正常执行。
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 仅添加文档中明确标注用途的配置项 | 避免把来源不明的字段写入 `settings.json` 后触发隐藏兼容性问题 |
+| 调整权限相关配置后先做一次基础功能验证 | 避免在正式使用时才发现 Plan 模式不可执行 |
+| 遇到联网或权限问题时优先对照官方字段名和现有报错文档 | 避免把无关字段误当成通用修复项 |

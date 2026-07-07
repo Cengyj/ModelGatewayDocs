@@ -1,0 +1,74 @@
+---
+title: "CC-020：Permission denied（操作被拒绝）"
+hidden: true
+---
+
+# CC-020：Permission denied（操作被拒绝）
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="macOS / Linux"
+  date="2026-03-16"
+/>
+---
+
+## 问题现象
+
+Claude Code 尝试读取或修改文件时，操作被终止，终端或对话中出现 `Permission denied` 提示，目标文件未被访问或修改。
+
+---
+
+## 根因分析
+
+`Permission denied` 有三类独立根因，对应不同的处理路径：
+
+```text
+Claude Code 尝试访问文件
+  → 系统层：文件/目录权限位不含当前用户读写权 → 根因 A
+  → CC 层：用户曾选择"总是拒绝"该类操作      → 根因 B
+  → CC 层：.claudeignore 规则匹配了目标路径  → 根因 C
+```
+
+---
+
+## 修复步骤
+
+**第一步：判断根因类型**
+
+系统层拒绝通常附有具体文件路径；Claude Code 层拒绝会在对话框或提示中明确说明权限设置。
+
+**第二步（根因 A）：修复系统文件权限**
+
+```bash
+# 查看文件或目录权限
+ls -la /path/to/file
+
+# 修复普通文件权限
+chmod 644 /path/to/file
+
+# 修复目录权限
+chmod 755 /path/to/dir
+```
+
+**第三步（根因 B）：修改 Claude Code 权限规则**
+
+按 `Cmd+Shift+P`（macOS）或 `Ctrl+Shift+P`（Windows/Linux）→ 搜索 `Claude: Manage Permissions` → 找到对应规则 → 将其改为"询问"或"允许"。
+
+**第四步（根因 C）：检查 .claudeignore**
+
+```bash
+cat .claudeignore
+```
+
+逐行检查是否有 glob 规则误匹配到目标文件，删除或精确化有问题的规则。
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| `.claudeignore` 使用精确路径而非宽泛通配符 | 避免误匹配到需要访问的文件 |
+| 定期检查 Permission 设置中的"总是拒绝"规则 | 避免误设置的规则长期阻碍正常操作 |
+| 项目目录文件权限保持 644（文件）/ 755（目录） | 避免 Claude Code 进程因权限不足无法读取 |

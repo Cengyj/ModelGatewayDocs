@@ -1,0 +1,206 @@
+---
+title: "Claude Code CLI · 手动配置"
+description: "直接改 ~/.claude/settings.json 与系统环境变量。"
+navLabel: "手动配置"
+---
+
+# Claude Code CLI · 手动配置
+
+<VersionBadge version="v2.1.183" date="2026-06-19" license="Proprietary" github="https://github.com/anthropics/claude-code" />
+
+<PageHeader
+  useCase="不用 CC Switch，直接改 settings.json 或系统环境变量"
+  audience="想搞清 CC Switch 写了什么；要程序化生成配置；多 Key 要写脚本切"
+  tldr="改 ~/.claude/settings.json 的 env 段即热生效；环境变量优先级更高"
+/>
+
+<Callout type="info">日常推荐 [CC Switch 配置](/claude-code/cli/cc-switch)。本页是给需要程序化 / 排障 / 多 Key 的人。</Callout>
+
+---
+
+## 配置文件位置
+
+| 平台 | 路径 |
+| --- | --- |
+| macOS / Linux / WSL | `~/.claude/settings.json` |
+| Windows | `%USERPROFILE%\.claude\settings.json` |
+
+启动 `claude` 时：
+- **没有该文件** → 触发 Anthropic 官方 OAuth 引导（需要 Anthropic 账号）
+- **文件存在且 `env` 段配置正确** → 跳过 OAuth 流程，直接使用配置的 API Key
+- **有文件但 `env` 段缺字段** → 拿不到 Key，报 401
+
+**结论：配好 `settings.json` 就不需要登录。**
+
+---
+
+## 最小可用模板
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://foropencode.com",
+    "ANTHROPIC_API_KEY": "sk-xxx"
+  }
+}
+```
+
+保存后**不用重启**，下一次发请求即生效（Claude Code 支持热切换）。
+
+---
+
+## 完整环境变量字段
+
+`env` 段所有字段在进程启动时注入到环境变量。Anthropic 官方文档列出的：
+
+### 认证与路由
+
+| 变量 | 用途 |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | 作为 `x-api-key` 请求头发送。中转站若校验标准 Anthropic Key，用这个 |
+| `ANTHROPIC_AUTH_TOKEN` | 作为 `Authorization: Bearer` 请求头发送。**很多第三方网关用的是这个**，不是 `ANTHROPIC_API_KEY` |
+| `ANTHROPIC_BASE_URL` | 请求目标地址。本站填 `https://foropencode.com`（**不带 `/v1`**） |
+
+<Callout type="tip" title="API_KEY 还是 AUTH_TOKEN？">
+两者发送的请求头不同：`ANTHROPIC_API_KEY` → `x-api-key`，`ANTHROPIC_AUTH_TOKEN` → `Authorization: Bearer`。**配了 Key 还一直 401,就换成 `ANTHROPIC_AUTH_TOKEN` 再试**——你的网关大概率只认 Bearer。两个都填时 `ANTHROPIC_AUTH_TOKEN` 优先。
+
+来源：[Claude Code LLM Gateway 官方文档](https://code.claude.com/docs/en/llm-gateway)（2026-06 核对）
+</Callout>
+
+### 模型选择
+
+| 变量 | 用途 |
+| --- | --- |
+| `ANTHROPIC_MODEL` | 强制单次会话用某个模型，覆盖 `/model` 选择 |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | `opus` 别名解析到的具体模型 ID |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | `sonnet` 别名解析到的具体模型 ID |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | `haiku` 别名解析到的具体模型 ID |
+| `ANTHROPIC_DEFAULT_FABLE_MODEL` | `fable` 别名解析到的具体模型 ID |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | 子代理用什么模型（默认跟主模型一样） |
+| `CLAUDE_CODE_EFFORT_LEVEL` | 推理深度档位 |
+
+### 行为开关
+
+| 变量 | 用途 |
+| --- | --- |
+| `MAX_THINKING_TOKENS` | 上限思考 token，`0` 关闭思考（Fable 5 例外） |
+| `DISABLE_AUTO_COMPACT` | `1` 关掉自动压缩 |
+| `DISABLE_AUTOUPDATER` | `1` 关掉自动更新 |
+| `CLAUDE_CODE_DISABLE_1M_CONTEXT` | `1` 让 1M 变体不出现在 `/model` 选择器里 |
+| `CLAUDE_CODE_SAFE_MODE` | 等价于 `--safe-mode` |
+| `CLAUDE_CODE_SIMPLE` | 等价于 `--bare` |
+| `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` | AWS 400 时关掉实验性 Beta 头 |
+| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` | 关掉遥测、更新检查 |
+
+### 提示词缓存
+
+| 变量 | 用途 |
+| --- | --- |
+| `DISABLE_PROMPT_CACHING` | 全模型关闭缓存 |
+| `DISABLE_PROMPT_CACHING_{HAIKU,SONNET,OPUS,FABLE}` | 关闭特定模型缓存 |
+| `ENABLE_PROMPT_CACHING_1H` | 启用 1 小时长缓存（需对应分组支持） |
+
+---
+
+## 国内网络必做配置
+
+```json
+{
+  "ENABLE_TOOL_SEARCH": true,
+  "skipWebFetchPreflight": true,
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://foropencode.com",
+    "ANTHROPIC_API_KEY": "sk-xxx",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  }
+}
+```
+
+| 字段 | 为什么 |
+| --- | --- |
+| `ENABLE_TOOL_SEARCH` | 减少工具调用时的 Token 泄漏 |
+| `skipWebFetchPreflight` | **不设置则 WebFetch 整体失效**——CC 会先打 `claude.ai` 做预检，国内网络拦截后整个工具炸掉 |
+| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` | 关掉遥测和更新检查 |
+
+详见 [CC-017：WebFetch 预检失败](/claude-code/errors/cc-webfetch-preflight-fail)。
+
+<Callout type="warning">**不要加 `skipAutoPermissionPrompt: true`** —— Plan 模式会直接失效。见 [CC-023](/claude-code/errors/cc-023-skip-auto-permission-prompt-plan-fail)。</Callout>
+
+---
+
+## 系统环境变量（备用）
+
+不想改 `settings.json`，也可以在系统级注入环境变量。**优先级高于** `settings.json`：
+
+<Tabs defaultValue="mac">
+  <Tab label="macOS / Linux" value="mac">
+    `~/.zshrc` 或 `~/.bashrc`：
+
+    ```bash
+    export ANTHROPIC_BASE_URL=https://foropencode.com
+    export ANTHROPIC_API_KEY=sk-xxx
+    ```
+
+    `source ~/.zshrc` 后**新开**终端跑 `claude`。
+  </Tab>
+  <Tab label="Windows PowerShell" value="ps">
+    ```powershell
+    [System.Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "https://foropencode.com", "User")
+    [System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-xxx", "User")
+    ```
+
+    **重启所有终端窗口** 让新值进入子进程。
+  </Tab>
+  <Tab label="Windows GUI" value="win">
+    1. 右键「此电脑」→「属性」→「高级系统设置」→「环境变量」
+    2. 在**用户变量**里新建：
+       - `ANTHROPIC_BASE_URL` = `https://foropencode.com`
+       - `ANTHROPIC_API_KEY` = `sk-xxx`
+    3. 重启所有终端
+  </Tab>
+</Tabs>
+
+---
+
+## AWS 分组 400 的补充项
+
+如果使用 AWS 分组时出现 400，且报错与请求内容无关：
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://foropencode.com",
+    "ANTHROPIC_API_KEY": "sk-xxx",
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+  }
+}
+```
+
+保存后**重启所有终端**，再启动 `claude` 生效。详见 [CC-006](/claude-code/errors/cc-400-experimental-betas)。
+
+---
+
+## 验证 & 排查
+
+```bash
+claude
+/status
+```
+
+`/status` 里看到的 `Base URL` 应该是你刚配的。看到 `api.anthropic.com` = 配置没生效或被覆盖。
+
+| 现象 | 排障页 |
+| --- | --- |
+| 401 / Invalid API Key | [CC-007](/claude-code/errors/cc-401-ide-mcp-conflict)、[CC-016](/claude-code/errors/cc-401-leftover-env) |
+| Key 看起来对但仍 401 | [CC-021 不可见字符](/claude-code/errors/cc-invalid-key-format) |
+| OAuth 残留覆盖中转 | [CC-018](/claude-code/errors/cc-oauth-conflict) |
+| `vip_2_cc` 报错 | `model` 改为 GPT 模型名 |
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/claude-code/cli/cc-switch', hint: '回到 CC Switch 流程' },
+    { route: '/claude-code/cli/install', hint: '装客户端' },
+    { route: '/claude-code/errors', hint: '排障总览' },
+  ]}
+/>

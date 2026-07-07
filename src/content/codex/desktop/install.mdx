@@ -1,0 +1,64 @@
+---
+title: "Codex 桌面版 · 安装"
+description: "ChatGPT 桌面客户端集成的 Codex 工作区安装。"
+navLabel: "安装"
+---
+
+# Codex 桌面版 · 安装
+
+<VersionBadge version="ChatGPT App" date="2026-06-18" license="Proprietary" />
+
+<PageHeader
+  useCase="不想开终端，在 ChatGPT 桌面客户端里用 Codex"
+  audience="偏好图形化的开发者"
+  tldr="装 ChatGPT 桌面客户端 → 登录账号 → 切到 Codex 工作区"
+/>
+
+> Codex App 是 ChatGPT 桌面客户端里内置的代理形态，与 CLI **共享** `~/.codex/config.toml`。
+
+<Callout type="info">如果已经按 [Codex CLI · 安装](/codex/cli/install) 装过、并在 [CC Switch 配置](/codex/cc-switch) 中配过，桌面版启动后会自动读到同一份 `config.toml`，不需要重复配置。</Callout>
+
+---
+
+## 步骤
+
+<Steps>
+  <Step title="装 ChatGPT 桌面客户端">
+    从 OpenAI 官方下载页获取对应平台的安装包并安装。
+  </Step>
+  <Step title="登录 OpenAI 账号">
+    第一次启动会要求登录。临时账号也行——后面接入第三方 API 后实际请求并不会发到官方。
+  </Step>
+  <Step title="进入 Codex 工作区">
+    打开桌面客户端 → 切到 Codex 工作区 / 模式（具体入口随版本变化）。
+  </Step>
+</Steps>
+
+---
+
+## 验证
+
+进入 Codex 工作区后，在模型选择处能看到模型下拉即 OK。下一步配 API：
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/codex/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/codex/manual', hint: '直接改 config.toml' },
+    { route: '/codex/cli/install', hint: '想用终端？装 Codex CLI' },
+  ]}
+/>
+
+---
+
+## 与 CLI 的差异
+
+| 维度 | CLI | App |
+| --- | --- | --- |
+| 启动方式 | 终端跑 `codex` | 打开桌面客户端进入 Codex |
+| 配置文件 | `~/.codex/config.toml` | 同上，**共享** |
+| 推理深度 | `/effort` 或 config.toml | UI 切换 |
+| 历史会话 | CLI session | App 内会话列表 |
+| 适合场景 | 项目里跑命令、写脚本 | 浏览代码、对话式调试 |
+
+<Callout type="warning">两者共享 `~/.codex/config.toml`，**改一边会影响另一边**。如果你想各走各的，需要在 App 内单独切 provider。</Callout>

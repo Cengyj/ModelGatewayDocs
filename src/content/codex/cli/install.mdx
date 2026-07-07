@@ -1,0 +1,111 @@
+---
+title: "Codex CLI · 安装"
+description: "OpenAI Codex 终端 CLI 安装方式。支持 npm、curl 脚本、Homebrew。"
+navLabel: "安装"
+---
+
+# Codex CLI · 安装
+
+<VersionBadge version="v0.141.0" date="2026-06-18" license="Apache-2.0" github="https://github.com/openai/codex" />
+
+<PageHeader
+  useCase="在终端跑 codex 命令，用 o3 / o4-mini 等 OpenAI 模型写代码"
+  audience="偏好命令行、想要可调推理深度（`--full-auto` 模式）的开发者"
+  tldr="npm 一行装好 → codex --version 验证"
+/>
+
+> Codex CLI 与 Codex App 的**配置共享** `~/.codex/config.toml`，但**安装方式不同**。App 的安装见 [Codex 桌面版 · 安装](/codex/desktop/install)。
+
+---
+
+## 系统要求
+
+<Callout type="info" title="环境要求">
+- **Node.js** 22+（官方要求，低于此版本无法运行）
+- **npm** 8+ / pnpm / yarn 均可用于全局安装
+- **Git**：必须（用于文件变更追踪）
+- **操作系统**：macOS、Linux、WSL2、Windows（curl 脚本）
+</Callout>
+
+---
+
+## 准备 Git
+
+Codex CLI 依赖 Git。Windows 装 [Git for Windows](https://git-scm.com/install/windows)；其它系统终端里能直接 `git` 即可：
+
+```bash
+git --version
+node --version   # 需要 v22+
+```
+
+---
+
+## 安装
+
+<Tabs defaultValue="npm">
+  <Tab label="npm（全平台）" value="npm">
+    ```bash
+    npm install -g @openai/codex
+    ```
+
+    升级到最新版：
+
+    ```bash
+    npm update -g @openai/codex
+    ```
+  </Tab>
+  <Tab label="macOS / Linux 脚本" value="sh">
+    ```bash
+    curl -fsSL https://chatgpt.com/codex/install.sh | sh
+    ```
+  </Tab>
+  <Tab label="Windows PowerShell" value="ps">
+    ```powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1 | iex"
+    ```
+  </Tab>
+  <Tab label="Homebrew (macOS)" value="brew">
+    ```bash
+    brew install --cask codex
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## 验证
+
+```bash
+codex --version
+# 输出示例：0.141.0
+```
+
+能输出版本号即装好。下一步配 API：
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/codex/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/codex/manual', hint: '直接改 config.toml' },
+    { route: '/codex/desktop/install', hint: '想用 GUI？装 Codex App' },
+  ]}
+/>
+
+---
+
+## 常见问题
+
+<Callout type="warning" title="Node.js 版本不满足">
+Codex CLI v0.141.0 要求 Node.js 22+。运行 `node --version` 检查，版本过低时：
+
+- 推荐用 [nvm](https://github.com/nvm-sh/nvm)（Linux/macOS）或 [nvm-windows](https://github.com/coreybutler/nvm-windows) 切换版本
+- 或直接到 [nodejs.org](https://nodejs.org/) 下载 v22 LTS
+</Callout>
+
+<Callout type="warning" title="安装命令下不动？">
+九成是网络问题，按这个顺序自查：
+
+1. 开了梯子的，关掉梯子再试
+2. 没开梯子的，开启梯子再试
+3. 仍不行，开启代理软件的**网卡 TUN 模式**（系统级代理），而非仅浏览器代理
+</Callout>

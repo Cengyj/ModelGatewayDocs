@@ -1,0 +1,145 @@
+.card {
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+}
+
+/* ── rows ── */
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  border-bottom: 1px solid var(--c-border);
+  transition: background-color var(--t-fast);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:not(.headerRow):hover {
+  background: var(--c-bg-soft);
+}
+
+/* ── header row ── */
+
+.headerRow {
+  background: var(--c-bg-soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--c-text-subtle);
+}
+
+.headerRow .cmdCell,
+.headerRow .descCell {
+  padding: 0.55rem 1rem;
+}
+
+/* ── cells ── */
+
+.cmdCell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem 0.65rem 1rem;
+  border-right: 1px solid var(--c-border);
+  min-width: 0;
+}
+
+.descCell {
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  color: var(--c-text-muted);
+  line-height: 1.45;
+}
+
+/* ── command code chip ── */
+
+.code {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--c-brand);
+  background: var(--c-brand-soft);
+  border-radius: var(--radius-sm);
+  padding: 0.22em 0.5em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* suppress default inline-code border from prose.css */
+  border: none !important;
+}
+
+html.dark .code {
+  color: var(--c-brand);
+  background: var(--c-brand-soft);
+}
+
+/* ── copy button ── */
+
+.copyBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--c-text-subtle);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition:
+    opacity var(--t-fast),
+    color var(--t-fast),
+    background-color var(--t-fast);
+}
+
+/* show on row hover or focus */
+.row:hover .copyBtn,
+.copyBtn:focus-visible {
+  opacity: 1;
+}
+
+.copyBtn:hover {
+  color: var(--c-brand);
+  background: var(--c-brand-soft);
+}
+
+.copyBtn.copied {
+  opacity: 1;
+  color: #22c55e;
+}
+
+/* ── mobile ── */
+
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .cmdCell {
+    border-right: none;
+    border-bottom: 1px solid var(--c-border-soft);
+    padding-bottom: 0.5rem;
+  }
+
+  .descCell {
+    padding-top: 0.4rem;
+    padding-bottom: 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  /* hide header on mobile to save space */
+  .headerRow {
+    display: none;
+  }
+}

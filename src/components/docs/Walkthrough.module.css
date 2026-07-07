@@ -1,0 +1,121 @@
+.walk {
+  border-left: 2px solid var(--c-border);
+  margin: 32px 0;
+  padding-left: 8px;
+}
+
+.title {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  margin: 0 0 16px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.list {
+  counter-reset: walk;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.frame {
+  counter-increment: walk;
+  background: var(--c-bg-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  position: relative;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.frame:hover {
+  border-color: var(--c-brand);
+  box-shadow: 0 4px 16px -8px rgba(13, 111, 196, 0.2);
+}
+
+.head {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.step {
+  align-items: center;
+  background: var(--c-brand);
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+  height: 24px;
+  justify-content: center;
+  margin-top: 2px;
+  width: 24px;
+}
+
+.step:empty::before {
+  content: counter(walk);
+}
+
+.headBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.frameTitle {
+  color: var(--c-text);
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.5;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.caption {
+  color: var(--c-text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 4px 0 0;
+}
+
+.media {
+  background: var(--c-bg);
+  border: 1px solid var(--c-border-soft, var(--c-border));
+  border-radius: var(--radius-md);
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.image {
+  cursor: zoom-in;
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.body {
+  color: var(--c-text);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.body > :first-child { margin-top: 8px; }
+.body > :last-child { margin-bottom: 0; }
+.body p { margin: 6px 0; }
+.body :global(code) {
+  background: var(--c-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.88em;
+  padding: 1px 5px;
+}
+
+:global(html.dark) .frame {
+  background: var(--c-bg-soft);
+}

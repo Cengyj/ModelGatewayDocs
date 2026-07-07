@@ -1,0 +1,101 @@
+---
+title: "Claude Code CLI · CC Switch 配置"
+description: "用 CC Switch 给 Claude Code CLI 一键配 API。"
+navLabel: "CC Switch 配置"
+---
+
+# Claude Code CLI · CC Switch 配置
+
+<VersionBadge version="v2.1.183" date="2026-06-19" license="Proprietary" github="https://github.com/anthropics/claude-code" />
+
+<PageHeader
+  useCase="不动配置文件，可视化切多分组 / 多 Key"
+  audience="所有 Claude Code CLI 用户"
+  tldr="CC Switch 主界面 → Claude Code → 填 Key → 启用 → claude 即生效"
+/>
+
+> 还没装 CC Switch？先看 [CC Switch 安装](/cc-switch)。装完再回这里。
+
+<Callout type="info">CC Switch 把所有配置写入 `~/.claude/settings.json`。要看 CC Switch 写了什么 / 自己手改，见 [手动配置](/claude-code/cli/manual)。</Callout>
+
+---
+
+## 配置步骤
+
+<Walkthrough title="CC Switch · 配置 Claude Code CLI">
+  <Frame step="1" title="选中 Claude Code CLI 图标，点击添加"
+    image="/img/cc-switch/cc-switch-cli-main-add.png"
+    imageAlt="CC Switch 主界面：选中第一个 Claude 图标，点右上角添加按钮">
+    打开 CC Switch，顶部工具栏选中**第一个 Claude 图标**（Claude Code CLI）。如有旧配置会显示在列表里；点右上角 **＋** 按钮新建一项。
+  </Frame>
+
+  <Frame step="2" title="填写供应商信息"
+    image="/img/cc-switch/cc-switch-add-provider-form.png"
+    imageAlt="添加新供应商表单：名称、API Key、请求地址">
+    弹出「添加新供应商」表单，按顺序填写：
+
+    - **供应商名称**：随便取，如 `for`
+    - **API Key**：你在 [foropencode.com](https://foropencode.com) 创建的 `sk-xxx`
+    - **请求地址**：点击右侧图标复制后粘贴
+
+    <CommandTable header={false} rows={[
+      { cmd: 'https://foropencode.com', desc: '请求地址（不带斜杠、不带 /v1）' },
+    ]} />
+
+    填好后点右下角 **添加**。CC Switch 会自动写入 `~/.claude/settings.json`，无需手动编辑文件。
+  </Frame>
+
+  <Frame step="3" title="确认「使用中」状态"
+    image="/img/cc-switch/cc-switch-active-status.png"
+    imageAlt="鼠标悬停在配置行上，显示「使用中」表示配置成功">
+    回到主界面，鼠标悬停在刚添加的配置行上，显示 **「使用中」** 即表示配置已生效。
+
+    Claude Code CLI **支持热切换**——不需要重启终端，下一次请求就会使用新配置。同一客户端下可保存多个供应商，主界面点击即可切换。
+  </Frame>
+
+  <Frame step="4" title="验证">
+    打开终端：
+
+    ```bash
+    claude
+    ```
+
+    **首次启动**：如果本机从未运行过 `claude`，可能会弹出一次「是否使用检测到的 API Key？」确认——选 **Yes / 继续** 即可，这是一次性确认，不是 OAuth 登录流程。
+
+    进入对话后跑 `/status`，确认 Base URL 是 `https://foropencode.com`。如显示官方 `api.anthropic.com`，见 [CC-018 OAuth 冲突](/claude-code/errors/cc-oauth-conflict)。
+  </Frame>
+</Walkthrough>
+
+---
+
+## 可用模型
+
+Claude Code CLI 使用 **Anthropic 格式**，请求地址填 `https://foropencode.com`（不带 `/v1`）：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+
+---
+
+## 配置写到哪
+
+CC Switch 将供应商配置写入 `~/.claude/settings.json`：
+
+| 平台 | 路径 |
+| --- | --- |
+| macOS / Linux | `~/.claude/settings.json` |
+| Windows | `%USERPROFILE%\.claude\settings.json` |
+
+---
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/claude-code/cli/manual', hint: '想看 CC Switch 写了什么 / 自己手改' },
+    { route: '/claude-code/cli/usage', hint: '熟悉日常命令、slash 命令、自动化' },
+    { route: '/claude-code/errors', hint: '遇到 401 / 429 等报错' },
+  ]}
+/>

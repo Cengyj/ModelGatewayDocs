@@ -1,0 +1,61 @@
+---
+title: "Cherry Studio · 软件配置"
+description: "在 Cherry Studio 设置界面添加 New API 供应商、获取模型列表并开始对话。"
+navLabel: "软件配置"
+---
+
+# Cherry Studio · 软件配置
+
+<VersionBadge version="v1.9.11" date="2026-06-07" license="AGPL-3.0" github="https://github.com/CherryHQ/cherry-studio" />
+
+<PageHeader
+  useCase="通过 Cherry Studio 界面添加 New API 供应商、填入 Key 和地址并获取模型"
+  audience="已安装 Cherry Studio，准备接入外部 API"
+  tldr="设置 → 搜索 new-api → 填 API 地址和密钥 → 获取模型列表"
+/>
+
+---
+
+<Walkthrough>
+  <Frame
+    title="跳过引导"
+    image="/img/cherry-studio/cherry-studio-welcome-skip.png"
+    imageAlt="Cherry Studio 欢迎界面，右上角「跳过引导」按钮高亮标注"
+    caption="首次启动会显示欢迎引导页。点击右上角「跳过引导」直接进入主界面。"
+  />
+  <Frame
+    title="进入设置，添加 New API"
+    image="/img/cherry-studio/cherry-studio-settings-newapi.png"
+    imageAlt="Cherry Studio 设置页：搜索 new-api，选中 New API，填写 API 地址和密钥，点击获取模型列表"
+    caption="点击右上角齿轮图标进入设置。搜索框输入 new-api，点击 New API 选项。API 地址填 https://foropencode.com，API 密钥填入你的 Key，最后点「获取模型列表」。"
+  />
+  <Frame
+    title="添加模型，关闭弹窗"
+    image="/img/cherry-studio/cherry-studio-model-add.png"
+    imageAlt="New API 模型列表弹窗，展示 gpt-5.5、gpt-5.4 等模型，右侧 + 按钮用于添加"
+    caption="弹窗里会列出所有可用模型。搜索或浏览找到需要的模型，点右侧 + 添加。添加完成后点右上角 × 关闭弹窗。"
+  />
+  <Frame
+    title="配置成功"
+    image="/img/cherry-studio/cherry-studio-settings-success.png"
+    imageAlt="设置页 New API 显示 ON 开关，模型列表出现 gpt-5.5，表示配置成功"
+    caption="New API 显示 ON 且右上角开关已开启，模型列表中出现 gpt-5.5，说明配置已生效。"
+  />
+  <Frame
+    title="开始对话"
+    image="/img/cherry-studio/cherry-studio-chat-ready.png"
+    imageAlt="对话界面顶部模型选择器显示「gpt-5.5 | New API」，输入框等待发送消息"
+    caption="切到对话页，顶部显示「gpt-5.5 | New API」表示已选中刚添加的模型。在下方输入框发送消息即可开始使用。"
+  />
+</Walkthrough>
+
+---
+
+<Callout type="info">Cherry Studio 的供应商配置存在本地数据库里，没有可直接编辑的 JSON 文件——所有改动均通过界面表单完成。</Callout>
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/cherry-studio/install', hint: '安装 Cherry Studio' },
+  ]}
+/>

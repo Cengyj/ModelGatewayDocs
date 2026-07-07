@@ -1,0 +1,33 @@
+/**
+ * Content access layer. All page metadata + the route→MDX importer map come
+ * from the generated manifest (src/generated/content-manifest.ts), which is a
+ * module-level singleton computed once at build time — no per-call disk walks.
+ *
+ * Source of truth = MDX frontmatter under src/content/ + per-dir _meta.ts,
+ * compiled by scripts/gen-content-manifest.mjs (runs on predev/prebuild).
+ */
+
+import { contentByRoute, routeToImporter } from '@/generated/content-manifest';
+import type { ContentMeta, TocEntry } from '@/lib/content-types';
+
+export type { ContentMeta, TocEntry };
+export { routeToImporter };
+
+export function getAllContent(): ContentMeta[] {
+  return Object.values(contentByRoute);
+}
+
+export function getContentByRoute(route: string): ContentMeta | undefined {
+  return contentByRoute[route];
+}
+
+export function getAllRoutes(): string[] {
+  return Object.keys(routeToImporter);
+}
+
+export async function loadMdx(route: string) {
+  const importer = routeToImporter[route];
+  if (!importer) return null;
+  const mod = await importer();
+  return mod.default;
+}

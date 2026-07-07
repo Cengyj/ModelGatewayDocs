@@ -1,7 +1,0 @@
-services:
-  docs:
-    image: ghcr.io/cengyj/model-gateway-docs:${IMAGE_TAG:-latest}
-    container_name: model-gateway-docs
-    ports:
-      - "${HOST_PORT:-8081}:80"
-    restart: unless-stopped

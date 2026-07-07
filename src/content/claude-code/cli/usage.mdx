@@ -1,0 +1,199 @@
+---
+title: "Claude Code CLI · 常用命令"
+description: "启动选项、会话命令、自动授权、继续上次对话等日常高频用法。"
+navLabel: "常用命令"
+---
+
+# Claude Code CLI · 常用命令
+
+<VersionBadge version="v2.1.183" date="2026-06-19" license="Proprietary" github="https://github.com/anthropics/claude-code" />
+
+<PageHeader
+  useCase="快速查启动参数、slash 命令、自动化脚本写法"
+  audience="已装好 Claude Code，想熟悉日常用法的开发者"
+  tldr="claude 启动 → /help 查命令 → --continue 接上次 → --dangerously-skip-permissions 免确认"
+/>
+
+---
+
+## 启动方式
+
+<CommandTable header={['命令', '效果']} rows={[
+  { cmd: 'claude',                             desc: '进入交互式对话（最常用）' },
+  { cmd: 'claude "帮我写一个 README"',         desc: '带初始 prompt 启动，直接进入对话' },
+  { cmd: 'claude --print "帮我写一个 README"', desc: '非交互模式，结果输出到 stdout，适合脚本' },
+  { cmd: 'claude --continue',                  desc: '继续上一次对话（加载最近的会话历史）' },
+  { cmd: 'claude --resume <session-id>',       desc: '继续指定会话' },
+]} />
+
+---
+
+## 继续上次对话
+
+```bash
+# 接着上次中断的对话继续工作
+claude --continue
+
+# 查看所有后台会话，找到 session-id
+claude agents
+
+# 继续指定会话
+claude --resume abc123
+```
+
+<Callout type="tip">`--continue` 是最常用的"回来继续干活"方式。Claude Code 会加载最近一次会话的上下文，你可以直接接着提问，不用重新交代背景。</Callout>
+
+---
+
+## 自动授权 / 跳过确认
+
+Claude Code 默认对每个工具调用（写文件、执行命令等）都会询问你是否允许。以下两个方式可以跳过：
+
+### `--dangerously-skip-permissions`
+
+```bash
+claude --dangerously-skip-permissions
+```
+
+启动后 Claude Code 对**所有**工具调用直接执行，不再弹确认。适合：
+
+- CI/CD 自动化流水线
+- 已充分审查任务、不想被打断的连续工作流
+- 脚本调用 `--print` 模式时不需要交互
+
+<Callout type="warning">**只在你信任任务内容时使用。** `--dangerously-skip-permissions` 不区分危险程度，`rm -rf` 和 `echo hello` 都会直接执行。建议结合 `settings.json` 的 `permissions.deny` 规则做底线保护。</Callout>
+
+### 细粒度权限规则（推荐替代方案）
+
+如果只想跳过特定工具的确认，在 `~/.claude/settings.json` 里用 `permissions.allow` 白名单更安全：
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(git:*)", "Bash(npm:*)", "Read(*)", "Write(src/**)"],
+    "deny": ["Bash(rm:*)", "Bash(git push --force:*)"]
+  }
+}
+```
+
+---
+
+## 常用启动参数
+
+<CommandTable rows={[
+  { cmd: '--continue',                     desc: '继续上一次会话' },
+  { cmd: '--resume <id>',                  desc: '继续指定会话' },
+  { cmd: '--print',                        desc: '非交互模式，结果输出 stdout' },
+  { cmd: '--output-format json',           desc: '输出 JSON（含 token 用量，适合脚本解析）' },
+  { cmd: '--model <model-id>',             desc: '指定模型，如 claude-opus-4-7' },
+  { cmd: '--dangerously-skip-permissions', desc: '跳过所有工具确认' },
+  { cmd: '--safe-mode',                    desc: '禁用所有自定义（CLAUDE.md、Hooks、MCP、Settings），用于排障' },
+  { cmd: '--bare',                         desc: '极简无头模式，关闭 UI 和非必要流量' },
+  { cmd: '--no-update-check',              desc: '跳过版本更新检查' },
+  { cmd: '--verbose',                      desc: '详细日志' },
+  { cmd: '--debug',                        desc: '调试模式，输出更多内部信息' },
+  { cmd: '--add-dir <path>',               desc: '把额外目录加入上下文' },
+  { cmd: '--mcp-config <path>',            desc: '指定 MCP 配置文件' },
+  { cmd: '--system-prompt <text>',         desc: '自定义系统提示词（替换默认）' },
+  { cmd: '--append-system-prompt <text>',  desc: '追加到系统提示词末尾' },
+  { cmd: '--allowedTools <tools>',         desc: '逗号分隔，只允许指定工具' },
+]} />
+
+---
+
+## 会话内 Slash 命令
+
+进入交互界面后，以 `/` 开头输入以下命令：
+
+<CommandTable header={['Slash 命令', '说明']} rows={[
+  { cmd: '/help',                     desc: '查看所有可用命令' },
+  { cmd: '/clear',                    desc: '清空当前对话，重新开始' },
+  { cmd: '/compact',                  desc: '压缩历史对话，节省 Token' },
+  { cmd: '/status',                   desc: '查看当前会话状态（Token 用量、模型）' },
+  { cmd: '/cost',                     desc: '显示本次会话 Token 费用' },
+  { cmd: '/config <key>=<value>',     desc: '临时修改配置，如 /config skipWebFetchPreflight=true' },
+  { cmd: '/memory',                   desc: '查看或编辑 CLAUDE.md 记忆文件' },
+  { cmd: '/mcp',                      desc: '查看 MCP 服务器状态' },
+  { cmd: '/ide',                      desc: '在 IDE 中打开当前文件' },
+  { cmd: '/review',                   desc: '审查当前改动' },
+  { cmd: '/init',                     desc: '在当前目录生成 CLAUDE.md 上下文文件' },
+]} />
+
+---
+
+## 非交互模式（脚本场景）
+
+```bash
+# 一次性执行，结果输出到终端
+claude --print "用中文总结一下这个 PR 的改动" 
+
+# 输出 JSON（包含 token 用量）
+claude --print --output-format json "列出 src/ 下所有函数名" 
+
+# 配合 CI，跳过确认 + 非交互
+claude --print --dangerously-skip-permissions \
+  "检查 src/api.ts 里有没有 SQL 注入漏洞，输出 JSON 报告"
+
+# 把结果传给其他命令
+claude --print "生成 .gitignore for Node.js 项目" > .gitignore
+```
+
+---
+
+## 指定模型
+
+```bash
+# 启动时指定
+claude --model claude-opus-4-7
+
+# 或在 settings.json 里固定
+# "model": "claude-opus-4-7"
+```
+
+常用模型 ID：
+
+<CommandTable header={['模型', '特点']} rows={[
+  { cmd: 'claude-sonnet-4-6', desc: '默认推荐，速度与能力均衡' },
+  { cmd: 'claude-opus-4-7',   desc: '最强，适合复杂推理' },
+  { cmd: 'claude-haiku-4-5',  desc: '最快最省，适合简单任务' },
+]} />
+
+---
+
+## 子代理 / 后台任务（v2.x）
+
+```bash
+# 查看所有正在运行的后台会话
+claude agents
+
+# 检查鉴权状态
+claude auth status
+claude auth status --text   # 人可读格式
+
+# 生成 CI/CD 用的长效 Token（不需要浏览器）
+claude setup-token
+```
+
+---
+
+## 版本与更新
+
+```bash
+# 查看版本
+claude --version
+
+# 更新到最新版（原生安装方式）
+claude update
+
+# 检查更新但不安装
+claude --version --no-update-check
+```
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/claude-code/cli/install', hint: '安装 Claude Code CLI' },
+    { route: '/claude-code/cli/manual', hint: 'settings.json 与环境变量手动配置' },
+    { route: '/claude-code/errors', hint: '常见报错按症状排查' },
+  ]}
+/>

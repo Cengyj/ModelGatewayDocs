@@ -1,0 +1,89 @@
+---
+title: "CC-007：401 无效令牌（IDE 或 MCP 覆盖配置）"
+hidden: true
+---
+
+# CC-007：401 无效令牌（IDE 或 MCP 覆盖配置）
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="Linux / macOS / Windows"
+  date="2026-03-14"
+/>
+---
+
+## 问题现象
+
+Claude Code 返回 401 错误，日志中可见：
+
+```text
+API Error: 401 {"error":{"type":"authentication_error","message":"invalid x-api-key"}}
+```
+
+或终端直接提示：
+
+```text
+Invalid API key · Please run /login
+```
+
+API Key 以 `sk-` 开头，确认填写正确，但错误持续出现。
+
+---
+
+## 根因分析
+
+```text
+IDE 插件或 MCP 服务器写入 settings.json
+  → 覆盖 Claude Code 的 apiKey / baseURL 字段
+  → Claude Code 读到被覆盖的旧值或错误值
+  → 向错误端点发送请求 → 401 认证失败
+```
+
+常见触发场景：
+
+- 安装了带 Claude Code 集成的 IDE 插件（如 Cursor、Continue 等）
+- MCP 服务器自动写入了 `~/.claude/settings.json` 或全局配置
+
+---
+
+## 修复步骤
+
+**方式一（推荐）：用 CC Switch 重新配置**
+
+下载并打开 [CC Switch](https://github.com/farion1231/cc-switch/)，重新填写 Base URL 和 API Key 后一键写入，覆盖被修改的配置。
+
+**方式二：手动修复环境变量**
+
+检查并设置以下环境变量，确保其优先于 settings.json 中的值生效：
+
+```bash
+# macOS / Linux
+export ANTHROPIC_BASE_URL=https://你的中转地址
+export ANTHROPIC_API_KEY=sk-xxx
+```
+
+```powershell
+# Windows（PowerShell）
+[System.Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL","https://你的中转地址","User")
+[System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY","sk-xxx","User")
+```
+
+**方式三：检查并还原 settings.json**
+
+找到被修改的配置文件（路径因平台而异），删除或修正其中的 `apiKey` / `baseURL` 字段：
+
+| 平台 | 配置文件路径 |
+| --- | --- |
+| Windows | `C:\Users\\.claude\settings.json` |
+| macOS / Linux | `~/.claude/settings.json` |
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 使用 CC Switch 统一管理配置，避免手动编辑 settings.json | IDE 插件再次覆盖手动配置 |
+| 安装新的 IDE 插件或 MCP 后，重新验证 Claude Code 连通性 | 插件静默写入配置导致认证失效 |
+| 优先通过环境变量设置 API Key 和 Base URL | 环境变量优先级高于配置文件，不易被覆盖 |

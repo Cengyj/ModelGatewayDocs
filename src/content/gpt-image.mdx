@@ -1,0 +1,73 @@
+---
+title: "GPT Image 2"
+description: "通过 foropencode gpt_plus 分组接入 gpt-image-2，在 AI 绘图工具中实现高质量图片生成。"
+navLabel: "GPT Image 2"
+---
+
+# GPT Image 2
+
+<PageHeader
+  useCase="将 gpt-image-2 图片模型接入 AI 绘图工具，通过 foropencode gpt_plus 分组调用"
+  audience="需要使用 OpenAI 图片生成能力的用户"
+  tldr="打开 image.foropencode.com → gpt_plus 密钥 → 设置 → 供应商 codex 分组 → 填 API Key → 获取模型 → 图片工作台"
+/>
+
+<Callout type="info" title="需要 gpt_plus 分组密钥">
+  gpt-image-2 归属 `gpt_plus` 分组。请先[创建一个绑定 gpt_plus 分组的 API 密钥](/get-key/create)，再继续以下步骤。
+</Callout>
+
+---
+
+## 接入步骤
+
+<Callout type="info" title="先打开图片工具">
+  在浏览器访问 [https://image.foropencode.com](https://image.foropencode.com/)，登录后再进行以下配置。
+</Callout>
+
+<Walkthrough>
+  <Frame
+    title="① 打开左上角菜单 → 设置"
+    image="/img/gpt-image/step-01-menu-settings.png"
+    imageAlt="AI 绘图工具左上角菜单展开，「设置」选项高亮标注"
+    caption="点击左上角菜单图标，在下拉列表中选择「设置」。"
+  />
+  <Frame
+    title="② 配置 codex 分组供应商"
+    image="/img/gpt-image/step-02-api-config.png"
+    imageAlt="设置页面：左侧选供应商，选中 codex 分组，右侧输入 API Key 后点击获取模型"
+    caption="设置页左侧选「供应商」→ 选中「codex 分组」→ 在 API Key 栏粘贴你的 foropencode 密钥 → 点击「获取模型」。"
+  >
+    <Callout type="info">
+      图接口格式选 **OpenAI GPT Image**，API 地址保持默认 `https://foropencode.com/v1`，无需修改。
+    </Callout>
+  </Frame>
+  <Frame
+    title="③ 选择文本模型和图片模型"
+    image="/img/gpt-image/step-03-select-models.png"
+    imageAlt="获取模型弹窗：文本栏勾选 gpt-5.5，图片栏勾选 gpt-image-2，点击添加模型"
+    caption="在「获取模型」弹窗中：文本模型推荐勾选 **gpt-5.5**（或 gpt-5.4 / gpt-5.4-mini）；图片模型勾选 **gpt-image-2**；完成后点击右下角「添加模型」。"
+  />
+  <Frame
+    title="④ 进入图片工作台开始体验"
+    image="/img/gpt-image/step-04-workspace.png"
+    imageAlt="左侧图片图标高亮，主界面切换到图片工作台，顶部功能标签可选 AI 图片生成等"
+    caption="点击左侧侧边栏的「图片」图标进入图片工作台，在顶部功能标签选择「AI 图片生成」或其他功能后即可开始使用 gpt-image-2。"
+  />
+</Walkthrough>
+
+---
+
+<Callout type="warning" title="图片生成消耗说明">
+  gpt-image-2 属于 `gpt_plus` 分组（0.1x 倍率），图片生成按官方定价折算扣除令牌。
+</Callout>
+
+---
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/get-key/create', label: '创建密钥', hint: '新建绑定 gpt_plus 分组的 API 密钥' },
+    { route: '/get-key/groups', label: '令牌分组', hint: '查看 gpt_plus 分组详情和倍率' },
+    { route: '/cc-switch', label: 'CC Switch', hint: '快速切换 Claude Code 到 foropencode' },
+  ]}
+/>

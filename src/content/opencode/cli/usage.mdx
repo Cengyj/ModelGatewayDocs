@@ -1,0 +1,126 @@
+---
+title: "OpenCode CLI · 常用命令"
+description: "启动选项、模型切换、会话命令、非交互脚本、环境变量等日常高频用法。"
+navLabel: "常用命令"
+---
+
+# OpenCode CLI · 常用命令
+
+<VersionBadge version="v1.17.8" date="2026-06-17" license="MIT" github="https://github.com/anomalyco/opencode" />
+
+<PageHeader
+  useCase="快速查启动参数、slash 命令、切换供应商与模型、自动化脚本写法"
+  audience="已装好 OpenCode CLI，想熟悉日常用法的开发者"
+  tldr="opencode 启动 TUI → /help 查命令 → -p 非交互脚本 → OPENCODE_MODEL 临时换模型"
+/>
+
+---
+
+## 启动方式
+
+<CommandTable header={['命令', '效果']} rows={[
+  { cmd: 'opencode',                         desc: '进入 TUI 交互界面（最常用）' },
+  { cmd: 'opencode -p "帮我写一个 README"',  desc: '非交互模式，结果输出到 stdout，适合脚本' },
+  { cmd: 'opencode --version',               desc: '查看版本号' },
+  { cmd: 'opencode --help',                  desc: '查看所有参数' },
+]} />
+
+---
+
+## 常用启动参数
+
+<CommandTable rows={[
+  { cmd: '-p / --print <prompt>',  desc: '非交互模式，把结果输出到 stdout' },
+  { cmd: '-m / --model <id>',      desc: '指定本次会话模型，格式 provider/model-id' },
+  { cmd: '--help',                 desc: '查看所有参数' },
+  { cmd: '--version',              desc: '查看版本号' },
+]} />
+
+---
+
+## 会话内 Slash 命令
+
+进入 TUI 后，以 `/` 开头输入以下命令：
+
+<CommandTable header={['Slash 命令', '说明']} rows={[
+  { cmd: '/help',    desc: '查看所有可用命令' },
+  { cmd: '/init',    desc: '在当前目录生成 AGENTS.md 上下文文件' },
+  { cmd: '/model',   desc: '切换供应商与模型（无需重启）' },
+  { cmd: '/theme',   desc: '切换 TUI 主题' },
+  { cmd: '/clear',   desc: '清空当前对话，重新开始' },
+  { cmd: '/compact', desc: '压缩历史上下文，节省 Token' },
+  { cmd: '/share',   desc: '生成可分享的对话链接' },
+]} />
+
+---
+
+## 临时切换模型
+
+```bash
+# 启动时指定（优先级高于 opencode.json）
+opencode -m fc-claude/claude-opus-4-7
+
+# 或用环境变量（会话级别生效）
+OPENCODE_MODEL="fc-claude/claude-opus-4-7" opencode
+```
+
+`model` 格式必须是 `<provider名>/<model-id>`，provider 名对应 `opencode.json` 里 `provider` 的 key。
+
+常见模型示例：
+
+<CommandTable header={['模型 ID（示例）', '特点']} rows={[
+  { cmd: 'fc-claude/claude-sonnet-4-6', desc: '均衡推荐，速度与质量均衡' },
+  { cmd: 'fc-claude/claude-opus-4-7',   desc: '最强，适合复杂推理' },
+  { cmd: 'fc-gpt/gpt-5.5',             desc: 'OpenAI 最新通用模型' },
+  { cmd: 'local/qwen2.5-coder:32b',    desc: 'Ollama 本地推理，完全离线' },
+]} />
+
+---
+
+## 非交互模式（脚本场景）
+
+```bash
+# 一次性执行，输出到终端
+opencode -p "用中文总结一下这个 PR 的改动"
+
+# 配合管道
+opencode -p "生成 .gitignore for Node.js 项目" > .gitignore
+
+# 临时换模型 + 非交互
+OPENCODE_MODEL="fc-claude/claude-haiku-4-5" opencode -p "列出 src/ 下所有函数名"
+```
+
+---
+
+## 环境变量速查
+
+<CommandTable header={['环境变量', '作用']} rows={[
+  { cmd: 'OPENCODE_MODEL',          desc: '覆盖 opencode.json 里的 model 字段，临时指定模型' },
+  { cmd: 'OPENCODE_CONFIG',         desc: '指定单个配置文件路径（绝对路径）' },
+  { cmd: 'OPENCODE_CONFIG_DIR',     desc: '指定整个配置目录，隔离不同项目或用户' },
+  { cmd: 'OPENCODE_CONFIG_CONTENT', desc: '直接把 JSONC 内容塞进环境变量，适合 CI 注入配置' },
+]} />
+
+---
+
+## AGENTS.md（上下文文件）
+
+OpenCode 读取项目根目录的 `AGENTS.md` 作为持久上下文，类似 Claude Code 的 `CLAUDE.md`：
+
+```bash
+# 在 TUI 里输入，自动生成 AGENTS.md
+/init
+```
+
+生成后建议 git commit，团队共用一份上下文。子目录的 `AGENTS.md` 支持嵌套覆盖。
+
+---
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/opencode/cli/install', hint: '安装 OpenCode CLI' },
+    { route: '/opencode/manual', hint: 'opencode.json 完整配置说明' },
+    { route: '/opencode/cc-switch', hint: '用 CC Switch 快速配置供应商' },
+  ]}
+/>

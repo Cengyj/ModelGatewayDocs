@@ -1,0 +1,13 @@
+.home {
+  width: 100%;
+}
+
+.proseWrap {
+  padding: 16px 0 64px;
+}
+
+.prose {
+  margin: 0 auto;
+  max-width: var(--layout-home-max);
+  padding: 0 32px;
+}

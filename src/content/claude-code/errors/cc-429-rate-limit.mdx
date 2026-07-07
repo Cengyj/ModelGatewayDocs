@@ -1,0 +1,76 @@
+---
+title: "CC-019：429 Rate Limit Exceeded / insufficient_quota"
+hidden: true
+---
+
+# CC-019：429 Rate Limit Exceeded / insufficient_quota
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="全平台"
+  date="2026-03-16"
+/>
+---
+
+## 问题现象
+
+调用过程中请求中断，终端输出含 `429` 字样，例如：
+
+```text
+API Error: 429 {"type":"error","error":{"type":"rate_limit_error","message":"..."}}`
+```
+
+或：
+
+```text
+API Error: 429 {"type":"error","error":{"type":"insufficient_quota","message":"..."}}`
+```
+
+Claude 停止响应，重试后仍然报错。
+
+---
+
+## 根因分析
+
+429 错误存在两种子类型，根因和处理方式完全不同：
+
+```text
+请求到达 Anthropic API
+  → 服务端校验请求频率 → 超出每分钟上限 → rate_limit_error
+  → 服务端校验账号余额 → 当月额度归零   → insufficient_quota
+```
+
+两种错误消息外观相似，但处理路径截然不同：
+
+| 子类型 | 含义 | 是否自动恢复 |
+| --- | --- | --- |
+| `rate_limit_error` | 短时间请求过于频繁 | 是，等待后自动恢复 |
+| `insufficient_quota` | 当月 API 额度已耗尽 | 否，必须充值或等下月重置 |
+
+---
+
+## 修复步骤
+
+**第一步：判断子类型**
+
+前往 [https://foropencode.com](https://foropencode.com) 查看是否是余额不足：
+
+- 用量未耗尽 → 是频率限制（`rate_limit_error`），执行第二步
+- 用量已归零 → 是额度耗尽（`insufficient_quota`），执行第三步
+
+**第二步：处理频率限制**
+
+若因批处理脚本并发过高触发限流，如有分发需求更改新的API。
+
+**第三步：处理额度耗尽**
+
+前往 [foropencode.com 充值 / 查看额度](https://foropencode.com/pricing)
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 遇到 429 先查 Console 用量，再排查配置 | 避免额度耗尽时在 Key 配置上浪费时间 |

@@ -1,0 +1,31 @@
+---
+title: "密钥管理 · 令牌分组"
+description: "foropencode 令牌分组说明：各分组用途、倍率及 model 填写建议。"
+navLabel: "令牌分组"
+---
+
+# 令牌分组
+
+<PageHeader
+  useCase="根据用途挑选令牌分组，配合 API 密钥在各客户端中使用"
+  audience="已创建密钥、准备选择分组接入网关的用户"
+  tldr="对照分组说明选用途 → 复制分组名 → 在创建/切换密钥时选中 → 填写对应 model 名"
+/>
+
+<Callout type="info">
+  下表倍率以控制台展示为准。不同分组可访问的模型和计费倍率不同，选分组前建议先确认目标模型在哪个分组下可用。
+</Callout>
+
+<TokenGroupFilter />
+
+<Callout type="warning" title="逆向分组注意事项">
+  **逆向分组**（如 `claude_free`）稳定性低于官方分组，对稳定性有要求的场景请优先使用 `claude_max` 等官方分组。
+</Callout>
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/get-key/create', label: '创建密钥', hint: '新建 API 密钥并绑定分组' },
+    { route: '/get-key/switch-group', label: '切换分组', hint: '修改已有密钥绑定的分组' },
+  ]}
+/>

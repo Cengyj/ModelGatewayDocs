@@ -1,0 +1,120 @@
+---
+title: "Codex · CC Switch 配置"
+description: "用 CC Switch 一键配 Codex CLI / App（共享同一份配置）。"
+navLabel: "CC Switch 配置"
+---
+
+# Codex · CC Switch 配置
+
+<VersionBadge version="v0.141.0" date="2026-06-18" license="Apache-2.0" github="https://github.com/openai/codex" />
+
+<PageHeader
+  useCase="可视化配置 Codex；CLI 与 App 配置共享，配一次两边都生效"
+  audience="所有 Codex 用户"
+  tldr="CC Switch 主界面 → Codex → 填 Key（Base URL 带 /v1）→ 启用"
+/>
+
+> 还没装 CC Switch？先看 [CC Switch 安装](/cc-switch)。
+
+<Callout type="warning">Codex 的 Base URL **必须**带 `/v1` 后缀，和 Claude Code 反着。漏了会 404。</Callout>
+
+---
+
+## 配置步骤
+
+<Walkthrough title="CC Switch · 配置 Codex（CLI / App 通用）">
+  <Frame step="1" title="选中 Codex 图标，点击添加"
+    image="/img/cc-switch/cc-switch-codex-main-add.png"
+    imageAlt="CC Switch 主界面：选中第三个 Codex 图标，点右上角添加按钮">
+    打开 CC Switch，顶部工具栏选中**第三个 Codex 图标**，点右上角 **＋** 按钮新建一项。
+
+    **Codex CLI 和 Codex App 共享 `~/.codex/config.toml`**——只配一次，两者都生效。
+  </Frame>
+
+  <Frame step="2" title="填写供应商信息"
+    image="/img/cc-switch/cc-switch-codex-provider-form.png"
+    imageAlt="添加新供应商表单：名称、API Key、请求地址（带 /v1）">
+    弹出「添加新供应商」表单，按顺序填写：
+
+    - **供应商名称**：随便取，如 `for`
+    - **API Key**：你的 Codex 分组对应 Key（`sk-xxx`）
+    - **API 请求地址**：点击右侧图标复制后粘贴
+
+    <CommandTable header={false} rows={[
+      { cmd: 'https://foropencode.com/v1', desc: 'Codex 必须带 /v1，和 Claude Code 反着' },
+    ]} />
+
+    <Callout type="warning">**暂不要点「添加」**，先进行下一步勾选 Goal mode 设置。</Callout>
+  </Frame>
+
+  <Frame step="3" title="启用 Goal mode 与通用配置，再点添加"
+    image="/img/cc-switch/cc-switch-codex-goalmode.png"
+    imageAlt="勾选启用 Goal mode 和写入通用配置，requires_openai_auth 设为 false，最后点添加">
+    在表单下方继续勾选：
+
+    - ✅ **启用 Goal mode**
+    - ✅ **写入通用配置**
+    - 若表单中出现 `requires_openai_auth` 字段，**设为 `false`**
+
+    设置完毕后，点右下角 **＋ 添加**。CC Switch 会自动写入 `~/.codex/config.toml` 和 `~/.codex/auth.json`。
+  </Frame>
+
+  <Frame step="4" title="确认配置添加成功"
+    image="/img/cc-switch/cc-switch-codex-active-status.png"
+    imageAlt="主界面配置行显示名称和 Base URL，绿色「使用中」按钮常驻，说明配置已生效">
+    回到主界面，配置行显示供应商名称和 Base URL，绿色 **「✓ 使用中」** 按钮常驻即表示配置已成功写入并生效。
+
+    - **CLI**：重启终端，下一次跑 `codex` 即生效
+    - **Codex App**：**完全退出**（菜单栏图标也要关），再启动
+  </Frame>
+</Walkthrough>
+
+---
+
+## 可用模型
+
+Codex 仅支持 OpenAI 格式（`OpenAI Responses`），Base URL 填 `https://foropencode.com/v1`：
+
+| 模型 ID | 上下文窗口 | 最大输出 | 备注 |
+| --- | --- | --- | --- |
+| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 | OpenAI 当前推荐起点 |
+| `gpt-5.4` | 1,050,000 | 128,000 | 上一代主力 |
+| `gpt-5.4-mini` | 400,000 | 128,000 | 轻量级 |
+| `gpt-5.3-codex-spark` | — | — | Codex 专用线路 |
+
+OpenAI 标注以下模型对**用 ChatGPT 登录**的用户已弃用：`gpt-5.2`、`gpt-5.3-codex`。
+
+---
+
+## 推理深度
+
+通过 `model_reasoning_effort` 控制（CC Switch 表单里有这一项，等价于在 `~/.codex/config.toml` 中设置）：
+
+| 值 | 备注 |
+| --- | --- |
+| `minimal` | 极速回答 |
+| `low` | 简单代码生成、快速问答 |
+| `medium` | 日常开发任务（推荐） |
+| `high` | 复杂算法、架构设计 |
+| `xhigh` | 仅 Responses API 路径下、且模型支持时可用 |
+
+---
+
+## 配置写到哪
+
+CC Switch 将配置写入 `~/.codex/config.toml`（CLI 与 Codex App 共用同一文件）：
+
+| 平台 | 路径 |
+| --- | --- |
+| macOS / Linux | `~/.codex/config.toml` |
+| Windows | `%USERPROFILE%\.codex\config.toml` |
+
+---
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/codex/manual', hint: '看 CC Switch 写了什么 / 自己手改' },
+    { route: '/cc-switch', hint: 'CC Switch 工具本身' },
+  ]}
+/>

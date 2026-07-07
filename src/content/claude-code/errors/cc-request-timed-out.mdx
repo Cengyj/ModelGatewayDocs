@@ -1,0 +1,80 @@
+---
+title: "CC-010：API Error (Request timed out.)"
+hidden: true
+---
+
+# CC-010：API Error (Request timed out.)
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="Linux / macOS / Windows"
+  date="2026-03-14"
+/>
+---
+
+## 问题现象
+
+发送请求后，终端等待一段时间后返回：
+
+```text
+API Error (Request timed out.)
+```
+
+---
+
+## 根因分析
+
+超时有两类原因，需分别判断：
+
+```text
+情况 A：网络延迟问题
+  Claude Code 发出请求 → 请求到达服务器过慢 → 超过客户端超时阈值 → 超时报错
+
+情况 B：上下文过长
+  当前会话积累了大量 token → 模型处理时间过长 → 超过超时阈值 → 超时报错
+```
+
+---
+
+## 修复步骤
+
+### 情况 A：网络问题
+
+参考 [CC-009 Connection error](./cc-connection-error) 中的网络排查步骤：切换 Wi-Fi、切换代理节点、或使用手机热点。
+
+### 情况 B：上下文过长
+
+**方式一：清理上下文后继续对话**
+
+在 Claude Code 交互界面输入：
+
+```text
+/clear
+```
+
+清理后重新发送请求。
+
+**方式二：关闭会话重新打开**
+
+直接退出 Claude Code，重新执行 `claude` 进入新会话。
+
+**方式三：压缩上下文**
+
+```text
+/compact
+```
+
+使用 compact 保留摘要后继续，适合不想完全丢失上下文的情况。
+
+> **IDE 用户注意**：IDE 插件通常内置大量系统 Prompt，叠加 Claude Code 自身 Prompt 后，可用的有效对话轮数会明显减少，出现超时时优先检查上下文长度。
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 长任务中定期执行 `/compact` 压缩上下文 | 上下文堆积过多导致超时或截断 |
+| 使用代理时确保节点延迟在合理范围内 | 高延迟节点导致请求超时 |
+| 在 IDE 中使用时注意内置 Prompt 占用的 token 量 | IDE 插件 Prompt 叠加缩短有效对话轮数 |

@@ -1,0 +1,127 @@
+---
+title: "OpenClaw · CC Switch 配置"
+description: "用 CC Switch 给 OpenClaw 配供应商与模型。"
+navLabel: "CC Switch 配置"
+---
+
+# OpenClaw · CC Switch 配置
+
+<VersionBadge version="v2026.6.8" date="2026-06-08" license="自定义" github="https://github.com/openclaw/openclaw" />
+
+<PageHeader
+  useCase="可视化配置 OpenClaw；GPT / Claude 两条路径均支持，配一次即可"
+  audience="所有 OpenClaw 用户"
+  tldr="CC Switch 主界面 → OpenClaw 图标 → 填表单 → 配模型 → 添加"
+/>
+
+> 还没装 CC Switch？先看 [CC Switch 安装](/cc-switch)。
+
+<Callout type="warning">OpenClaw 的字段名与其他工具不同——叫 **API 协议**（非「接口格式」）和 **API 端点**（非「Base URL」），注意对应填写。</Callout>
+
+---
+
+## 配置步骤
+
+<Walkthrough title="CC Switch · 配置 OpenClaw">
+  <Frame step="1" title="选中 OpenClaw 图标，点击添加"
+    image="/img/cc-switch/cc-switch-openclaw-main-add.png"
+    imageAlt="CC Switch 主界面：选中 OpenClaw 图标，点右上角橙色添加按钮">
+    打开 CC Switch，顶部工具栏选中 **OpenClaw 图标**，点右上角橙色 **＋** 按钮新建一项。
+  </Frame>
+
+  <Frame step="2" title="填写供应商信息（按模型类型选 API 协议）"
+    image="/img/cc-switch/cc-switch-openclaw-gpt-form.png"
+    imageAlt="GPT 分组：API 协议选 OpenAI Responses，API 端点填 https://foropencode.com/v1">
+    弹出「添加新供应商」表单，按模型类型选择 **API 协议**：
+
+    **GPT 分组**（gpt-5.5 / gpt-5.4 等，上图示例）：接口协议选 `OpenAI Responses`，填入 API Key，API 端点填：
+
+    <CommandTable header={false} rows={[
+      { cmd: 'https://foropencode.com/v1', desc: 'GPT 系列必须带 /v1' },
+    ]} />
+
+    **Claude 分组**（claude-sonnet 等，下图示例）：接口协议选 `Anthropic Messages`，填入 API Key，API 端点填：
+
+    <img src="/img/cc-switch/cc-switch-openclaw-claude-form.png" alt="Claude 分组：API 协议选 Anthropic Messages，API 端点填 https://foropencode.com（不带 /v1）" style={{width:'100%', borderRadius:'8px', margin:'8px 0'}} />
+
+    <CommandTable header={false} rows={[
+      { cmd: 'https://foropencode.com', desc: 'Claude 系列不带 /v1' },
+    ]} />
+
+    <Callout type="warning">**暂不要点「添加」**，先向下滚动完成模型配置。</Callout>
+  </Frame>
+
+  <Frame step="3" title="配置模型，填上下文窗口，点击添加"
+    image="/img/cc-switch/cc-switch-openclaw-model-settings.png"
+    imageAlt="模型列表：获取模型 → 添加模型 → 展开选 ID → 填上下文窗口和最大输出 → 点添加">
+    在「模型列表」区域：
+
+    1. 点击 **获取模型列表** 拉取可用模型
+    2. 点击 **＋ 添加模型** 插入一行
+    3. 展开模型条目，从下拉列表选择 **模型 ID**（如 `gpt-5.4`、`gpt-5.5`）
+    4. 在「高级选项」中填写 **上下文窗口** 和 **最大输出 Tokens**：
+
+    | 模型 | 上下文窗口 | 最大输出 |
+    | --- | --- | --- |
+    | `gpt-5.5` | `270000` | `128000` |
+    | `gpt-5.4` | `1050000` | `128000` |
+    | `gpt-5.4-mini` | `400000` | `128000` |
+
+    <Callout type="warning">**gpt-5.5 实际有效上下文约 270K**——填 1M 会触发 `context_length_exceeded`，建议上下文窗口填 `270000`。</Callout>
+
+    配置完毕后点右下角 **＋ 添加**，CC Switch 自动写入 OpenClaw 配置。
+  </Frame>
+
+  <Frame step="4" title="确认配置添加成功"
+    image="/img/cc-switch/cc-switch-openclaw-active-status.png"
+    imageAlt="主界面配置行显示绿色「当前默认」和橙色「移除」按钮，说明配置已添加成功">
+    回到主界面，配置行同时显示绿色 **「当前默认」**（正在使用）和橙色 **「移除」** 按钮即表示配置成功写入。
+
+    **重启 OpenClaw** 使配置生效：OpenClaw 守护进程不会自动重读配置，需要完全重启。
+  </Frame>
+</Walkthrough>
+
+---
+
+## 可用模型
+
+### OpenAI 模型
+
+API 协议选 `OpenAI Responses`，API 端点填 `https://foropencode.com/v1`：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 |
+| `gpt-5.4` | 1,050,000 | 128,000 |
+| `gpt-5.4-mini` | 400,000 | 128,000 |
+
+### Anthropic 模型
+
+API 协议选 `Anthropic Messages`，API 端点填 `https://foropencode.com`（**不带 `/v1`**）：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+
+---
+
+## 配置写到哪
+
+CC Switch 将供应商信息写入 OpenClaw 的配置数据库，重启守护进程后生效：
+
+| 平台 | 路径 |
+| --- | --- |
+| macOS / Linux | `~/.openclaw/openclaw.json` |
+| Windows | `%USERPROFILE%\.openclaw\openclaw.json` |
+
+---
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/openclaw/manual', hint: '看 CC Switch 写了什么 / 自己手改' },
+    { route: '/cc-switch', hint: 'CC Switch 工具本身' },
+  ]}
+/>

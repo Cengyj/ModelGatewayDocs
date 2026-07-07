@@ -1,0 +1,63 @@
+---
+title: "密钥管理 · 切换分组"
+description: "通过控制台修改 API 密钥绑定的分组，快速切换到目标令牌分组。"
+navLabel: "切换分组"
+---
+
+# API 密钥分组切换
+
+<PageHeader
+  useCase="在控制台编辑已有密钥，将其绑定的令牌分组切换为目标分组"
+  audience="需要更换密钥分组的用户，例如从 claude_free 切换到 claude_max"
+  tldr="控制台 → API 密钥 → 操作菜单 → 编辑 → 选分组 → 保存更改"
+/>
+
+---
+
+## 切换步骤
+
+<Frame
+  title="API 密钥分组切换流程"
+  image="/img/foropencode/switch-group-overview.png"
+  imageAlt="API 密钥分组切换教程：步骤1 进入 API 密钥列表 → 点击操作菜单 → 编辑；步骤2 选择目标分组并保存更改"
+  caption="完整流程：控制台 → API 密钥 → 操作菜单（···）→ 编辑 → 选分组 → 保存更改"
+/>
+
+<Walkthrough>
+  <Frame
+    title="① 点击控制台 / 进入 API 密钥"
+    caption="在 foropencode.com 顶部导航栏点击「控制台」，然后在左侧菜单进入「API 密钥」列表。"
+  />
+  <Frame
+    title="② 点击操作菜单 → 编辑"
+    caption="找到要切换分组的密钥，点击该行末尾的「···」操作菜单，选择「编辑」。"
+  >
+    <Callout type="info">
+      操作菜单还提供「复制密钥」「复制连接信息」「CC 切换」「聊天」「删除」等快捷操作。
+    </Callout>
+  </Frame>
+  <Frame
+    title="③ 分组选 gpt_plus（或目标分组）"
+    caption="在「更新 API 密钥」弹窗中点击「分组」下拉框，从列表中选择目标分组。每个分组旁显示倍率。"
+  />
+  <Frame
+    title="④ 点击保存更改"
+    caption="确认分组选择无误后点击右下角「保存更改」。密钥的分组即刻生效，列表页「分组」列会显示新分组名称。"
+  />
+</Walkthrough>
+
+---
+
+<Callout type="warning" title="切换后立即生效">
+  分组切换保存后立即生效，无需重新获取密钥字符串。使用同一个 `sk-...` 密钥继续调用，模型权限和计费倍率已自动更新为新分组的规则。
+</Callout>
+
+---
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/get-key/create', label: '创建密钥', hint: '还没有密钥？先创建一个' },
+    { route: '/get-key/groups', label: '令牌分组', hint: '查看各分组可用模型和倍率说明' },
+  ]}
+/>

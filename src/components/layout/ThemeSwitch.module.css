@@ -1,0 +1,40 @@
+.switch {
+  align-items: center;
+  background: var(--c-bg-soft);
+  border-radius: 999px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 24px;
+  padding: 2px;
+  position: relative;
+  transition: background var(--t-fast);
+  width: 40px;
+}
+
+.switch:hover {
+  background: var(--c-border);
+}
+
+.knob {
+  background: var(--c-bg-elevated);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  display: inline-flex;
+  height: 20px;
+  margin-left: 0;
+  transition: margin-left var(--t-base);
+  width: 20px;
+}
+
+.icon {
+  align-items: center;
+  color: var(--c-text-muted);
+  display: inline-flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+
+:global(html.dark) .knob {
+  margin-left: 16px;
+}

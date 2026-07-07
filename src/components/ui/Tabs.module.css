@@ -1,0 +1,59 @@
+.tabs {
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.tablist {
+  background: var(--c-bg-soft);
+  border-bottom: 1px solid var(--c-border);
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.tab {
+  border-bottom: 2px solid transparent;
+  color: var(--c-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  transition: color var(--t-fast), border-color var(--t-fast);
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--c-text);
+}
+
+.tabActive {
+  border-bottom-color: var(--c-brand) !important;
+  color: var(--c-brand) !important;
+}
+
+.panels {
+  /* Grid stack: all panels share the same cell, only the active one is visible.
+     This makes the container size to the active panel's height without a
+     remount animation, and avoids the brief 0-height collapse that caused
+     visible flicker on tab switches. */
+  display: grid;
+  grid-template-areas: "stack";
+  padding: 4px 16px;
+  position: relative;
+}
+
+.panel {
+  grid-area: stack;
+  min-width: 0;
+}
+
+.panel[hidden] {
+  /* Browsers honor `hidden` as display:none, which removes from layout.
+     But because all panels share one grid cell, the container's intrinsic
+     height matches the active panel without any reflow flash on switch. */
+  display: none;
+}
+
+.panel > :first-child { margin-top: 12px; }
+.panel > :last-child { margin-bottom: 12px; }

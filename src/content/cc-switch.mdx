@@ -1,0 +1,111 @@
+---
+title: "CC Switch · 安装与概览"
+description: "CC Switch 一键管理 7 个 AI 客户端的 API 配置。安装后选对应工具的配置向导。"
+navLabel: "安装与概览"
+---
+
+# CC Switch
+
+<VersionBadge version="v3.16.3" date="2026-06-14" license="MIT" github="https://github.com/farion1231/cc-switch" />
+
+<PageHeader
+  useCase="统一管理 Claude Code / Claude Desktop / Codex / OpenCode / OpenClaw / Cherry Studio / Hermes 七个客户端的供应商和密钥"
+  audience="任何使用本站推荐工具的用户"
+  tldr="装 CC Switch → 选工具图标 → 填表单 → 添加"
+/>
+
+[CC Switch](https://github.com/farion1231/cc-switch) 是一个桌面端 API 配置管理器，在同一界面里为七个 AI 客户端写入供应商信息，无需手动编辑各工具的配置文件。
+
+---
+
+## 安装
+
+<Tabs defaultValue="win">
+  <Tab label="Windows" value="win">
+    到 [Releases](https://github.com/farion1231/cc-switch/releases) 下载安装包（要求 Windows 10+）：
+
+    | 文件 | 说明 |
+    | --- | --- |
+    | `cc-switch-setup-x64.msi` | 推荐，MSI 安装包（含自动更新） |
+    | `cc-switch-portable-x64.zip` | 便携版，解压即用，不写注册表 |
+  </Tab>
+  <Tab label="macOS" value="mac">
+    Homebrew Cask（macOS 12 Monterey 及以上）：
+
+    ```bash
+    brew install --cask cc-switch
+    ```
+
+    或从 [Releases](https://github.com/farion1231/cc-switch/releases) 下载 `.dmg`（已签名并公证）。
+  </Tab>
+  <Tab label="Linux" value="linux">
+    要求 Ubuntu 22.04+ / Debian 11+ / Fedora 34+：
+
+    | 包格式 | 安装方式 |
+    | --- | --- |
+    | `.deb` | `sudo dpkg -i cc-switch_*.deb` |
+    | `.rpm` | `sudo rpm -i cc-switch-*.rpm` |
+    | `.AppImage` | `chmod +x cc-switch-*.AppImage && ./cc-switch-*.AppImage` |
+    | AUR（Arch） | `paru -S cc-switch-bin` |
+  </Tab>
+</Tabs>
+
+---
+
+## 选配置向导
+
+安装完成后，顶部工具栏点击对应客户端图标，跟着向导填表单即可。
+
+<img src="/img/cc-switch/cc-switch-opencode-main-add.png" alt="CC Switch 主界面：顶部工具栏列出所有支持的客户端图标" style={{width:'100%', borderRadius:'8px', margin:'8px 0'}} />
+
+| 工具 | 向导 | 配置文件 |
+| --- | --- | --- |
+| Claude Code CLI | [配置向导](/claude-code/cli/cc-switch) | `~/.claude/settings.json` |
+| Claude 桌面版 | [配置向导](/claude-code/desktop/cc-switch) | `~/.claude/settings.json` |
+| Codex | [配置向导](/codex/cc-switch) | `~/.codex/config.toml` |
+| OpenCode | [配置向导](/opencode/cc-switch) | `~/.config/opencode/opencode.json` |
+| OpenClaw | [配置向导](/openclaw/cc-switch) | OpenClaw 内部数据库 |
+| Hermes | [配置向导](/hermes/cc-switch) | `~/.hermes/` |
+
+---
+
+## 可用模型
+
+### OpenAI 模型
+
+接口格式选 `OpenAI` / `OpenAI Responses`，Base URL 填 `https://foropencode.com/v1`：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 |
+| `gpt-5.4` | 1,050,000 | 128,000 |
+| `gpt-5.4-mini` | 400,000 | 128,000 |
+
+### Anthropic 模型
+
+接口格式选 `Anthropic`，Base URL 填 `https://foropencode.com`（**不带 `/v1`**）：
+
+| 模型 ID | 上下文窗口 | 最大输出 |
+| --- | --- | --- |
+| `claude-opus-4-8` | 1,000,000 | 128,000 |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+
+---
+
+## 数据位置
+
+| 路径 | 用途 |
+| --- | --- |
+| `~/.cc-switch/cc-switch.db` | SQLite 数据库，存供应商、MCP、Prompts、Skills |
+| `~/.cc-switch/settings.json` | 设备级 UI 偏好 |
+| `~/.cc-switch/backups/` | 自动备份，保留最近 10 份 |
+| `~/.cc-switch/skills/` | 默认以符号链接同步到各 AI 客户端 |
+
+---
+
+## 常见问题
+
+<Callout type="warning" title="为什么删不掉当前启用的供应商？">CC Switch 的设计是：**每个工具至少保留一个启用的供应商**，这样即使把 CC Switch 卸载，CLI 工具依然可用。要删它，先切到别的供应商再删。</Callout>
+
+<Callout type="info" title="哪些客户端支持热切换？">README 明确：**Claude Code 支持热切换**，切换后无需重启终端。其它客户端切换后需要重启终端或重启应用。</Callout>

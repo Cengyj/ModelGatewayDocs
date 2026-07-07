@@ -1,0 +1,158 @@
+---
+title: "Codex CLI · 常用命令"
+description: "启动选项、审批模式、会话命令、自动化脚本写法等日常高频用法。"
+navLabel: "常用命令"
+---
+
+# Codex CLI · 常用命令
+
+<VersionBadge version="v0.141.0" date="2026-06-18" license="Apache-2.0" github="https://github.com/openai/codex" />
+
+<PageHeader
+  useCase="快速查启动参数、审批模式、slash 命令、自动化脚本写法"
+  audience="已装好 Codex CLI，想熟悉日常用法的开发者"
+  tldr="codex 启动 → /help 查命令 → --approval-mode full-auto 全自动 → -q 非交互脚本"
+/>
+
+---
+
+## 启动方式
+
+<CommandTable header={['命令', '效果']} rows={[
+  { cmd: 'codex',                          desc: '进入交互式对话（最常用）' },
+  { cmd: 'codex "帮我写一个 README"',      desc: '带初始 prompt 启动，直接进入对话' },
+  { cmd: 'codex -q "帮我写一个 README"',   desc: '非交互模式，结果输出到 stdout，适合脚本' },
+  { cmd: 'codex --approval-mode full-auto', desc: '全自动模式，免确认执行所有操作（含 shell）' },
+]} />
+
+---
+
+## 审批模式（--approval-mode）
+
+Codex 用**审批模式**控制 AI 的执行权限，共三档：
+
+<CommandTable header={['模式', '行为']} rows={[
+  { cmd: 'suggest（默认）',  desc: 'Codex 仅建议，每步需你手动确认并应用' },
+  { cmd: 'auto-edit',        desc: '自动写文件，但 shell 命令仍需确认' },
+  { cmd: 'full-auto',        desc: '自动写文件 + 自动执行 shell，无需任何确认' },
+]} />
+
+```bash
+# 启动时指定模式
+codex --approval-mode full-auto
+codex --approval-mode auto-edit
+
+# 也可以在 ~/.codex/config.toml 里固定
+# approval_mode = "auto-edit"
+```
+
+<Callout type="warning">**`full-auto` 只在可信任的工作目录使用。** macOS 下 Codex 会用 Apple Sandbox 隔离 shell 命令；Linux/Windows 无沙箱，请在容器或虚拟环境中运行。</Callout>
+
+---
+
+## 常用启动参数
+
+<CommandTable rows={[
+  { cmd: '--approval-mode <mode>',           desc: '设置审批模式：suggest / auto-edit / full-auto' },
+  { cmd: '--model <model-id>',               desc: '指定模型，如 gpt-5.5、gpt-5.4、gpt-5.4-mini' },
+  { cmd: '-q / --quiet',                     desc: '非交互模式，结果输出 stdout' },
+  { cmd: '--notify',                         desc: '任务完成后发送桌面通知' },
+  { cmd: '--no-project-doc',                 desc: '跳过 AGENTS.md 上下文注入' },
+  { cmd: '--no-git-context',                 desc: '跳过 git diff / log 上下文注入' },
+  { cmd: '--dangerously-auto-approve-everything', desc: '跳过所有确认（等同 full-auto + 无沙箱）' },
+  { cmd: '--config',                         desc: '显示当前 config.toml 文件路径' },
+  { cmd: '--version',                        desc: '查看版本号' },
+  { cmd: '--help',                           desc: '查看所有参数' },
+]} />
+
+---
+
+## 会话内 Slash 命令
+
+进入交互界面后，以 `/` 开头输入以下命令：
+
+<CommandTable header={['Slash 命令', '说明']} rows={[
+  { cmd: '/help',               desc: '查看所有可用命令' },
+  { cmd: '/exit',               desc: '退出 Codex' },
+  { cmd: '/clear',              desc: '清空当前对话，重新开始' },
+  { cmd: '/history',            desc: '查看本次会话历史' },
+  { cmd: '/log',                desc: '打开日志文件' },
+  { cmd: '/model <model-id>',   desc: '切换模型（无需重启）' },
+  { cmd: '/approval <mode>',    desc: '切换审批模式（无需重启）' },
+]} />
+
+---
+
+## 非交互模式（脚本场景）
+
+```bash
+# 一次性执行，结果输出到终端
+codex -q "用中文总结一下这个 PR 的改动"
+
+# 全自动 + 非交互，适合 CI
+codex -q --approval-mode full-auto \
+  "检查 src/api.ts 里有没有 SQL 注入漏洞，输出 Markdown 报告"
+
+# 把结果传给其他命令
+codex -q "生成 .gitignore for Node.js 项目" > .gitignore
+```
+
+---
+
+## 指定模型
+
+```bash
+# 启动时指定
+codex --model gpt-5.5
+
+# 在 ~/.codex/config.toml 里固定
+# model = "gpt-5.5"
+```
+
+当前可用模型：
+
+<CommandTable header={['模型', '特点']} rows={[
+  { cmd: 'gpt-5.5',      desc: '当前主力，代码能力最强；有效上下文约 272K（见下方说明）' },
+  { cmd: 'gpt-5.4',      desc: '上一代主力，稳定性高；支持 1M 上下文' },
+  { cmd: 'gpt-5.4-mini', desc: '轻量版，速度快、成本低，适合简单任务' },
+]} />
+
+<Callout type="warning" title="gpt-5.5 有效上下文远低于标称值">
+实测在 Codex 实际调用场景中，`gpt-5.5` 的**有效上下文约 272K**，而非对外宣传的更大值：
+
+- **270K 可正常完成**，300K 会返回明确的 `context_length_exceeded` 错误
+- 上游模型映射显示实际上下文仅约 **272K**
+
+需要大上下文时请改用 **`gpt-5.4`**（真实 1M 上下文）。
+
+如果坚持用 `gpt-5.5`，`model_context_window` 建议不超过 **270000**：
+
+```toml
+model_context_window = 270000
+model_auto_compact_token_limit = 240000
+```
+</Callout>
+
+---
+
+## AGENTS.md（上下文文件）
+
+Codex 读取项目根目录的 `AGENTS.md` 作为持久上下文（类似 Claude Code 的 `CLAUDE.md`）：
+
+```bash
+# 初始化一个 AGENTS.md 模板
+codex "请为这个项目生成一份 AGENTS.md，概述技术栈和代码规范"
+```
+
+`AGENTS.md` 支持嵌套：子目录里的 `AGENTS.md` 会被当前目录的覆盖。
+
+---
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/codex/cli/install', hint: '安装 Codex CLI' },
+    { route: '/codex/manual', hint: 'config.toml 完整参数速查' },
+    { route: '/codex/cc-switch', hint: '用 CC Switch 快速配置 API' },
+  ]}
+/>

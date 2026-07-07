@@ -1,0 +1,424 @@
+.overlay {
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  padding: 11vh 16px 16px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: var(--z-modal);
+}
+
+.backdrop {
+  animation: fade 150ms ease-out;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+/* Panel: outer radius 16 = inner field/list radius ~10 + 6 padding band. */
+.panel {
+  animation: pop 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 1px rgba(15, 23, 42, 0.04),
+    0 8px 16px -8px rgba(15, 23, 42, 0.16),
+    0 32px 64px -24px rgba(15, 23, 42, 0.32);
+  display: flex;
+  flex-direction: column;
+  max-height: min(580px, calc(100vh - 16vh));
+  max-width: 600px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+html.dark .panel {
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.3),
+    0 8px 16px -8px rgba(0, 0, 0, 0.4),
+    0 32px 64px -24px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+}
+
+/* Search field */
+.form {
+  align-items: center;
+  border-bottom: 1px solid var(--c-border);
+  display: flex;
+  gap: 12px;
+  padding: 0 14px 0 18px;
+  transition: border-color 150ms ease-out;
+}
+
+/* Focus indication: just tint the icon + the field's bottom divider. No full
+   ring around the row. */
+.form:focus-within {
+  border-bottom-color: var(--c-brand);
+}
+
+.form:focus-within .icon {
+  color: var(--c-brand);
+}
+
+.icon {
+  color: var(--c-text-subtle);
+  flex: 0 0 auto;
+}
+
+.input {
+  background: transparent;
+  border: 0;
+  color: var(--c-text);
+  flex: 1 1 auto;
+  font-size: 16px;
+  height: 58px;
+  line-height: 58px;
+  outline: none;
+  padding: 0;
+}
+
+/* The field sits in an obviously-focused modal; the global focus-visible ring
+   would draw a heavy box around the whole row. Suppress it here. */
+.input:focus-visible {
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--c-text-subtle);
+  opacity: 1;
+}
+
+.close {
+  align-items: center;
+  background: var(--c-bg-soft);
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+  color: var(--c-text-muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 11px;
+  height: 26px;
+  justify-content: center;
+  line-height: 1;
+  min-width: 26px;
+  padding: 0 7px;
+  transition-property: background-color, color, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.close:hover {
+  background: var(--c-border);
+  color: var(--c-text);
+}
+
+.close:active {
+  transform: scale(0.94);
+}
+
+/* Results list */
+.results {
+  flex: 1 1 auto;
+  list-style: none;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
+}
+
+/* No-results */
+.empty {
+  align-items: center;
+  color: var(--c-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 52px 24px 56px;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.emptyIcon {
+  align-items: center;
+  background: var(--c-bg-soft);
+  border-radius: 50%;
+  color: var(--c-text-subtle);
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  margin-bottom: 8px;
+  width: 44px;
+}
+
+.emptyHint {
+  color: var(--c-text-subtle);
+  font-size: 12.5px;
+}
+
+/* Empty state: recents + quick links */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  list-style: none;
+  padding: 14px 12px 8px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sectionHead {
+  align-items: center;
+  color: var(--c-text-subtle);
+  display: flex;
+  font-size: 11px;
+  font-weight: 600;
+  justify-content: space-between;
+  letter-spacing: 0.05em;
+  padding: 0 6px;
+  text-transform: uppercase;
+}
+
+.recentsClear {
+  background: transparent;
+  border-radius: 5px;
+  color: var(--c-text-subtle);
+  font-size: 11px;
+  letter-spacing: 0;
+  padding: 3px 6px;
+  text-transform: none;
+  transition: color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.recentsClear:hover {
+  background: var(--c-bg-soft);
+  color: var(--c-brand);
+}
+
+.recentsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.recentChip {
+  align-items: center;
+  background: var(--c-bg-soft);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--c-text-muted);
+  display: inline-flex;
+  font-size: 12.5px;
+  gap: 5px;
+  padding: 5px 12px;
+  transition-property: background-color, color, border-color, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.recentChip:hover {
+  background: var(--c-brand-soft);
+  border-color: var(--c-brand-soft);
+  color: var(--c-brand);
+}
+
+.recentChip:active {
+  transform: scale(0.97);
+}
+
+/* Quick links */
+.quickGrid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.quickLink {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--c-text);
+  display: flex;
+  font-size: 13.5px;
+  font-weight: 500;
+  gap: 11px;
+  padding: 9px 12px;
+  transition-property: background-color, color, border-color, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.quickLink:hover {
+  background: var(--c-bg-soft);
+  border-color: var(--c-border);
+  color: var(--c-brand);
+}
+
+.quickLink:active {
+  transform: scale(0.985);
+}
+
+.quickIcon {
+  align-items: center;
+  background: var(--c-bg-soft);
+  border-radius: 7px;
+  color: var(--c-text-subtle);
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 28px;
+  justify-content: center;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+  width: 28px;
+}
+
+.quickLink:hover .quickIcon {
+  background: var(--c-brand-soft);
+  color: var(--c-brand);
+}
+
+/* Hit rows */
+.hit {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--c-text);
+  display: block;
+  padding: 11px 13px;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+.hit:hover, .hitActive {
+  background: var(--c-bg-soft);
+  border-color: var(--c-border);
+  color: var(--c-text);
+}
+
+.hitTitles {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 14px;
+  gap: 6px;
+}
+
+.hashIcon {
+  color: var(--c-text-subtle);
+  font-weight: 500;
+}
+
+.hitParent {
+  align-items: center;
+  color: var(--c-text-muted);
+  display: inline-flex;
+  gap: 4px;
+}
+
+.hitMain {
+  color: var(--c-text);
+  font-weight: 500;
+}
+
+.chevron {
+  color: var(--c-text-subtle);
+}
+
+.hitSnippet {
+  color: var(--c-text-muted);
+  display: block;
+  font-size: 13px;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Inline highlight: tint the glyphs and underline them. A background swatch on
+   an inline element overflows the line box and reads as an oversized sticker in
+   tight CJK runs, so we keep zero block footprint — color + underline only. */
+.mark {
+  background: none;
+  color: var(--c-brand);
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+  text-decoration-color: var(--c-brand);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* Footer */
+.footer {
+  align-items: center;
+  border-top: 1px solid var(--c-border);
+  color: var(--c-text-subtle);
+  display: flex;
+  font-size: 12px;
+  gap: 18px;
+  padding: 11px 18px;
+}
+
+.footer span {
+  align-items: center;
+  display: inline-flex;
+}
+
+.footer kbd {
+  align-items: center;
+  background: var(--c-bg-soft);
+  border: 1px solid var(--c-border);
+  border-radius: 5px;
+  color: var(--c-text-muted);
+  display: inline-flex;
+  font-family: var(--font-body);
+  font-size: 11px;
+  height: 18px;
+  justify-content: center;
+  line-height: 1;
+  margin-right: 5px;
+  min-width: 18px;
+  padding: 0 4px;
+}
+
+@media (max-width: 600px) {
+  .overlay {
+    padding: 0;
+  }
+  .panel {
+    border-radius: 0;
+    max-height: 100vh;
+    max-width: 100%;
+  }
+  .quickGrid {
+    grid-template-columns: 1fr;
+  }
+  .footer {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop, .panel {
+    animation: none;
+  }
+  .recentChip:active, .quickLink:active, .close:active {
+    transform: none;
+  }
+}

@@ -1,0 +1,205 @@
+---
+title: "Hermes Agent · 手动配置"
+description: "config.yaml + HERMES_HOME；三种 API 模式。"
+navLabel: "手动配置"
+---
+
+# Hermes Agent · 手动配置
+
+<VersionBadge version="v2026.6.19" date="2026-06-19" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
+
+<PageHeader
+  useCase="不用 CC Switch，直接改 Hermes 的 YAML 配置 / 用 hermes config 命令"
+  audience="批量改配置；用 HERMES_HOME 切换多份配置；想用 OAuth 而不是 API Key"
+  tldr="config.yaml 写 providers；或用 hermes config set 一行行设"
+/>
+
+<Callout type="info">Hermes 自带 `hermes config` 命令，**推荐用命令改而不是直接编辑 YAML**——避免缩进出错。</Callout>
+
+---
+
+## 配置文件位置
+
+| 平台 | 默认 `HERMES_HOME` | 主配置 |
+| --- | --- | --- |
+| Linux / macOS / WSL2 | `~/.hermes/` | `~/.hermes/config.yaml` |
+| Windows 原生 | `%LOCALAPPDATA%\hermes\` | `%LOCALAPPDATA%\hermes\config.yaml` |
+| 模板 | （仓库自带） | `config.yaml.example` |
+
+要切换多份配置，导出 `HERMES_HOME`：
+
+```bash
+HERMES_HOME=~/.hermes-work hermes
+```
+
+---
+
+## 三种 API 模式
+
+<Callout type="warning" title="api_mode 为必填字段">
+Hermes Agent 的 `api_mode` 字段是**必填项**，漏掉此字段或填了不支持的值，provider 会静默跳过，导致请求全部失败。
+
+升级后出现 `provider not found` 或无法连接，**第一个检查点就是 `api_mode` 是否填写且拼写正确**。
+
+推荐用 `hermes config set provider.<name>.api_mode <值>` 命令设置，避免 YAML 缩进出错。
+</Callout>
+
+Hermes 的 provider 必须挂在三种 API 模式之一上：
+
+| 模式 | 适用 |
+| --- | --- |
+| `chat_completions` | OpenAI 兼容端点（大多数中转、OpenRouter、xAI、本地推理等） |
+| `codex_responses` | OpenAI Codex Responses 端点 |
+| `anthropic_messages` | Anthropic 原生 / 兼容代理 |
+
+---
+
+## 推荐：用 `hermes config` 改
+
+```bash
+# 加一个 Claude provider
+hermes auth add anthropic
+
+# 或加一个自定义 provider
+hermes config set provider.foropencode.base_url https://foropencode.com/v1
+hermes config set provider.foropencode.api_mode chat_completions
+hermes config set provider.foropencode.api_key sk-xxx
+
+# 设默认 provider 和模型
+hermes config set default.provider foropencode
+hermes config set default.model gpt-5.5
+```
+
+具体子命令以 `hermes --help` / `hermes config --help` 为准。Hermes 版本更新很快，CLI 名字可能微调。
+
+---
+
+## 可用模型规格
+
+| 模型 | 上下文窗口 | 最大输出 | api_mode |
+| --- | --- | --- | --- |
+| `gpt-5.5` | 270,000（普通渠道）/ 1,050,000（Pro/Plus Codex） | 128,000 | `chat_completions` |
+| `gpt-5.4` | 1,050,000 | 128,000 | `chat_completions` |
+| `gpt-5.4-mini` | 400,000 | 128,000 | `chat_completions` |
+| `claude-opus-4-8` | 1,000,000 | 128,000 | `anthropic_messages` |
+| `claude-sonnet-4-6` | 1,000,000 | 64,000 | `anthropic_messages` |
+| `claude-haiku-4-5-20251001` | 200,000 | 64,000 | `anthropic_messages` |
+
+---
+
+## 直接改 YAML
+
+```yaml
+providers:
+  foropencode-claude:
+    api_mode: anthropic_messages
+    base_url: https://foropencode.com
+    api_key: sk-xxx
+    models:
+      - claude-sonnet-4-6
+      - claude-opus-4-8
+      - claude-haiku-4-5-20251001
+
+  foropencode-codex:
+    api_mode: chat_completions
+    base_url: https://foropencode.com/v1
+    api_key: sk-xxx
+    models:
+      - gpt-5.5
+      - gpt-5.4
+      - gpt-5.4-mini
+
+default:
+  provider: foropencode-codex
+  model: gpt-5.5
+```
+
+<Callout type="warning">**YAML 缩进敏感**，必须用空格不能用 Tab。`hermes config validate` 可以检查格式。</Callout>
+
+---
+
+## 鉴权方式
+
+Hermes 文档列出的 Anthropic 端鉴权方式：
+
+| 方式 | 配置 |
+| --- | --- |
+| 直接 API Key | `api_key` 字段或环境变量 `ANTHROPIC_API_KEY` |
+| OAuth | `hermes auth add anthropic` 走交互式登录 |
+| OpenRouter | `provider.openrouter.*` |
+| 任意兼容代理 | 自定义 provider，按 chat_completions 模式 |
+
+OAuth 会把 token 存到 `$HERMES_HOME/auth/` 下。
+
+---
+
+## 环境变量
+
+| 变量 | 作用 |
+| --- | --- |
+| `HERMES_HOME` | 配置目录；默认 `~/.hermes`，Win `%LOCALAPPDATA%\hermes` |
+| `ANTHROPIC_API_KEY` | 默认 Claude 鉴权 |
+| `ANTHROPIC_TOKEN` | 备用 token 字段 |
+| `OPENAI_API_KEY` | 默认 OpenAI 鉴权 |
+
+---
+
+## 多 provider 切换
+
+```bash
+# 临时用别的 provider
+hermes --provider foropencode-claude
+
+# 永久改默认
+hermes config set default.provider foropencode-claude
+
+# 看当前用什么
+hermes config get default
+```
+
+---
+
+## 改完之后
+
+```bash
+# 重启 hermes（直接退出 + 重启即可，配置在启动时读）
+hermes
+```
+
+Hermes 会在启动时验证 provider 连通性，配错会立刻报错。要单独测：
+
+```bash
+hermes auth status
+```
+
+---
+
+## Termux 特别说明
+
+Termux 环境下 Hermes 的官方安装脚本会用裁剪过的 `[termux]` extra——完整 extra 会带入 Android 不兼容的语音依赖。
+
+如果手动 `uv pip install`，记得：
+
+```bash
+uv pip install -e ".[termux]"   # 推荐
+uv pip install -e ".[all,dev]"  # 仅非 Android
+```
+
+---
+
+## 常见排查
+
+| 现象 | 检查 |
+| --- | --- |
+| YAML 解析错 | 缩进对吗？用了 Tab 吗？`hermes config validate` |
+| `provider not found` | `default.provider` 拼写对吗？大小写敏感 |
+| 401 | API Key 对应分组对吗？`hermes auth status` |
+| 多端口冲突 | Hermes 默认占的端口被占，查 `hermes config get gateway` |
+
+<RelatedPages
+  title="相关"
+  items={[
+    { route: '/hermes/cc-switch', hint: '回到 CC Switch 流程' },
+    { route: '/hermes/install', hint: '装客户端' },
+  ]}
+/>

@@ -1,0 +1,81 @@
+---
+title: "CC-014：413 请求体过大 / 400 Invalid model name"
+hidden: true
+---
+
+# CC-014：413 请求体过大 / 400 Invalid model name
+
+<ErrorMeta
+  component="Claude Code 本体"
+  version="不限版本"
+  platform="Linux / macOS / Windows"
+  date="2026-03-14"
+/>
+---
+
+## 问题现象
+
+**现象 A：**
+
+```text
+API Error: 413 Request Entity Too Large
+```
+
+**现象 B：**
+
+```text
+API Error: 400 Invalid model name
+```
+
+两者均为请求阶段报错，与网络无关。
+
+---
+
+## 根因分析
+
+```text
+现象 A（413）：
+  当前会话上下文 token 数量过多
+  → 请求体超过服务端允许的最大体积
+  → 返回 413
+
+现象 B（400 Invalid model name）：
+  请求模型为 Claude Opus
+  → Opus 并发配额不足，服务端降级拒绝
+  → 以 400 Invalid model name 形式返回
+```
+
+---
+
+## 修复步骤
+
+### 现象 A：413 请求体过大
+
+**方式一：清理上下文**
+
+```text
+/clear
+```
+
+或退出后重新打开 Claude Code 进入新会话。
+
+**方式二：压缩上下文**
+
+```text
+/compact
+```
+
+保留摘要后继续，避免完全丢失对话记录。
+
+### 现象 B：400 Invalid model name（Opus 并发不足）
+
+此为服务端并发限制问题，无需修改配置，稍等片刻后重试即可。
+
+---
+
+## 预防措施
+
+| 做法 | 避免的问题 |
+| --- | --- |
+| 长任务中定期执行 `/compact` | 上下文堆积触发 413 |
+| Opus 并发失败时稍等重试，而非反复修改配置 | 无效排查浪费时间 |

@@ -1,0 +1,74 @@
+---
+title: "OpenCode 桌面版 · 安装"
+description: "OpenCode 桌面客户端（BETA）安装方式。"
+navLabel: "安装"
+---
+
+# OpenCode 桌面版 · 安装
+
+<VersionBadge version="v1.17.8 (BETA)" date="2026-06-17" license="MIT" github="https://github.com/anomalyco/opencode" />
+
+<PageHeader
+  useCase="用图形化界面管理 OpenCode 会话、模型与文件浏览"
+  audience="不想用终端、需要图形化管理会话的用户"
+  tldr="brew / scoop 装桌面 → 启动后自动读 CLI 的 opencode.json"
+/>
+
+> 桌面版与 CLI **配置共享** `~/.config/opencode/opencode.json`。CLI 安装见 [OpenCode CLI · 安装](/opencode/cli/install)。
+
+<Callout type="warning">**桌面版当前标注为 BETA**。CLI 是主线版本——如果不确定要不要用桌面版，先用 CLI。</Callout>
+
+---
+
+## 安装
+
+<Tabs defaultValue="mac">
+  <Tab label="macOS" value="mac">
+    ```bash
+    brew install --cask opencode-desktop
+    ```
+  </Tab>
+  <Tab label="Windows" value="win">
+    ```powershell
+    scoop bucket add extras
+    scoop install extras/opencode-desktop
+    ```
+  </Tab>
+</Tabs>
+
+启动后，桌面版会自动读取与 CLI 完全相同的 `~/.config/opencode/opencode.json`。
+
+---
+
+## 验证
+
+启动应用，进入主界面能看到会话列表与模型选择即 OK。下一步配 API：
+
+<RelatedPages
+  title="下一步"
+  items={[
+    { route: '/opencode/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/opencode/manual', hint: '直接改 opencode.json' },
+    { route: '/opencode/cli/install', hint: '想用终端？装 CLI' },
+  ]}
+/>
+
+---
+
+## 与 CLI 的差异
+
+| 维度 | CLI | 桌面版 |
+| --- | --- | --- |
+| 启动方式 | 终端跑 `opencode` | 启动应用 |
+| 配置文件 | `~/.config/opencode/opencode.json` | 同上，**共享** |
+| 当前稳定度 | 主线稳定版 | BETA |
+| 推荐使用场景 | 已熟悉 CLI 的开发者 | 偏好 GUI、需要图形化管理会话的用户 |
+
+桌面版常用功能：
+
+- **会话列表**：左侧侧栏显示历史会话，可继续上次的工作
+- **模型切换**：右上角下拉切换当前 provider / 模型
+- **文件浏览器**：内置的代码浏览器，定位修改位置不需要切到 IDE
+- **build / plan 模式**：与 CLI 同款，按钮切换
+
+<Callout type="info">两端共享 `opencode.json`，**改一边会影响另一边**。如果想分开用，可以借助 `OPENCODE_CONFIG` 或 `OPENCODE_CONFIG_DIR` 环境变量给桌面版指定独立配置目录。</Callout>

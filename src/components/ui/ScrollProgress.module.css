@@ -1,0 +1,27 @@
+.bar {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  height: 3px;
+  left: 0;
+  padding: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: calc(var(--z-nav) + 1);
+}
+
+.fill {
+  background: linear-gradient(90deg, var(--c-brand), #5eb1f5);
+  display: block;
+  height: 100%;
+  transform-origin: left center;
+  width: 100%;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fill {
+    transition: transform 0.12s linear;
+  }
+}

@@ -1,0 +1,77 @@
+.hero {
+  padding: 64px 0 32px;
+}
+
+.inner {
+  margin: 0 auto;
+  max-width: var(--layout-home-max);
+  padding: 0 32px;
+}
+
+.heading {
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.name {
+  background: linear-gradient(120deg, var(--c-brand), #5eb1f5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: block;
+}
+
+.text {
+  color: var(--c-text);
+  display: block;
+}
+
+.tagline {
+  color: var(--c-text-muted);
+  font-size: 20px;
+  margin: 16px 0 32px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.button {
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+
+.primary {
+  background: var(--c-brand);
+  color: #fff;
+}
+
+.primary:hover {
+  background: var(--c-brand-hover);
+  color: #fff;
+}
+
+.secondary {
+  background: var(--c-bg-soft);
+  color: var(--c-text);
+}
+
+.secondary:hover {
+  background: var(--c-border);
+  color: var(--c-text);
+}
+
+@media (max-width: 720px) {
+  .hero { padding: 32px 0 16px; }
+  .heading { font-size: 36px; }
+  .tagline { font-size: 16px; }
+}
