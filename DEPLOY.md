@@ -8,6 +8,84 @@
 - `compose.yaml`
 - `nginx.conf`
 - `.env.container.example`
+- `compose.prebuilt.yaml`
+
+## 推荐：使用 GitHub 预编译镜像部署
+
+如果不希望在服务器上重新编译，推荐使用 GitHub Actions 生成的预编译镜像：
+
+```text
+ghcr.io/cengyj/model-gateway-docs:latest
+```
+
+仓库已经提供 `.github/workflows/build-image.yml`。推送到 `main` 分支后，GitHub 会自动构建 `linux/amd64` 镜像并发布到 GitHub Container Registry。你的 Debian x86_64 服务器可以直接拉取这个镜像运行。
+
+### 在 GitHub 上编译
+
+1. 推送代码到 `main` 分支，或者在 GitHub 仓库的 `Actions` 页面手动运行 `Build prebuilt container image`。
+2. 如果需要指定正式访问域名，在仓库的 `Settings` -> `Secrets and variables` -> `Actions` -> `Variables` 中添加：
+
+```text
+SITE_URL=https://你的域名
+```
+
+也可以手动运行 workflow 时填写 `site_url`。
+
+注意：`SITE_URL` 是构建阶段写入 Docusaurus 的，域名变更后需要重新运行 GitHub Actions 构建镜像。
+
+### 在服务器 `/opt` 部署
+
+在服务器创建目录：
+
+```bash
+mkdir -p /opt/model-gateway-docs
+cd /opt/model-gateway-docs
+```
+
+把仓库中的 `compose.prebuilt.yaml` 内容保存为 `/opt/model-gateway-docs/compose.yaml`，或者在 1Panel 中直接导入：
+
+```yaml
+services:
+  docs:
+    image: ghcr.io/cengyj/model-gateway-docs:${IMAGE_TAG:-latest}
+    container_name: model-gateway-docs
+    ports:
+      - "${HOST_PORT:-8081}:80"
+    restart: unless-stopped
+```
+
+可选创建 `/opt/model-gateway-docs/.env`：
+
+```dotenv
+IMAGE_TAG=latest
+HOST_PORT=8081
+```
+
+启动：
+
+```bash
+docker compose up -d
+```
+
+如果使用 1Panel：
+
+- 应用目录选择 `/opt/model-gateway-docs`
+- Compose 内容使用 `compose.prebuilt.yaml`
+- 外部端口默认 `8081`
+- 反向代理目标填 `http://127.0.0.1:8081`
+
+如果 GHCR 镜像不是公开的，需要先在服务器登录：
+
+```bash
+docker login ghcr.io
+```
+
+更新时，只需要让 GitHub Actions 重新构建镜像，然后服务器执行：
+
+```bash
+docker compose pull
+docker compose up -d
+```
 
 ## 先导出部署包
 
