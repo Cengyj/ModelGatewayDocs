@@ -1,6 +1,9 @@
 services:
   docs:
-    image: ${IMAGE_NAME:-foropencode-docs}:${IMAGE_TAG:-latest}
+    # Default: pull the prebuilt image from GHCR (built by GitHub Actions on
+    # every push to main). For a local source build instead, set
+    # IMAGE_NAME=foropencode-docs in .env and run `docker compose up -d --build`.
+    image: ${IMAGE_NAME:-ghcr.io/cengyj/modelgatewaydocs}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
