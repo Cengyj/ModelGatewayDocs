@@ -67,6 +67,8 @@ docker compose up -d --build
 
 ## 反向代理示例（Nginx）
 
+应用容器只发与协议无关的安全头；**HTTPS 跳转和 HSTS 请在反向代理层配置**（域名全站 HTTPS 后再加 HSTS）：
+
 ```nginx
 server {
   listen 443 ssl http2;
@@ -74,6 +76,9 @@ server {
 
   ssl_certificate     /etc/letsencrypt/live/docs.example.com/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/docs.example.com/privkey.pem;
+
+  # 域名确认全站 HTTPS 后启用：
+  add_header Strict-Transport-Security "max-age=31536000" always;
 
   location / {
     proxy_pass         http://127.0.0.1:8081;

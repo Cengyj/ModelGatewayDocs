@@ -52,7 +52,11 @@ const productionSecurityHeaders = [
       "frame-src 'none'",
       "manifest-src 'self'",
       "worker-src 'self' blob:",
-      'upgrade-insecure-requests',
+      // NOTE: no `upgrade-insecure-requests` here. The container may be
+      // served over plain HTTP (IP:port, LAN, health checks); that directive
+      // makes browsers rewrite every asset URL to https:// and breaks such
+      // deployments. HTTPS enforcement (redirect + HSTS) belongs on the TLS
+      // reverse proxy / CDN in front — see DEPLOY.md.
     ].join('; '),
   },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -64,9 +68,9 @@ const productionSecurityHeaders = [
     key: 'Permissions-Policy',
     value: 'camera=(), geolocation=(), microphone=(), payment=(), usb=()',
   },
-  // Do not cover subdomains until the operator confirms every subdomain is
-  // HTTPS-only. HSTS is ignored on local HTTP and only takes effect over HTTPS.
-  { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
+  // Strict-Transport-Security is intentionally NOT set at the app layer:
+  // browsers ignore it over HTTP, and the terminating proxy is the right
+  // place to add it once the domain is HTTPS-only.
 ];
 
 /** @type {import('next').NextConfig} */
