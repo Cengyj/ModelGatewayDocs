@@ -11,7 +11,7 @@ export function SearchButton({ onClick }: Props) {
     setMac(/Mac|iPhone|iPod|iPad/i.test(navigator.platform));
   }, []);
   return (
-    <button type="button" className={styles.button} onClick={onClick}>
+    <button type="button" className={styles.button} onClick={onClick} aria-label="搜索文档">
       <span className={styles.icon} aria-hidden="true">
         <SearchIcon />
       </span>

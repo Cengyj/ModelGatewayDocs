@@ -98,6 +98,15 @@
   margin: 40px 0;
 }
 
+/* MDX authors separate sections with `---` followed by `## heading`. The h2
+   already draws its own top border + top padding, so an hr right before it
+   produces a double rule with ~130px of dead space. Hide the hr and let the
+   h2's uniform rule be the separator (falls back to the old look in browsers
+   without :has support). */
+.prose hr:has(+ h2) {
+  display: none;
+}
+
 .prose a {
   color: var(--c-brand);
   text-decoration: underline;
@@ -120,14 +129,20 @@
   padding: 1px 6px;
 }
 
-.prose table {
+/* Tables keep native table display for semantics (screen readers, search
+   engines); horizontal overflow is handled by the .tableWrap div that the MDX
+   `table` component renders around every table. */
+.prose .table-wrap {
   border: 1px solid var(--c-border);
-  border-collapse: collapse;
   border-radius: var(--radius-md);
-  display: block;
   margin: 24px 0;
   max-width: 100%;
   overflow-x: auto;
+}
+
+.prose table {
+  border-collapse: collapse;
+  margin: 0;
   width: 100%;
 }
 
@@ -150,6 +165,25 @@
   padding: 11px 14px;
   text-align: left;
   vertical-align: top;
+}
+
+/* Cells at the outer edge would double up with the wrapper's border */
+.prose .table-wrap th:first-child,
+.prose .table-wrap td:first-child {
+  border-left: 0;
+}
+
+.prose .table-wrap th:last-child,
+.prose .table-wrap td:last-child {
+  border-right: 0;
+}
+
+.prose .table-wrap thead th {
+  border-top: 0;
+}
+
+.prose .table-wrap tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .prose th {

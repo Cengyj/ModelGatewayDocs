@@ -1,22 +1,24 @@
 ---
 title: "Claude 桌面版 · CC Switch 配置"
-description: "用 CC Switch 把本站中转接到 Claude 桌面客户端。"
+description: "在当前 Claude 官方功能明确支持的前提下，用第三方社区工具 CC Switch 管理网关配置。"
 navLabel: "CC Switch 配置"
 ---
 
 # Claude 桌面版 · CC Switch 配置
 
-<VersionBadge version="桌面版" date="2026-06-19" license="Proprietary" github="https://claude.com/download" />
+<VersionBadge version="滚动发布" date="2026-07-26 核对" license="Proprietary" github="https://claude.com/download" sourceLabel="官方下载" />
 
 <PageHeader
   useCase="可视化配置 Claude 桌面版的第三方中转入口"
   audience="已在 CC Switch 装好的 Claude 桌面版用户"
-  tldr="CC Switch 主界面 → 第二个 Claude 图标 → 填 Key 与请求地址 → 重启桌面版直接用"
+  tldr="先确认 Claude 当前官方支持第三方推理 → 备份配置 → 再用 CC Switch"
 />
 
-> 前置：桌面客户端已装好并启用 Developer Mode → 见 [桌面版 · 安装](/claude-code/desktop/install)。
+> 前置：桌面客户端来自 [Claude 官方下载页](https://claude.com/download)，且当前官方界面或文档明确提供第三方推理入口。
 
-<Callout type="warning">Claude 桌面版的第三方中转入口**仅接受 HTTPS 域名**，IP + 端口、HTTP 协议、带 `/v1` 后缀的都会被拒。</Callout>
+<Callout type="warning" title="CC Switch 是第三方社区工具">
+CC Switch 不是 Anthropic 产品。其“Claude Desktop”支持不代表 Anthropic 对第三方网关背书。使用前请查看 [farion1231/cc-switch 官方仓库](https://github.com/farion1231/cc-switch) 的当前支持列表并备份配置；如果 Claude 当前版本没有公开的第三方推理入口，不要用工具强制开启。
+</Callout>
 
 ---
 
@@ -25,8 +27,8 @@ navLabel: "CC Switch 配置"
 <Walkthrough title="CC Switch · 配置 Claude Desktop">
   <Frame step="1" title="选中 Claude Desktop 图标，点击添加"
     image="/img/cc-switch/cc-switch-desktop-main-add.png"
-    imageAlt="CC Switch 主界面：选中第二个 Claude 图标（Claude Desktop），点右上角添加按钮">
-    打开 CC Switch，顶部工具栏选中**第二个 Claude 图标**（Claude Desktop，带屏幕的那个）。点右上角 **＋** 按钮新建一项。
+    imageAlt="CC Switch 主界面：选中 Claude Desktop 图标，点右上角添加按钮">
+    打开 CC Switch，顶部工具栏按名称选中 **Claude Desktop 图标**。点右上角 **＋** 按钮新建一项；不要依赖图标排列位置。
   </Frame>
 
   <Frame step="2" title="填写供应商信息"
@@ -48,7 +50,7 @@ navLabel: "CC Switch 配置"
   <Frame step="3" title="确认「使用中」，重启桌面版"
     image="/img/cc-switch/cc-switch-active-status.png"
     imageAlt="鼠标悬停在配置行上，显示「使用中」表示配置成功">
-    鼠标悬停在刚添加的配置行上，显示 **「使用中」** 即表示配置已写入。关闭 CC Switch，**完全重启** Claude 桌面版后即可直接使用。
+    鼠标悬停在刚添加的配置行上，显示 **「使用中」** 只表示 CC Switch 已写入配置，不代表 Claude 当前版本接受该配置。完全重启后仍应在 Claude 的可见界面核对实际 provider 和最终请求域名。
   </Frame>
 </Walkthrough>
 
@@ -56,24 +58,13 @@ navLabel: "CC Switch 配置"
 
 ## 可用模型
 
-Claude 桌面版使用 **Anthropic 格式**，请求地址填 `https://foropencode.com`（必须 HTTPS 域名，不带 `/v1`）：
-
-| 模型 ID | 上下文窗口 | 最大输出 |
-| --- | --- | --- |
-| `claude-opus-4-8` | 1,000,000 | 128,000 |
-| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
-| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+Anthropic 官方当前模型清单与第三方网关实际支持范围是两套事实。选择模型时，以网关控制台或模型列表的实时结果为准，并确认 Claude 当前版本支持对应协议；不要根据本站静态表格推定可用性。
 
 ---
 
 ## 配置写到哪
 
-CC Switch 将配置写入 `~/.claude/settings.json`（CLI 与桌面版共用同一文件）：
-
-| 平台 | 路径 |
-| --- | --- |
-| macOS / Linux | `~/.claude/settings.json` |
-| Windows | `%USERPROFILE%\.claude\settings.json` |
+CC Switch 与 Claude Desktop 的配置路径可能随两边版本变化。本次无法从 Anthropic 官方资料确认一个稳定、受支持的桌面版内部路径，因此不再宣称它与 CLI 共用 `~/.claude/settings.json`。以 CC Switch 当前版本的备份提示和 Claude 官方说明为准。
 
 ---
 
@@ -85,3 +76,9 @@ CC Switch 将配置写入 `~/.claude/settings.json`（CLI 与桌面版共用同�
     { route: '/claude-code/errors', hint: '遇到 401 / 403 等报错' },
   ]}
 />
+
+---
+
+## 资料来源与限制
+
+资料来源：[Claude 官方下载页](https://claude.com/download) · [LLM Gateway · Desktop app](https://code.claude.com/docs/en/llm-gateway-connect) · [CC Switch 官方仓库](https://github.com/farion1231/cc-switch)（2026-07-26 核对）。桌面版的官方第三方推理入口为管理员分发配置或应用内 Developer Mode 表单；本页仅在该官方入口可用时适用，不要用第三方工具写入未记录的内部文件。

@@ -1,17 +1,17 @@
 ---
 title: "OpenCode CLI · 安装"
-description: "OpenCode 开源终端 AI 编码代理的安装方式。支持 75+ 供应商。"
+description: "OpenCode 开源终端 AI 编码代理的官方安装方式与下载安全说明。"
 navLabel: "安装"
 ---
 
 # OpenCode CLI · 安装
 
-<VersionBadge version="v1.17.8" date="2026-06-17" license="MIT" github="https://github.com/anomalyco/opencode" />
+<VersionBadge version="v1.18.5" date="2026-07-24" license="MIT" github="https://github.com/anomalyco/opencode" />
 
 <PageHeader
-  useCase="用一个客户端调 Claude / OpenAI / DeepSeek / Ollama 等 75+ 供应商"
+  useCase="用一个客户端连接多种官方、第三方或本地模型供应商"
   audience="想自由组合模型的开发者；想在本地跑 Ollama 或低成本试 DeepSeek 的用户"
-  tldr="curl 一行装好 → opencode --version 验证"
+  tldr="查看 OpenCode 官方安装方式 → 核对发布域名 → opencode --version 验证"
 />
 
 > CLI 与桌面版**配置共享** `~/.config/opencode/opencode.json`，但**安装入口不同**。桌面版安装见 [OpenCode 桌面版 · 安装](/opencode/desktop/install)。
@@ -20,25 +20,25 @@ navLabel: "安装"
 
 ## 支持哪些供应商？
 
-OpenCode 内置 75+ 供应商适配，覆盖主流国际服务和国产中转：
+OpenCode 可通过内置适配和自定义 provider 连接多种服务；具体列表会随版本变化，应以 [OpenCode 官方 Providers 文档](https://opencode.ai/docs/providers/) 为准：
 
 | 类别 | 示例 |
 | --- | --- |
-| 官方大厂 | Anthropic (Claude)、OpenAI、Google Gemini、AWS Bedrock、Azure OpenAI |
-| 高性价比 | DeepSeek、Groq、Mistral、Together AI |
-| 国内中转 | OpenRouter、自建 API Gateway、各类兼容 OpenAI 格式的接口 |
-| 本地部署 | Ollama（完全离线，免 API key） |
+| 模型厂商与云平台 | Anthropic、OpenAI、Google Vertex AI、Amazon Bedrock、Azure OpenAI 等；以官方 Providers 列表为准 |
+| 其他服务商 | DeepSeek、Groq、Together AI、OpenRouter、Ollama 等 |
+| 自定义兼容端点 | 自建 API Gateway 或经双方文档确认的兼容接口 |
+| 本地模型运行时 | Ollama 等；是否离线取决于模型、工具和其他已启用功能 |
 
-配置供应商时，只需在 `opencode.json` 的 `provider` 字段指定端点和 key；CC Switch 会自动生成此配置，无需手填。
+可按 OpenCode 官方文档在 `opencode.json` 的 `provider` 字段配置端点和 Key；也可选择第三方 CC Switch 生成配置，但应先查看它准备写入的内容并备份原文件。
 
 ---
 
 ## 系统要求
 
 <Callout type="info" title="环境要求">
-- **Node.js** 20+（npm 安装时需要）
-- **操作系统**：macOS、Linux（含 WSL2）、Windows（Scoop / Chocolatey）、Arch Linux
-- **磁盘**：约 100 MB
+- **Node.js / 包管理器**：仅在选择 npm 等对应安装方式时需要
+- **操作系统**：按官方安装页选择 macOS、Linux、Windows 或 Arch Linux 的当前安装方式
+- **下载来源**：`opencode.ai`、`github.com/anomalyco/opencode` 或官方文档列出的包管理器
 </Callout>
 
 ---
@@ -46,19 +46,16 @@ OpenCode 内置 75+ 供应商适配，覆盖主流国际服务和国产中转：
 ## 安装
 
 <Tabs defaultValue="curl">
-  <Tab label="curl 一键脚本" value="curl">
-    官方推荐，自动检测平台、安装最新版本：
+  <Tab label="官方安装脚本" value="curl">
+    OpenCode 官方文档列出的安装脚本会检测平台并安装当前版本：
+
+    <Callout type="warning">该命令会从 `opencode.ai` 下载并执行脚本。请先查看 [OpenCode 官方安装文档](https://opencode.ai/docs/) 或下载脚本到本地审阅；域名、证书或内容不一致时停止执行。</Callout>
 
     ```bash
     curl -fsSL https://opencode.ai/install | bash
     ```
 
-    安装结束后重新加载 shell：
-
-    ```bash
-    source ~/.bashrc   # bash 用户
-    source ~/.zshrc    # zsh 用户
-    ```
+    安装结束后按脚本输出更新 PATH，或打开一个新终端；不要盲目 `source` 不属于当前 shell 的配置文件。
   </Tab>
   <Tab label="npm" value="npm">
     ```bash
@@ -68,7 +65,7 @@ OpenCode 内置 75+ 供应商适配，覆盖主流国际服务和国产中转：
     注意包名是 `opencode-ai`，不是 `opencode`。
   </Tab>
   <Tab label="Homebrew (macOS)" value="brew">
-    官方 tap（优先，始终最新）：
+    官方仓库当前优先推荐的 tap：
 
     ```bash
     brew install anomalyco/tap/opencode
@@ -114,7 +111,7 @@ OpenCode 内置 75+ 供应商适配，覆盖主流国际服务和国产中转：
 
 ```bash
 opencode --version
-# 输出示例：1.17.8
+# 输出示例：1.18.5
 ```
 
 能输出版本号即装好。下一步配 API：
@@ -122,7 +119,7 @@ opencode --version
 <RelatedPages
   title="下一步"
   items={[
-    { route: '/opencode/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/opencode/cc-switch', hint: '用第三方图形界面管理 API 配置' },
     { route: '/opencode/manual', hint: '直接改 opencode.json' },
     { route: '/opencode/desktop/install', hint: '想用 GUI？装桌面版（BETA）' },
   ]}
@@ -130,14 +127,4 @@ opencode --version
 
 ---
 
-## 常见问题
-
-<Callout type="warning" title="旧版本升级注意">
-如果你安装的是早于 0.1.x 的旧版本，官方要求**先完全卸载再重装**，不能直接覆盖升级：
-
-```bash
-# 卸载旧版（npm 安装的情况）
-npm uninstall -g opencode-ai
-# 再按上面的 curl 脚本重装
-```
-</Callout>
+资料来源：[OpenCode 官方文档](https://opencode.ai/docs/) · [anomalyco/opencode Releases](https://github.com/anomalyco/opencode/releases/latest)（2026-07-26 核对）

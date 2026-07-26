@@ -109,8 +109,12 @@ export function SearchModal({ open, onClose }: Props) {
           score: titleScore + 500,
         });
       }
-      // Heading-level hits
+      // Heading-level hits. Skip headings whose text is already contained in
+      // the page title ("安装" inside "OpenClaw · 安装"): the title-level hit
+      // above always outscores them, so they'd only show up as near-duplicate
+      // "页面 › 安装" noise below the page entry.
       for (const h of doc.headings) {
+        if (doc.title.toLowerCase().includes(h.text.toLowerCase())) continue;
         const s = scoreText(h.text.toLowerCase(), needle);
         if (s > 0) {
           const route = doc.route === '/' ? `/#${h.id}` : `${doc.route}#${h.id}`;
@@ -187,6 +191,13 @@ export function SearchModal({ open, onClose }: Props) {
             placeholder="搜索文档"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            role="combobox"
+            aria-label="搜索文档"
+            aria-expanded={hits.length > 0}
+            aria-controls="search-results-list"
+            aria-activedescendant={
+              trimmed && hits.length > 0 ? `search-hit-${selectedIndex}` : undefined
+            }
           />
           <button
             type="button"
@@ -197,9 +208,9 @@ export function SearchModal({ open, onClose }: Props) {
             {query ? <ClearIcon /> : 'esc'}
           </button>
         </div>
-        <ul className={styles.results} role="listbox">
+        <ul id="search-results-list" className={styles.results} role="listbox" aria-label="搜索结果">
           {!trimmed ? (
-            <li className={styles.emptyState}>
+            <li className={styles.emptyState} role="presentation">
               {recents.length > 0 ? (
                 <div className={styles.section}>
                   <div className={styles.sectionHead}>
@@ -249,14 +260,14 @@ export function SearchModal({ open, onClose }: Props) {
             </li>
           ) : null}
           {trimmed && hits.length === 0 ? (
-            <li className={styles.empty}>
+            <li className={styles.empty} role="presentation">
               <span className={styles.emptyIcon} aria-hidden="true"><SearchIcon /></span>
               <span>未找到与「{trimmed}」匹配的内容</span>
               <span className={styles.emptyHint}>试试更换关键词，或浏览上方的快速跳转</span>
             </li>
           ) : null}
           {hits.map((hit, i) => (
-            <li key={`${hit.routeHash}-${i}`} role="option" aria-selected={i === selectedIndex}>
+            <li key={`${hit.routeHash}-${i}`} id={`search-hit-${i}`} role="option" aria-selected={i === selectedIndex}>
               <Link
                 href={hit.routeHash}
                 className={`${styles.hit} ${i === selectedIndex ? styles.hitActive : ''}`}

@@ -1,425 +1,132 @@
 ---
 title: "OpenCode · 手动配置"
-description: "~/.config/opencode/opencode.json JSONC 格式 + 项目级覆盖。"
+description: "OpenCode JSON/JSONC 配置、项目级覆盖和第三方 custom provider 的安全写法。"
 navLabel: "手动配置"
 ---
 
 # OpenCode · 手动配置
 
-<VersionBadge version="v1.17.8" date="2026-06-17" license="MIT" github="https://github.com/anomalyco/opencode" />
+<VersionBadge version="v1.18.5" date="2026-07-24" license="MIT" github="https://github.com/anomalyco/opencode" />
 
 <PageHeader
-  useCase="直接改 opencode.json 配 provider 与 model；项目级覆盖用户级"
-  audience="一个供应商要接多模型；项目仓库要锁定模型/参数"
-  tldr="provider 写 provider.<name>；model 字段格式 <name>/<model-id>"
+  useCase="直接配置 OpenCode provider、model 与项目级覆盖"
+  audience="需要自定义端点或多 provider 的开发者"
+  tldr="配置文件使用 JSON/JSONC → Key 引用环境变量 → model 写 provider/model-id"
 />
 
-<Callout type="info">CLI 和桌面版 **共享同一份** `~/.config/opencode/opencode.json`。改一边两边都生效。</Callout>
-
 ---
 
-## 配置文件位置
+## 配置文件
 
-| 范围 | 路径 |
+| 范围 | 常用位置 |
 | --- | --- |
-| 全局（推荐） | `~/.config/opencode/opencode.json` |
-| 终端 UI 偏好 | `~/.config/opencode/tui.json` |
-| 项目级（覆盖全局） | 仓库根目录 `opencode.json` |
-| 缓存的鉴权信息 | `~/.local/share/opencode/auth.json` |
-| 系统级（管理员部署） | macOS `/Library/Application Support/opencode/`、Linux `/etc/opencode/`、Windows `%ProgramData%\opencode` |
+| 全局 | `~/.config/opencode/opencode.json` |
+| 项目级 | 仓库根目录 `opencode.json` |
+| 自定义配置文件 | `OPENCODE_CONFIG`（指向单个配置文件路径） |
 
-Windows 上 `~/.config/` 对应 `%APPDATA%`；`~/.local/share/` 对应 `%LOCALAPPDATA%`。
+另有 `OPENCODE_CONFIG_DIR` 环境变量，用于指定额外搜索 agents、commands、modes、plugins 等扩展资源的目录；官方文档未说明它会加载 `opencode.json`，不要把它当作配置文件的自定义路径。
 
-文件**格式是 JSONC**——可以写 `//` 注释。
+OpenCode 配置支持 JSON 和 JSONC。不同层会合并，项目级配置会覆盖冲突项。不要在项目文件中写真实 API Key，因为它很容易被提交到仓库。
 
 ---
 
-## 最小可用模板
+## OpenAI 兼容 custom provider
+
+以下 schema 来自 OpenCode 官方 custom provider 文档；`foropencode.com` 是第三方网关：
 
 ```json
 {
+  "$schema": "https://opencode.ai/config.json",
   "provider": {
     "foropencode": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "foropencode (third-party gateway)",
       "options": {
         "baseURL": "https://foropencode.com/v1",
-        "apiKey": "{env:OPENAI_API_KEY}"
+        "apiKey": "{env:FOROPENCODE_API_KEY}"
+      },
+      "models": {
+        "gateway-model-id": {
+          "name": "gateway-model-id"
+        }
       }
     }
   },
-  "model": "foropencode/gpt-5.5"
+  "model": "foropencode/gateway-model-id"
 }
 ```
-
-然后导出 Key：
 
 ```bash
-export OPENAI_API_KEY=sk-xxx
+export FOROPENCODE_API_KEY="sk-xxx"
+opencode
 ```
 
-启动 `opencode`。
+`{env:VAR}` 让 OpenCode 在运行时读取环境变量，避免把 Key 写进配置。模型 ID 应从网关实际模型列表取得。
 
 ---
 
-## 顶层字段
+## Anthropic 兼容 custom provider
 
-| 字段 | 含义 |
-| --- | --- |
-| `provider` | 所有供应商的字典 |
-| `model` | 默认用哪个模型，格式 `<provider 名>/<model ID>` |
-| `theme` | TUI 主题 |
-| `keybinds` | 自定义快捷键 |
-| `mcp` | MCP server 配置 |
-| `agent` | 自定义 agent 行为（继承 `build` / `plan`） |
-| `references` | 上下文引用文件列表（`reference` 已废弃，用 `references`） |
-
----
-
-## `provider.<name>` 段
+只有第三方端点明确支持当前 Anthropic Messages 行为时，才使用 Anthropic adapter。以下 `@ai-sdk/anthropic` 写法是社区常见配置，未见于 OpenCode 官方 Providers 文档的第三方端点示例；字段是否生效以 OpenCode 当前版本与端点方文档为准：
 
 ```json
 {
+  "$schema": "https://opencode.ai/config.json",
   "provider": {
-    "foropencode": {
-      "options": {
-        "baseURL": "https://foropencode.com/v1",
-        "apiKey": "{env:OPENAI_API_KEY}"
-      }
-    },
-    "anthropic-direct": {
+    "gateway-claude": {
+      "npm": "@ai-sdk/anthropic",
+      "name": "Third-party Anthropic-compatible gateway",
       "options": {
         "baseURL": "https://foropencode.com",
-        "apiKey": "{env:ANTHROPIC_API_KEY}"
-      }
-    }
-  }
-}
-```
-
-| 子字段 | 含义 |
-| --- | --- |
-| `options.baseURL` | API 根地址；OpenAI 兼容端点带 `/v1`，Anthropic 端点不带 |
-| `options.apiKey` | API Key；可用 `{env:VAR}` 引用环境变量 |
-| `options.headers` | 额外 HTTP 头，例如外接场景的 UA |
-| `disabled` | `true` 时该 provider 不出现在选择器 |
-
-`{env:VAR}` 和 `{file:PATH}` 是 OpenCode 的占位语法，启动时解析。这样 Key 不进配置文件，安全些。
-
-<Callout type="tip" title="自定义 provider 要不要写 npm 字段？">
-OpenCode 基于 AI SDK 选适配器。如果你的 provider ID **复用内置名**（如 `anthropic`、`openai`），只填 `options.baseURL` 覆盖即可。但如果是**全新的自定义 ID**（如本站 `foropencode`），OpenAI 兼容端点建议显式加 `"npm": "@ai-sdk/openai-compatible"`，Anthropic 端点用 `"npm": "@ai-sdk/anthropic"`，OpenCode 才知道该用哪个适配器去请求。
-
-来源：[OpenCode Providers 官方文档](https://opencode.ai/docs/providers/)（2026-06 核对）
-</Callout>
-
----
-
-## 模型规格速查
-
-| 模型 | 上下文窗口 | 最大输出 |
-| --- | --- | --- |
-| `gpt-5.5` | 270,000（普通渠道）/ 1,050,000（Pro/Plus Codex） | 128,000 |
-| `gpt-5.4` | 1,050,000 | 128,000 |
-| `gpt-5.4-mini` | 400,000 | 128,000 |
-| `claude-opus-4-8` | 1,000,000 | 128,000 |
-| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
-| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
-
----
-
-## `provider.<name>.models.<id>` 段
-
-在 provider 下可为每个模型单独声明上下文窗口、最大输出、推理档位和 I/O 能力，OpenCode 会据此在模型选择器里显示档位切换和附件支持提示。
-
-<Tabs defaultValue="gpt55">
-  <Tab label="gpt-5.5" value="gpt55">
-    ```json
-    {
-      "provider": {
-        "foropencode": {
-          "options": {
-            "baseURL": "https://foropencode.com/v1",
-            "apiKey": "{env:OPENAI_API_KEY}"
-          },
-          "models": {
-            "gpt-5.5": {
-              "options": {
-                "contextLength": 270000,
-                "maxTokens": 128000
-              },
-              "variants": {
-                "low":    { "reasoningEffort": "low" },
-                "medium": { "reasoningEffort": "medium" },
-                "high":   { "reasoningEffort": "high" }
-              },
-              "modalities": {
-                "input":  ["text", "image"],
-                "output": ["text", "image"]
-              }
-            }
-          }
+        "apiKey": "{env:FOROPENCODE_ANTHROPIC_KEY}"
+      },
+      "models": {
+        "gateway-model-id": {
+          "name": "gateway-model-id"
         }
-      }
-    }
-    ```
-    > 普通渠道上下文 270K；Pro/Plus Codex 账号可将 `contextLength` 改为 `1050000`。
-  </Tab>
-  <Tab label="gpt-5.4" value="gpt54">
-    ```json
-    {
-      "provider": {
-        "foropencode": {
-          "options": {
-            "baseURL": "https://foropencode.com/v1",
-            "apiKey": "{env:OPENAI_API_KEY}"
-          },
-          "models": {
-            "gpt-5.4": {
-              "options": {
-                "contextLength": 1050000,
-                "maxTokens": 128000
-              },
-              "variants": {
-                "low":    { "reasoningEffort": "low" },
-                "medium": { "reasoningEffort": "medium" },
-                "high":   { "reasoningEffort": "high" }
-              },
-              "modalities": {
-                "input":  ["text", "image"],
-                "output": ["text"]
-              }
-            }
-          }
-        }
-      }
-    }
-    ```
-  </Tab>
-  <Tab label="gpt-5.4-mini" value="gpt54mini">
-    ```json
-    {
-      "provider": {
-        "foropencode": {
-          "options": {
-            "baseURL": "https://foropencode.com/v1",
-            "apiKey": "{env:OPENAI_API_KEY}"
-          },
-          "models": {
-            "gpt-5.4-mini": {
-              "options": {
-                "contextLength": 400000,
-                "maxTokens": 128000
-              },
-              "variants": {
-                "low":    { "reasoningEffort": "low" },
-                "medium": { "reasoningEffort": "medium" },
-                "high":   { "reasoningEffort": "high" }
-              },
-              "modalities": {
-                "input":  ["text", "image"],
-                "output": ["text"]
-              }
-            }
-          }
-        }
-      }
-    }
-    ```
-  </Tab>
-  <Tab label="claude-opus-4-8" value="opus48">
-    ```json
-    {
-      "provider": {
-        "foropencode": {
-          "options": {
-            "baseURL": "https://foropencode.com",
-            "apiKey": "{env:ANTHROPIC_API_KEY}"
-          },
-          "models": {
-            "claude-opus-4-8": {
-              "options": {
-                "contextLength": 1000000,
-                "maxTokens": 128000
-              },
-              "modalities": {
-                "input":  ["text", "image"],
-                "output": ["text"]
-              }
-            }
-          }
-        }
-      }
-    }
-    ```
-    > Anthropic 端点 baseURL **不带 `/v1`**。
-  </Tab>
-  <Tab label="claude-sonnet-4-6" value="sonnet46">
-    ```json
-    {
-      "provider": {
-        "foropencode": {
-          "options": {
-            "baseURL": "https://foropencode.com",
-            "apiKey": "{env:ANTHROPIC_API_KEY}"
-          },
-          "models": {
-            "claude-sonnet-4-6": {
-              "options": {
-                "contextLength": 1000000,
-                "maxTokens": 64000
-              },
-              "modalities": {
-                "input":  ["text", "image"],
-                "output": ["text"]
-              }
-            }
-          }
-        }
-      }
-    }
-    ```
-    > Anthropic 端点 baseURL **不带 `/v1`**。
-  </Tab>
-  <Tab label="claude-haiku-4-5" value="haiku45">
-    ```json
-    {
-      "provider": {
-        "foropencode": {
-          "options": {
-            "baseURL": "https://foropencode.com",
-            "apiKey": "{env:ANTHROPIC_API_KEY}"
-          },
-          "models": {
-            "claude-haiku-4-5-20251001": {
-              "options": {
-                "contextLength": 200000,
-                "maxTokens": 64000
-              },
-              "modalities": {
-                "input":  ["text", "image"],
-                "output": ["text"]
-              }
-            }
-          }
-        }
-      }
-    }
-    ```
-    > Anthropic 端点 baseURL **不带 `/v1`**。
-  </Tab>
-</Tabs>
-
-| 字段 | 含义 |
-| --- | --- |
-| `options.contextLength` | 上下文窗口 Token 数 |
-| `options.maxTokens` | 单次最大输出 Token 数 |
-| `variants` | 推理深度档位；每个 key 是档位名，值为 `{ "reasoningEffort": "low\|medium\|high" }` |
-| `modalities.input` | 模型接受的输入类型，可填 `text`、`image`、`audio`、`video`、`pdf` |
-| `modalities.output` | 模型可输出的类型，可填 `text`、`image`、`audio` |
-
-以上字段均可省略——省略时 OpenCode 自动推断，但显式声明可让选择器正确显示档位和附件支持。
-
-<Callout type="warning">**gpt-5.5 普通渠道有效上下文约 270K**——超出后遇到 `context_length_exceeded` 时开新会话即可；Pro/Plus Codex 账号可将 `contextLength` 改为 `1050000`。</Callout>
-
----
-
-## 多 provider + model 前缀
-
-```json
-{
-  "provider": {
-    "fc-claude": {
-      "options": {
-        "baseURL": "https://foropencode.com",
-        "apiKey": "{env:ANTHROPIC_KEY}"
-      }
-    },
-    "fc-gpt": {
-      "options": {
-        "baseURL": "https://foropencode.com/v1",
-        "apiKey": "{env:OPENAI_KEY}"
       }
     }
   },
-  "model": "fc-gpt/gpt-5.5"
+  "model": "gateway-claude/gateway-model-id"
 }
 ```
 
-`model` 字段的前缀必须对应 `provider` 里某个 ID。切换模型时改前缀即可：
-
-```json
-{ "model": "fc-claude/claude-sonnet-4-6" }
-```
+<Callout type="warning" title="兼容端点不是官方端点">
+“OpenAI 兼容”或“Anthropic 兼容”只描述协议目标，不代表模型厂商运营、审核或背书该服务。使用前核对鉴权头、Base URL、模型能力、数据保留、价格与故障支持。
+</Callout>
 
 ---
 
 ## 项目级覆盖
 
-仓库根放一个 `opencode.json`：
+项目根目录可只写需要覆盖的非敏感项：
 
 ```json
 {
-  "model": "fc-claude/claude-haiku-4-5"
+  "$schema": "https://opencode.ai/config.json",
+  "model": "foropencode/gateway-model-id"
 }
 ```
 
-启动 `opencode` 时项目级会**合并**到全局上，**项目级优先**。
-
-适用场景：
-
-- 团队仓库锁定模型（避免大家随便切）
-- 不同项目用不同 Key（项目级覆盖 `provider.<name>.options.apiKey`）
-- CI 里跑 OpenCode，项目里直接写好
+不要把 `apiKey` 或包含 Key 的 `OPENCODE_CONFIG_CONTENT` 写入仓库、CI 日志或共享 shell 历史。
 
 ---
 
-## 环境变量覆盖
+## 验证
 
-| 变量 | 作用 |
-| --- | --- |
-| `OPENCODE_CONFIG` | 指定单个配置文件路径 |
-| `OPENCODE_CONFIG_DIR` | 指定配置目录 |
-| `OPENCODE_CONFIG_CONTENT` | 直接把 JSON 内容塞进环境变量 |
-| `OPENCODE_TUI_CONFIG` | 终端 UI 配置 |
-| `OPENCODE_MODEL` | 本次会话用的模型，覆盖配置文件 |
-
-```bash
-OPENCODE_MODEL="fc-claude/claude-opus-4-7" opencode
-```
-
----
-
-## CLI vs 桌面版 的差异
-
-| 维度 | CLI | 桌面版 |
-| --- | --- | --- |
-| 配置文件 | `~/.config/opencode/opencode.json` | **同一个** |
-| 项目级覆盖 | 自动读 cwd 下的 `opencode.json` | 同 |
-| 当前稳定度 | 主线稳定 | BETA |
-| 完全独立配置 | 用 `OPENCODE_CONFIG_DIR` 指向另一个目录 | 给桌面版单独建启动脚本传 env |
-
-改完 config：
-
-- CLI：重启 `opencode`
-- 桌面版：完全退出 + 重启
-
----
-
-## 常见排查
-
-| 现象 | 检查 |
-| --- | --- |
-| 启动报 `model not found` | `model` 前缀是不是 `provider` 里某个 ID |
-| `apiKey is empty` | `{env:VAR}` 引用的环境变量是否真的有值 |
-| 桌面版读不到 config | 完全退出（含菜单栏图标）再启动；BETA 期偶有缓存问题 |
-| `reference is deprecated` | 把 `reference` 改成 `references`（v1.17.0+ breaking change） |
-
-<Callout type="tip" title="v1.17.0 项目初始化">
-在项目目录跑 `/init`（会话内命令），OpenCode 会自动生成 `AGENTS.md` —— 建议 git commit 这个文件，团队共用。
-</Callout>
+1. 运行 `opencode --version`
+2. 启动 TUI，用模型选择器确认 provider/model
+3. 发送不含敏感数据的最小请求
+4. 401 时检查环境变量名；404/协议错误时向网关确认 Base URL 与 API 类型
+5. 配置解析失败时从最小 JSON 开始逐项恢复，不把含 Key 的文件粘贴到在线校验站
 
 <RelatedPages
   title="相关"
   items={[
-    { route: '/opencode/cc-switch', hint: '回到 CC Switch 流程' },
-    { route: '/opencode/cli/install', hint: '装客户端' },
+    { route: '/opencode/cc-switch', hint: 'CC Switch 第三方配置说明' },
+    { route: '/opencode/cli/usage', hint: '当前 CLI 命令' },
+    { route: '/opencode/cli/install', hint: '安装 OpenCode' },
   ]}
 />
+
+资料来源：[OpenCode Config](https://opencode.ai/docs/config/) · [OpenCode Providers](https://opencode.ai/docs/providers/) · [anomalyco/opencode](https://github.com/anomalyco/opencode)（2026-07-26 核对）

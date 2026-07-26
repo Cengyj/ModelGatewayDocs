@@ -1,6 +1,6 @@
 ---
 title: "GPT Image 2"
-description: "通过 foropencode gpt_plus 分组接入 gpt-image-2，在 AI 绘图工具中实现高质量图片生成。"
+description: "通过 foropencode gpt_plus 分组接入 gpt-image-2，并说明第三方图片工具的密钥、计费与数据边界。"
 navLabel: "GPT Image 2"
 ---
 
@@ -12,8 +12,12 @@ navLabel: "GPT Image 2"
   tldr="打开 image.foropencode.com → gpt_plus 密钥 → 设置 → 供应商 codex 分组 → 填 API Key → 获取模型 → 图片工作台"
 />
 
+<Callout type="info" title="官方模型事实与第三方网关能力分开看">
+OpenAI 官方 Image generation 文档在 2026-07-26 将 `gpt-image-2` 标为最新 GPT Image 模型。本文的 `gpt_plus` 分组、`image.foropencode.com`、倍率与可用性则属于 foropencode 第三方网关/工具，不代表 OpenAI 官方提供或背书。
+</Callout>
+
 <Callout type="info" title="需要 gpt_plus 分组密钥">
-  gpt-image-2 归属 `gpt_plus` 分组。请先[创建一个绑定 gpt_plus 分组的 API 密钥](/get-key/create)，再继续以下步骤。
+  按当前 foropencode 页面说明，`gpt-image-2` 使用 `gpt_plus` 分组。请先从实际控制台确认该分组仍提供此模型，再[创建对应的第三方网关密钥](/get-key/create)。
 </Callout>
 
 ---
@@ -21,7 +25,11 @@ navLabel: "GPT Image 2"
 ## 接入步骤
 
 <Callout type="info" title="先打开图片工具">
-  在浏览器访问 [https://image.foropencode.com](https://image.foropencode.com/)，登录后再进行以下配置。
+  `image.foropencode.com` 是第三方图片工具，不是 OpenAI 官方站点。访问 [https://image.foropencode.com](https://image.foropencode.com/) 前请核对最终域名、账户和数据处理说明；输入网关 Key 意味着该工具会使用它向所配置的 API 端点发起请求。
+</Callout>
+
+<Callout type="warning" title="第三方工具会接触密钥和输入内容">
+  当前没有可引用的公开说明可确认该工具的运营主体、日志留存和密钥处理方式。不要使用同时具有其他高权限的 Key；如决定测试，应在网关侧创建用途单一、额度受限且可随时撤销的独立 Key，并避免提交敏感图片、提示词或个人信息。无法接受这一数据边界时，请等待运营方披露后再使用。
 </Callout>
 
 <Walkthrough>
@@ -38,27 +46,27 @@ navLabel: "GPT Image 2"
     caption="设置页左侧选「供应商」→ 选中「codex 分组」→ 在 API Key 栏粘贴你的 foropencode 密钥 → 点击「获取模型」。"
   >
     <Callout type="info">
-      图接口格式选 **OpenAI GPT Image**，API 地址保持默认 `https://foropencode.com/v1`，无需修改。
+      若工具当前仍提供 **OpenAI GPT Image** 接口格式，可选择它；截图中的默认地址是第三方网关 `https://foropencode.com/v1`，提交 Key 前须到该网关控制台核对当前端点。
     </Callout>
   </Frame>
   <Frame
     title="③ 选择文本模型和图片模型"
     image="/img/gpt-image/step-03-select-models.png"
-    imageAlt="获取模型弹窗：文本栏勾选 gpt-5.5，图片栏勾选 gpt-image-2，点击添加模型"
-    caption="在「获取模型」弹窗中：文本模型推荐勾选 **gpt-5.5**（或 gpt-5.4 / gpt-5.4-mini）；图片模型勾选 **gpt-image-2**；完成后点击右下角「添加模型」。"
+    imageAlt="旧版获取模型弹窗：分别选择文本模型和 gpt-image-2 图片模型"
+    caption="在「获取模型」弹窗中，以工具实际返回的列表为准选择文本模型；图片模型若出现 gpt-image-2，可选中后添加。不要根据截图推定当前网关必然提供同一模型。"
   />
   <Frame
-    title="④ 进入图片工作台开始体验"
+    title="④ 进入图片工作台验证配置"
     image="/img/gpt-image/step-04-workspace.png"
     imageAlt="左侧图片图标高亮，主界面切换到图片工作台，顶部功能标签可选 AI 图片生成等"
-    caption="点击左侧侧边栏的「图片」图标进入图片工作台，在顶部功能标签选择「AI 图片生成」或其他功能后即可开始使用 gpt-image-2。"
+    caption="点击左侧侧边栏的「图片」图标进入图片工作台，在顶部功能标签选择「AI 图片生成」；先使用非敏感内容做小额测试，并以实际响应确认模型和计费配置。"
   />
 </Walkthrough>
 
 ---
 
 <Callout type="warning" title="图片生成消耗说明">
-  gpt-image-2 属于 `gpt_plus` 分组（0.1x 倍率），图片生成按官方定价折算扣除令牌。
+  `gpt_plus` 分组、倍率和扣费换算由第三方网关定义，并非 OpenAI 官方价格承诺。生成前查看网关控制台的当前价格、余额与计费单位；OpenAI 官方 API 价格仅适用于 OpenAI 直接计费场景。
 </Callout>
 
 ---
@@ -71,3 +79,5 @@ navLabel: "GPT Image 2"
     { route: '/cc-switch', label: 'CC Switch', hint: '快速切换 Claude Code 到 foropencode' },
   ]}
 />
+
+资料来源：[OpenAI Image generation 官方文档](https://developers.openai.com/api/docs/guides/image-generation)（2026-07-26 核对；官方文档称 `gpt-image-2` 为最新 GPT Image 模型）。第三方网关分组与倍率仍需运营方提供可验证的公开说明。

@@ -1,5 +1,6 @@
 ---
 title: "CC-010：API Error (Request timed out.)"
+description: "使用官方诊断区分网络、网关、模型处理、工具执行和上下文相关的请求超时。"
 hidden: true
 ---
 
@@ -25,7 +26,7 @@ API Error (Request timed out.)
 
 ## 根因分析
 
-超时有两类原因，需分别判断：
+超时可能发生在 DNS、TLS、代理、网关排队、模型处理、工具执行或客户端等待阶段。旧版页面将它固定为“网络延迟/上下文过长”两类，证据不足；以下两类只作为常见排查方向。
 
 ```text
 情况 A：网络延迟问题
@@ -41,7 +42,7 @@ API Error (Request timed out.)
 
 ### 情况 A：网络问题
 
-参考 [CC-009 Connection error](./cc-connection-error) 中的网络排查步骤：切换 Wi-Fi、切换代理节点、或使用手机热点。
+参考 [CC-009 Connection error](./cc-connection-error) 核对最终域名、证书、官方服务状态和组织批准的网络配置。不要关闭 TLS 校验或安全软件。
 
 ### 情况 B：上下文过长
 
@@ -67,7 +68,7 @@ API Error (Request timed out.)
 
 使用 compact 保留摘要后继续，适合不想完全丢失上下文的情况。
 
-> **IDE 用户注意**：IDE 插件通常内置大量系统 Prompt，叠加 Claude Code 自身 Prompt 后，可用的有效对话轮数会明显减少，出现超时时优先检查上下文长度。
+是否由上下文导致，应结合 `/context`、日志和模型限制判断；不要把所有 IDE 超时都归因于系统 Prompt。
 
 ---
 
@@ -76,5 +77,7 @@ API Error (Request timed out.)
 | 做法 | 避免的问题 |
 | --- | --- |
 | 长任务中定期执行 `/compact` 压缩上下文 | 上下文堆积过多导致超时或截断 |
-| 使用代理时确保节点延迟在合理范围内 | 高延迟节点导致请求超时 |
-| 在 IDE 中使用时注意内置 Prompt 占用的 token 量 | IDE 插件 Prompt 叠加缩短有效对话轮数 |
+| 用 `claude doctor`、`/status` 和 `/context` 分层定位 | 避免凭单一报错猜测根因 |
+| 自动化任务设置合理重试与幂等性 | 避免超时后重复提交产生额外操作或费用 |
+
+资料来源：[Claude Code 配置诊断](https://code.claude.com/docs/en/debug-your-config) · [Claude Code 成本与上下文](https://code.claude.com/docs/en/costs) · [安装与登录排障](https://code.claude.com/docs/en/troubleshoot-install)（2026-07-26 核对）

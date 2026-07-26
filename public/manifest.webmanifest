@@ -1,7 +1,7 @@
 {
   "name": "foropencode · AI Coding 中文配置手册",
   "short_name": "foropencode",
-  "description": "Claude Code、Codex、OpenCode、OpenClaw、Hermes 中文配置手册",
+  "description": "foropencode 网关的配套 AI Coding 中文配置文档，不是各产品厂商官网",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fafbfc",

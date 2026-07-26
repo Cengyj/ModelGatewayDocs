@@ -2,7 +2,7 @@
  * foropencode docs — offline cache.
  *
  * Strategy:
- *   - Navigations (HTML)            : network-first, falls back to cache, finally to /offline page in cache
+ *   - Navigations (HTML)            : network-first, falls back to the cached page or cached homepage
  *   - Static assets under /_next/   : stale-while-revalidate
  *   - Article images under /img/    : stale-while-revalidate
  *   - search-index.json             : network-only (always fresh)
@@ -10,7 +10,7 @@
  * Cache key is versioned. On activate, we drop old caches.
  */
 
-const CACHE_VERSION = 'v2-2026-06-21';
+const CACHE_VERSION = 'v3-2026-07-26';
 const CACHE_HTML = `foropencode-html-${CACHE_VERSION}`;
 const CACHE_STATIC = `foropencode-static-${CACHE_VERSION}`;
 const CACHE_IMG = `foropencode-img-${CACHE_VERSION}`;

@@ -5,6 +5,7 @@ type Props = {
   date?: string;
   license?: string;
   github?: string;
+  sourceLabel?: string;
 };
 
 /**
@@ -12,7 +13,7 @@ type Props = {
  * Usage in MDX:
  *   <VersionBadge version="v2.1.183" date="2026-06-19" license="Proprietary" github="https://github.com/anthropics/claude-code" />
  */
-export function VersionBadge({ version, date, license, github }: Props) {
+export function VersionBadge({ version, date, license, github, sourceLabel }: Props) {
   return (
     <div className={styles.strip}>
       <span className={styles.badge}>
@@ -39,7 +40,7 @@ export function VersionBadge({ version, date, license, github }: Props) {
           rel="noopener noreferrer"
         >
           <GithubIcon />
-          GitHub
+          {sourceLabel ?? 'GitHub'}
           <ExternalIcon />
         </a>
       ) : null}

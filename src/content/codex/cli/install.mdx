@@ -1,48 +1,56 @@
 ---
 title: "Codex CLI · 安装"
-description: "OpenAI Codex 终端 CLI 安装方式。支持 npm、curl 脚本、Homebrew。"
+description: "OpenAI Codex CLI 的官方安装脚本、npm、Homebrew 与 GitHub Releases 安装方式。"
 navLabel: "安装"
 ---
 
 # Codex CLI · 安装
 
-<VersionBadge version="v0.141.0" date="2026-06-18" license="Apache-2.0" github="https://github.com/openai/codex" />
+<VersionBadge version="v0.145.0" date="2026-07-21" license="Apache-2.0" github="https://github.com/openai/codex" />
 
 <PageHeader
-  useCase="在终端跑 codex 命令，用 o3 / o4-mini 等 OpenAI 模型写代码"
-  audience="偏好命令行、想要可调推理深度（`--full-auto` 模式）的开发者"
-  tldr="npm 一行装好 → codex --version 验证"
+  useCase="在终端运行 OpenAI Codex 编码代理"
+  audience="偏好命令行、希望使用审批与沙箱控制的开发者"
+  tldr="先查看 OpenAI 官方安装说明 → 选择脚本、npm、Homebrew 或 Releases → codex --version 验证"
 />
 
-> Codex CLI 与 Codex App 的**配置共享** `~/.codex/config.toml`，但**安装方式不同**。App 的安装见 [Codex 桌面版 · 安装](/codex/desktop/install)。
+> Codex CLI 与 IDE 扩展等共用 `CODEX_HOME`（默认 `~/.codex/`）下的配置；Codex App 的配置共享范围以官方文档当前说明为准。App 的安装见 [Codex 桌面版 · 安装](/codex/desktop/install)。
 
 ---
 
 ## 系统要求
 
 <Callout type="info" title="环境要求">
-- **Node.js** 22+（官方要求，低于此版本无法运行）
-- **npm** 8+ / pnpm / yarn 均可用于全局安装
-- **Git**：必须（用于文件变更追踪）
-- **操作系统**：macOS、Linux、WSL2、Windows（curl 脚本）
+- **npm 安装**：需要本机已有受支持的 Node.js 与 npm；独立二进制和 Homebrew 不依赖全局 npm
+- **Git**：建议安装，用于仓库上下文与变更检查
+- **操作系统**：按 [OpenAI 官方 Releases](https://github.com/openai/codex/releases/latest) 提供的当前平台构建选择；Windows 也可使用官方支持的原生/WSL 工作流
 </Callout>
 
 ---
 
-## 准备 Git
+## 准备 Git（建议）
 
-Codex CLI 依赖 Git。Windows 装 [Git for Windows](https://git-scm.com/install/windows)；其它系统终端里能直接 `git` 即可：
+Codex 可在普通目录运行，但 Git 能提供仓库上下文和变更检查。Windows 可从 [Git for Windows](https://git-scm.com/install/windows) 安装；其它系统先确认终端能运行 `git`：
 
 ```bash
 git --version
-node --version   # 需要 v22+
+node --version   # 仅 npm 安装方式需要
 ```
 
 ---
 
 ## 安装
 
-<Tabs defaultValue="npm">
+<Tabs defaultValue="official">
+  <Tab label="官方脚本（macOS / Linux）" value="official">
+    OpenAI 官方仓库当前 Quickstart 提供以下安装器；它默认从 `releases.openai.com/codex` 获取发布内容，并在必要时回退到官方 GitHub Releases：
+
+    <Callout type="warning">执行前先查看 [openai/codex 官方仓库](https://github.com/openai/codex) 的当前安装说明，确认脚本域名、证书和内容。Windows 官方示例会调整当前 PowerShell 进程的 ExecutionPolicy，本站不直接复制该远程执行命令；请在官方说明中审阅后再决定。</Callout>
+
+    ```bash
+    curl -fsSL https://chatgpt.com/codex/install.sh | sh
+    ```
+  </Tab>
   <Tab label="npm（全平台）" value="npm">
     ```bash
     npm install -g @openai/codex
@@ -51,23 +59,18 @@ node --version   # 需要 v22+
     升级到最新版：
 
     ```bash
-    npm update -g @openai/codex
-    ```
-  </Tab>
-  <Tab label="macOS / Linux 脚本" value="sh">
-    ```bash
-    curl -fsSL https://chatgpt.com/codex/install.sh | sh
-    ```
-  </Tab>
-  <Tab label="Windows PowerShell" value="ps">
-    ```powershell
-    powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1 | iex"
+    npm install -g @openai/codex@latest
     ```
   </Tab>
   <Tab label="Homebrew (macOS)" value="brew">
     ```bash
     brew install --cask codex
     ```
+  </Tab>
+  <Tab label="独立二进制 / Windows" value="release">
+    前往 [OpenAI 官方 GitHub Releases（github.com/openai/codex）](https://github.com/openai/codex/releases/latest)，选择与操作系统和 CPU 架构匹配的发布资产。本站不托管或重新打包这些文件。
+
+    下载后先核对发布方为 `openai/codex`；若系统提示签名或发布方异常，请停止运行并回到官方发布页核实。
   </Tab>
 </Tabs>
 
@@ -77,7 +80,7 @@ node --version   # 需要 v22+
 
 ```bash
 codex --version
-# 输出示例：0.141.0
+# 输出示例：0.145.0
 ```
 
 能输出版本号即装好。下一步配 API：
@@ -85,7 +88,7 @@ codex --version
 <RelatedPages
   title="下一步"
   items={[
-    { route: '/codex/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/codex/cc-switch', hint: '用第三方图形界面管理 API 配置' },
     { route: '/codex/manual', hint: '直接改 config.toml' },
     { route: '/codex/desktop/install', hint: '想用 GUI？装 Codex App' },
   ]}
@@ -95,17 +98,8 @@ codex --version
 
 ## 常见问题
 
-<Callout type="warning" title="Node.js 版本不满足">
-Codex CLI v0.141.0 要求 Node.js 22+。运行 `node --version` 检查，版本过低时：
-
-- 推荐用 [nvm](https://github.com/nvm-sh/nvm)（Linux/macOS）或 [nvm-windows](https://github.com/coreybutler/nvm-windows) 切换版本
-- 或直接到 [nodejs.org](https://nodejs.org/) 下载 v22 LTS
+<Callout type="warning" title="安装或下载失败？">
+确认安装入口来自 `chatgpt.com/codex`、`releases.openai.com/codex`、npm 的 `@openai/codex` 或 `github.com/openai/codex`。再检查 DNS、系统时间、企业防火墙与已获授权的代理设置；不要关闭 SmartScreen、Gatekeeper、签名或 TLS 校验。
 </Callout>
 
-<Callout type="warning" title="安装命令下不动？">
-九成是网络问题，按这个顺序自查：
-
-1. 开了梯子的，关掉梯子再试
-2. 没开梯子的，开启梯子再试
-3. 仍不行，开启代理软件的**网卡 TUN 模式**（系统级代理），而非仅浏览器代理
-</Callout>
+资料来源：[OpenAI Codex 官方文档](https://developers.openai.com/codex) · [openai/codex 官方仓库](https://github.com/openai/codex) · [Releases](https://github.com/openai/codex/releases/latest)（2026-07-26 核对）

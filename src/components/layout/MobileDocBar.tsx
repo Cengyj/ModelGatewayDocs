@@ -88,6 +88,7 @@ export function MobileDocBar() {
           className={`${styles.overlay} ${panel === 'menu' ? styles.menuOverlay : styles.tocOverlay} ${animating ? styles.open : ''}`}
           role="dialog"
           aria-modal="true"
+          aria-label={panel === 'menu' ? '文档菜单' : '本页目录'}
         >
           <button
             type="button"

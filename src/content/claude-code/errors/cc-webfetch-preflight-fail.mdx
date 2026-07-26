@@ -1,5 +1,6 @@
 ---
 title: "CC-017：WebFetch 工具报错，目标网站可访问但仍失败"
+description: "撤下未获官方确认的 WebFetch 跳过字段，按权限、目标站点和网络规则排查。"
 hidden: true
 ---
 
@@ -7,75 +8,35 @@ hidden: true
 
 <ErrorMeta
   component="Claude Code 本体"
-  version="不限版本"
-  platform="Linux / macOS / Windows（国内网络环境下高发）"
-  date="2026-03-14"
+  version="v2.1.220 核对"
+  platform="Linux / macOS / Windows"
+  date="2026-07-26"
 />
+
 ---
 
 ## 问题现象
 
-Claude Code 调用 WebFetch 工具抓取网页时报错，表现为搜索失败或联网功能异常，但手动用浏览器访问目标网站完全正常，代理也已开启全局模式。
+Claude Code 调用 WebFetch 时失败，但同一目标网页在浏览器中可以打开。浏览器可访问并不能证明 Claude Code 进程、代理、DNS、证书信任和目标站策略完全相同。
 
 ---
 
-## 根因分析
+## 已撤下的未确认配置
 
-```text
-Claude Code 调用 WebFetch
-  → 抓取目标页面前先向 claude.ai 发起预检请求
-  → 请求地址：https://claude.ai/api/web/domain_info?domain=目标域名
-  → 国内网络 / 企业防火墙拦截 claude.ai
-  → 预检失败
-  → WebFetch 整体报错，目标页面从未被实际请求
-```
-
-关键点：即使目标网站可以访问，只要 `claude.ai` 本身被拦截，预检就会失败，导致 WebFetch 完全不可用。全局代理若未正确处理 `claude.ai` 的请求，同样触发此问题。
+旧版页面建议在 `settings.json` 中加入 `skipWebFetchPreflight: true`，并声称这是网络环境下的必做项。本次未能在 Anthropic 当前官方设置文档中确认该字段，因此不再提供或推荐。即使旧版本曾识别内部开关，也不能据此推定当前版本仍支持或安全。
 
 ---
 
-## 修复步骤
+## 排查步骤
 
-**第一步：打开 `~/.claude/settings.json`**
+1. 新开一个最小会话，记录 WebFetch 的完整错误、目标域名和发生时间
+2. 检查 Claude Code 进程实际继承的 `HTTP_PROXY`、`HTTPS_PROXY` 与 `NO_PROXY`，确认符合组织网络策略
+3. 检查系统时间、DNS、企业 TLS 代理证书和目标站是否拒绝自动化客户端
+4. 暂时移除未在官方文档中出现的 `skip*` 或第三方注入字段，使用最小受支持配置复现
+5. 升级到当前官方版本后重试，并通过 Anthropic 官方支持渠道提交可复现信息；提交前删除 Key、Token、Cookie 和私人 URL
 
-| 平台 | 路径 |
-| --- | --- |
-| Windows | `C:\Users\\.claude\settings.json` |
-| macOS / Linux | `~/.claude/settings.json` |
+<Callout type="warning">
+不要通过跳过安全预检、关闭证书校验或伪造浏览器身份来强行抓取目标网站。目标站的访问控制、robots 规则和组织政策仍然适用。
+</Callout>
 
-**第二步：添加 `skipWebFetchPreflight` 字段**
-
-```json
-{
-  "skipWebFetchPreflight": true
-}
-```
-
-若文件中已有其他字段，合并写入：
-
-```json
-{
-  "env": {
-    "ANTHROPIC_BASE_URL": "https://foropencode.com",
-    "ANTHROPIC_API_KEY": "sk-xxx"
-  },
-  "skipWebFetchPreflight": true
-}
-```
-
-**第三步：重启 Claude Code**
-
-```bash
-claude
-```
-
-重启后 WebFetch 跳过预检，直接请求目标页面。
-
----
-
-## 预防措施
-
-| 做法 | 避免的问题 |
-| --- | --- |
-| 初次配置时在 `settings.json` 中写入 `"skipWebFetchPreflight": true` | 国内网络环境下 WebFetch 默认不可用 |
-| 代理切换后若 WebFetch 再次失败，优先检查此字段是否存在 | 误以为是代理或网络问题反复排查 |
+资料来源：[Claude Code 设置文档](https://code.claude.com/docs/en/settings) · [Claude Code 官方 GitHub](https://github.com/anthropics/claude-code)（2026-07-26 核对；`skipWebFetchPreflight` 未确认）

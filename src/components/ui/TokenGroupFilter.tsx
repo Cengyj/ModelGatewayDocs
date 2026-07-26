@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import styles from './TokenGroupFilter.module.css';
 
-type Category = 'Claude 官方' | 'Claude 逆向' | 'OpenAI / Codex' | 'Grok';
+type Category = 'Claude 渠道' | 'OpenAI 兼容' | '其他兼容渠道';
 
 type GroupRow = {
   id: string;
@@ -14,13 +14,13 @@ type GroupRow = {
 };
 
 const ROWS: GroupRow[] = [
-  { id: 'claude_max',  category: 'Claude 官方', note: 'Claude Max 官方号池',           rate: '0.6x', model: '留空' },
-  { id: 'claude_free', category: 'Claude 逆向', note: '逆向渠道 claude krio',           rate: '0.2x', model: '留空' },
-  { id: 'gpt_plus',   category: 'OpenAI / Codex', note: 'gpt_plus 专用分组',          rate: '0.1x', model: 'gpt-5.5 / gpt-5.4 / gpt-5.4-mini' },
-  { id: 'grok_free',  category: 'Grok',            note: 'Grok 免费分组',              rate: '1x',   model: 'grok-3 等 Grok 模型名' },
+  { id: 'claude_max',  category: 'Claude 渠道', note: '第三方网关控制台中的分组名；不代表 Anthropic 官方服务', rate: '以控制台为准', model: '以控制台模型列表为准' },
+  { id: 'claude_free', category: 'Claude 渠道', note: '第三方网关控制台中的社区渠道；使用前核对来源、稳定性与数据处理', rate: '以控制台为准', model: '以控制台模型列表为准' },
+  { id: 'gpt_plus', category: 'OpenAI 兼容', note: '第三方网关控制台中的 OpenAI 兼容分组', rate: '以控制台为准', model: '以控制台模型列表为准' },
+  { id: 'grok_free', category: '其他兼容渠道', note: '第三方网关控制台中的 Grok 兼容分组', rate: '以控制台为准', model: '以控制台模型列表为准' },
 ];
 
-const CATEGORIES: Array<Category | '全部'> = ['全部', 'Claude 官方', 'Claude 逆向', 'OpenAI / Codex', 'Grok'];
+const CATEGORIES: Array<Category | '全部'> = ['全部', 'Claude 渠道', 'OpenAI 兼容', '其他兼容渠道'];
 
 function highlight(text: string, query: string) {
   if (!query) return text;
@@ -58,13 +58,12 @@ export function TokenGroupFilter() {
   return (
     <div className={styles.wrap}>
       <div className={styles.controls}>
-        <div className={styles.tabs} role="tablist" aria-label="按分类筛选">
+        <div className={styles.tabs} role="group" aria-label="按分类筛选">
           {CATEGORIES.map((c) => (
             <button
               key={c}
               type="button"
-              role="tab"
-              aria-selected={active === c}
+              aria-pressed={active === c}
               className={`${styles.tab} ${active === c ? styles.tabActive : ''}`}
               onClick={() => setActive(c)}
             >

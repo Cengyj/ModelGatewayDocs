@@ -6,17 +6,17 @@ navLabel: "安装"
 
 # OpenCode 桌面版 · 安装
 
-<VersionBadge version="v1.17.8 (BETA)" date="2026-06-17" license="MIT" github="https://github.com/anomalyco/opencode" />
+<VersionBadge version="v1.18.5" date="2026-07-24" license="MIT" github="https://github.com/anomalyco/opencode" />
 
 <PageHeader
   useCase="用图形化界面管理 OpenCode 会话、模型与文件浏览"
   audience="不想用终端、需要图形化管理会话的用户"
-  tldr="brew / scoop 装桌面 → 启动后自动读 CLI 的 opencode.json"
+  tldr="brew / scoop 装桌面 → 核对与 CLI 共享的 opencode.json"
 />
 
 > 桌面版与 CLI **配置共享** `~/.config/opencode/opencode.json`。CLI 安装见 [OpenCode CLI · 安装](/opencode/cli/install)。
 
-<Callout type="warning">**桌面版当前标注为 BETA**。CLI 是主线版本——如果不确定要不要用桌面版，先用 CLI。</Callout>
+<Callout type="warning">桌面版的发布状态、平台与包管理器入口会变化。安装前先查看 [OpenCode 官方文档](https://opencode.ai/docs/) 与 [官方 Releases](https://github.com/anomalyco/opencode/releases/latest)，核对当前版本是否仍标注为 Beta。本站不托管安装包。</Callout>
 
 ---
 
@@ -36,7 +36,7 @@ navLabel: "安装"
   </Tab>
 </Tabs>
 
-启动后，桌面版会自动读取与 CLI 完全相同的 `~/.config/opencode/opencode.json`。
+默认情况下，桌面版与 CLI 共享 `~/.config/opencode/opencode.json`。如果设置了 `OPENCODE_CONFIG`，实际配置文件位置可能不同，应在当前进程环境中核对。
 
 ---
 
@@ -47,7 +47,7 @@ navLabel: "安装"
 <RelatedPages
   title="下一步"
   items={[
-    { route: '/opencode/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/opencode/cc-switch', hint: '用第三方社区工具管理 provider' },
     { route: '/opencode/manual', hint: '直接改 opencode.json' },
     { route: '/opencode/cli/install', hint: '想用终端？装 CLI' },
   ]}
@@ -61,7 +61,7 @@ navLabel: "安装"
 | --- | --- | --- |
 | 启动方式 | 终端跑 `opencode` | 启动应用 |
 | 配置文件 | `~/.config/opencode/opencode.json` | 同上，**共享** |
-| 当前稳定度 | 主线稳定版 | BETA |
+| 当前稳定度 | 以官方 Release 为准 | 以官方 Release 为准 |
 | 推荐使用场景 | 已熟悉 CLI 的开发者 | 偏好 GUI、需要图形化管理会话的用户 |
 
 桌面版常用功能：
@@ -71,4 +71,10 @@ navLabel: "安装"
 - **文件浏览器**：内置的代码浏览器，定位修改位置不需要切到 IDE
 - **build / plan 模式**：与 CLI 同款，按钮切换
 
-<Callout type="info">两端共享 `opencode.json`，**改一边会影响另一边**。如果想分开用，可以借助 `OPENCODE_CONFIG` 或 `OPENCODE_CONFIG_DIR` 环境变量给桌面版指定独立配置目录。</Callout>
+<Callout type="info">两端共享 `opencode.json`，**改一边会影响另一边**。如果想分开用，可以借助 `OPENCODE_CONFIG` 环境变量给桌面版指定独立的配置文件路径（`OPENCODE_CONFIG_DIR` 只影响 agents / commands / plugins 等扩展目录，不用于重定位 `opencode.json`）。</Callout>
+
+---
+
+## 资料来源
+
+资料来源：[OpenCode 官方仓库](https://github.com/anomalyco/opencode) · [官方 Releases](https://github.com/anomalyco/opencode/releases/latest) · [OpenCode 配置文档](https://opencode.ai/docs/config/)（2026-07-26 核对）。

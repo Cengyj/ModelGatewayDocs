@@ -3,7 +3,7 @@ import '@/styles/global.css';
 import { ThemeScript } from '@/components/layout/ThemeScript';
 import { AppShell } from '@/components/layout/AppShell';
 import { PersistentDocFrame } from '@/components/layout/PersistentDocFrame';
-import { site } from '@/lib/site';
+import { site, operator } from '@/lib/site';
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
       { url: '/logo.svg', type: 'image/svg+xml' },
     ],
     shortcut: '/favicon.svg',
-    apple: '/logo.svg',
+    apple: '/logo.png',
   },
   manifest: '/manifest.webmanifest',
   openGraph: {
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     images: [{ url: site.ogImage }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: `${site.name} · ${site.tagline}`,
     description: site.description,
     images: [site.ogImage],
@@ -48,10 +48,45 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: site.name,
+    url: site.url,
+    description: site.description,
+    inLanguage: 'zh-CN',
+  };
+
+  // Organization JSON-LD is emitted ONLY once the operator fills in real
+  // entity info in src/lib/site.ts — never fabricated.
+  const organizationJsonLd = operator.legalName
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: operator.legalName,
+        url: site.url,
+        ...(operator.contactEmail ? { email: operator.contactEmail } : {}),
+      }
+    : null;
+
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteJsonLd).replace(/</g, '\\u003c'),
+          }}
+        />
+        {organizationJsonLd ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(organizationJsonLd).replace(/</g, '\\u003c'),
+            }}
+          />
+        ) : null}
       </head>
       <body>
         <AppShell>

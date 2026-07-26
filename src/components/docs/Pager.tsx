@@ -16,13 +16,13 @@ export function Pager({ currentRoute }: Props) {
   return (
     <nav className={styles.pager} aria-label="上一页和下一页">
       {prev ? (
-        <Link href={prev.route} className={`${styles.link} ${styles.prev}`}>
+        <Link href={prev.route} rel="prev" className={`${styles.link} ${styles.prev}`}>
           <span className={styles.label}>上一页</span>
           <span className={styles.title}>{prev.label}</span>
         </Link>
       ) : <span />}
       {next ? (
-        <Link href={next.route} className={`${styles.link} ${styles.next}`}>
+        <Link href={next.route} rel="next" className={`${styles.link} ${styles.next}`}>
           <span className={styles.label}>下一页</span>
           <span className={styles.title}>{next.label}</span>
         </Link>

@@ -1,205 +1,118 @@
 ---
 title: "Hermes Agent · 手动配置"
-description: "config.yaml + HERMES_HOME；三种 API 模式。"
+description: "Hermes Agent 的 config.yaml、.env、hermes model 与 custom provider 安全配置。"
 navLabel: "手动配置"
 ---
 
 # Hermes Agent · 手动配置
 
-<VersionBadge version="v2026.6.19" date="2026-06-19" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
+<VersionBadge version="v0.19.0 (tag v2026.7.20)" date="2026-07-20" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
 
 <PageHeader
-  useCase="不用 CC Switch，直接改 Hermes 的 YAML 配置 / 用 hermes config 命令"
-  audience="批量改配置；用 HERMES_HOME 切换多份配置；想用 OAuth 而不是 API Key"
-  tldr="config.yaml 写 providers；或用 hermes config set 一行行设"
+  useCase="管理 Hermes 的 provider、模型、custom endpoint 与密钥"
+  audience="需要自定义端点、切换 provider 或审计凭据位置的用户"
+  tldr="hermes model 配 provider → 密钥进 ~/.hermes/.env → 非敏感设置进 config.yaml"
 />
 
-<Callout type="info">Hermes 自带 `hermes config` 命令，**推荐用命令改而不是直接编辑 YAML**——避免缩进出错。</Callout>
-
 ---
 
-## 配置文件位置
+## 当前配置结构
 
-| 平台 | 默认 `HERMES_HOME` | 主配置 |
-| --- | --- | --- |
-| Linux / macOS / WSL2 | `~/.hermes/` | `~/.hermes/config.yaml` |
-| Windows 原生 | `%LOCALAPPDATA%\hermes\` | `%LOCALAPPDATA%\hermes\config.yaml` |
-| 模板 | （仓库自带） | `config.yaml.example` |
+| 文件 | 用途 |
+| --- | --- |
+| `~/.hermes/config.yaml` | 模型、终端、压缩、记忆和工具等非敏感设置 |
+| `~/.hermes/.env` | API Key、Token、密码等 secrets |
+| `~/.hermes/auth.json` | OAuth provider 凭据 |
 
-要切换多份配置，导出 `HERMES_HOME`：
+`HERMES_HOME` 可切换 Hermes profile 目录。不要改变系统 `HOME` 来模拟 profile；官方文档明确将 `HERMES_HOME` 与操作系统用户目录分开。
 
-```bash
-HERMES_HOME=~/.hermes-work hermes
-```
-
----
-
-## 三种 API 模式
-
-<Callout type="warning" title="api_mode 为必填字段">
-Hermes Agent 的 `api_mode` 字段是**必填项**，漏掉此字段或填了不支持的值，provider 会静默跳过，导致请求全部失败。
-
-升级后出现 `provider not found` 或无法连接，**第一个检查点就是 `api_mode` 是否填写且拼写正确**。
-
-推荐用 `hermes config set provider.<name>.api_mode <值>` 命令设置，避免 YAML 缩进出错。
+<Callout type="warning" title="密钥只放 secrets 存储">
+Hermes 官方规则是 secrets 放 `.env`，非敏感设置放 `config.yaml`。`hermes config set <API_KEY_NAME> <value>` 会把 API Key 路由到 `.env`；这些文件都不能上传仓库、截图或在线校验站。
 </Callout>
 
-Hermes 的 provider 必须挂在三种 API 模式之一上：
-
-| 模式 | 适用 |
-| --- | --- |
-| `chat_completions` | OpenAI 兼容端点（大多数中转、OpenRouter、xAI、本地推理等） |
-| `codex_responses` | OpenAI Codex Responses 端点 |
-| `anthropic_messages` | Anthropic 原生 / 兼容代理 |
-
 ---
 
-## 推荐：用 `hermes config` 改
+## 推荐：使用 provider 向导
 
 ```bash
-# 加一个 Claude provider
-hermes auth add anthropic
+# 在聊天外运行：添加 provider、OAuth、API Key 或 custom endpoint
+hermes model
 
-# 或加一个自定义 provider
-hermes config set provider.foropencode.base_url https://foropencode.com/v1
-hermes config set provider.foropencode.api_mode chat_completions
-hermes config set provider.foropencode.api_key sk-xxx
+# 查看当前配置
+hermes config
 
-# 设默认 provider 和模型
-hermes config set default.provider foropencode
-hermes config set default.model gpt-5.5
+# 打开 config.yaml
+hermes config edit
+
+# 检查升级后缺失项
+hermes config check
 ```
 
-具体子命令以 `hermes --help` / `hermes config --help` 为准。Hermes 版本更新很快，CLI 名字可能微调。
+聊天内的 `/model` 只能切换已经配置好的 provider/model，不能新增 provider 或完成 OAuth。旧版页面把 `hermes config set provider.<name>...` 与 `api_mode` 写成所有 provider 的必填 schema；当前官方文档不支持这种概括，已撤下。
 
 ---
 
-## 可用模型规格
+## OpenAI 兼容 custom provider
 
-| 模型 | 上下文窗口 | 最大输出 | api_mode |
-| --- | --- | --- | --- |
-| `gpt-5.5` | 270,000（普通渠道）/ 1,050,000（Pro/Plus Codex） | 128,000 | `chat_completions` |
-| `gpt-5.4` | 1,050,000 | 128,000 | `chat_completions` |
-| `gpt-5.4-mini` | 400,000 | 128,000 | `chat_completions` |
-| `claude-opus-4-8` | 1,000,000 | 128,000 | `anthropic_messages` |
-| `claude-sonnet-4-6` | 1,000,000 | 64,000 | `anthropic_messages` |
-| `claude-haiku-4-5-20251001` | 200,000 | 64,000 | `anthropic_messages` |
-
----
-
-## 直接改 YAML
+Hermes 官方说明 custom endpoint 应实现 `/v1/chat/completions`。最稳妥的方式是在 `hermes model` 中选择 **Custom endpoint**。如需命名多个 custom provider，可使用官方 `custom_providers` schema：
 
 ```yaml
-providers:
-  foropencode-claude:
-    api_mode: anthropic_messages
-    base_url: https://foropencode.com
-    api_key: sk-xxx
-    models:
-      - claude-sonnet-4-6
-      - claude-opus-4-8
-      - claude-haiku-4-5-20251001
-
-  foropencode-codex:
-    api_mode: chat_completions
+custom_providers:
+  - name: foropencode
     base_url: https://foropencode.com/v1
-    api_key: sk-xxx
-    models:
-      - gpt-5.5
-      - gpt-5.4
-      - gpt-5.4-mini
+    key_env: FOROPENCODE_API_KEY
 
-default:
-  provider: foropencode-codex
-  model: gpt-5.5
+model:
+  provider: custom:foropencode
+  default: gateway-model-id
 ```
 
-<Callout type="warning">**YAML 缩进敏感**，必须用空格不能用 Tab。`hermes config validate` 可以检查格式。</Callout>
+并把 Key 放到 `~/.hermes/.env`：
 
----
-
-## 鉴权方式
-
-Hermes 文档列出的 Anthropic 端鉴权方式：
-
-| 方式 | 配置 |
-| --- | --- |
-| 直接 API Key | `api_key` 字段或环境变量 `ANTHROPIC_API_KEY` |
-| OAuth | `hermes auth add anthropic` 走交互式登录 |
-| OpenRouter | `provider.openrouter.*` |
-| 任意兼容代理 | 自定义 provider，按 chat_completions 模式 |
-
-OAuth 会把 token 存到 `$HERMES_HOME/auth/` 下。
-
----
-
-## 环境变量
-
-| 变量 | 作用 |
-| --- | --- |
-| `HERMES_HOME` | 配置目录；默认 `~/.hermes`，Win `%LOCALAPPDATA%\hermes` |
-| `ANTHROPIC_API_KEY` | 默认 Claude 鉴权 |
-| `ANTHROPIC_TOKEN` | 备用 token 字段 |
-| `OPENAI_API_KEY` | 默认 OpenAI 鉴权 |
-
----
-
-## 多 provider 切换
-
-```bash
-# 临时用别的 provider
-hermes --provider foropencode-claude
-
-# 永久改默认
-hermes config set default.provider foropencode-claude
-
-# 看当前用什么
-hermes config get default
+```dotenv
+FOROPENCODE_API_KEY=sk-xxx
 ```
 
+`foropencode.com` 是第三方网关，不是 Nous Research、OpenAI 或 Anthropic。`gateway-model-id` 必须替换为网关实际模型列表中的值。
+
+<Callout type="warning" title="协议不能靠猜">
+通用 custom provider 路径面向 OpenAI-compatible Chat Completions。若端点使用 Codex Responses、Anthropic Messages、Azure Foundry 或其他协议，应通过 `hermes model` 选择 Hermes 当前明确支持的 provider/模式，并同时核对端点发布方文档；不要把 `api_mode` 当成能让任意协议自动兼容的开关。
+</Callout>
+
 ---
 
-## 改完之后
+## 环境变量引用
+
+`config.yaml` 支持 `${VAR_NAME}` 引用环境变量。密钥仍应放在 `.env`：
+
+```yaml
+auxiliary:
+  vision:
+    api_key: ${VISION_API_KEY}
+    base_url: ${VISION_BASE_URL}
+```
+
+Hermes 的辅助模型可能处理视觉、网页摘要或其他工具任务。即使主聊天使用某个 provider，也要在 `hermes portal info`、`hermes tools` 和配置中核对辅助任务最终路由，避免误解数据流。
+
+---
+
+## 验证与切换
 
 ```bash
-# 重启 hermes（直接退出 + 重启即可，配置在启动时读）
+hermes config check
+hermes model
 hermes
 ```
 
-Hermes 会在启动时验证 provider 连通性，配错会立刻报错。要单独测：
-
-```bash
-hermes auth status
-```
-
----
-
-## Termux 特别说明
-
-Termux 环境下 Hermes 的官方安装脚本会用裁剪过的 `[termux]` extra——完整 extra 会带入 Android 不兼容的语音依赖。
-
-如果手动 `uv pip install`，记得：
-
-```bash
-uv pip install -e ".[termux]"   # 推荐
-uv pip install -e ".[all,dev]"  # 仅非 Android
-```
-
----
-
-## 常见排查
-
-| 现象 | 检查 |
-| --- | --- |
-| YAML 解析错 | 缩进对吗？用了 Tab 吗？`hermes config validate` |
-| `provider not found` | `default.provider` 拼写对吗？大小写敏感 |
-| 401 | API Key 对应分组对吗？`hermes auth status` |
-| 多端口冲突 | Hermes 默认占的端口被占，查 `hermes config get gateway` |
+provider 切换不要求重启，历史、记忆和 skills 会保留。切换前确认这些持久内容是否适合发送给新的 provider，并从不含敏感数据的最小请求开始。
 
 <RelatedPages
   title="相关"
   items={[
-    { route: '/hermes/cc-switch', hint: '回到 CC Switch 流程' },
-    { route: '/hermes/install', hint: '装客户端' },
+    { route: '/hermes/cc-switch', hint: 'CC Switch 第三方配置边界' },
+    { route: '/hermes/install', hint: '安装 Hermes Agent' },
+    { route: '/site-info', hint: 'API Key、隐私与第三方关系' },
   ]}
 />
+
+资料来源：[Hermes Configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) · [AI Providers](https://hermes-agent.nousresearch.com/docs/integrations/providers) · [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)（2026-07-26 核对）

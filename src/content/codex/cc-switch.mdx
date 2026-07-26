@@ -1,12 +1,12 @@
 ---
 title: "Codex · CC Switch 配置"
-description: "用 CC Switch 一键配 Codex CLI / App（共享同一份配置）。"
+description: "使用第三方社区工具 CC Switch 管理 Codex CLI / App provider 配置的安全边界。"
 navLabel: "CC Switch 配置"
 ---
 
 # Codex · CC Switch 配置
 
-<VersionBadge version="v0.141.0" date="2026-06-18" license="Apache-2.0" github="https://github.com/openai/codex" />
+<VersionBadge version="v0.145.0" date="2026-07-21" license="Apache-2.0" github="https://github.com/openai/codex" />
 
 <PageHeader
   useCase="可视化配置 Codex；CLI 与 App 配置共享，配一次两边都生效"
@@ -15,6 +15,10 @@ navLabel: "CC Switch 配置"
 />
 
 > 还没装 CC Switch？先看 [CC Switch 安装](/cc-switch)。
+
+<Callout type="warning" title="第三方工具与第三方网关">
+CC Switch 不是 OpenAI 产品，`foropencode.com` 也不是 OpenAI API。使用前备份 `~/.codex/`，确认 CC Switch 当前版本支持你的 Codex 版本，并核对最终 Base URL、凭据存储、数据处理与计费主体。
+</Callout>
 
 <Callout type="warning">Codex 的 Base URL **必须**带 `/v1` 后缀，和 Claude Code 反着。漏了会 404。</Callout>
 
@@ -25,8 +29,8 @@ navLabel: "CC Switch 配置"
 <Walkthrough title="CC Switch · 配置 Codex（CLI / App 通用）">
   <Frame step="1" title="选中 Codex 图标，点击添加"
     image="/img/cc-switch/cc-switch-codex-main-add.png"
-    imageAlt="CC Switch 主界面：选中第三个 Codex 图标，点右上角添加按钮">
-    打开 CC Switch，顶部工具栏选中**第三个 Codex 图标**，点右上角 **＋** 按钮新建一项。
+    imageAlt="CC Switch 主界面：选中 Codex 图标，点右上角添加按钮">
+    打开 CC Switch，顶部工具栏按名称选中 **Codex 图标**，点右上角 **＋** 按钮新建一项；不要依赖图标排列位置。
 
     **Codex CLI 和 Codex App 共享 `~/.codex/config.toml`**——只配一次，两者都生效。
   </Frame>
@@ -49,14 +53,14 @@ navLabel: "CC Switch 配置"
 
   <Frame step="3" title="启用 Goal mode 与通用配置，再点添加"
     image="/img/cc-switch/cc-switch-codex-goalmode.png"
-    imageAlt="勾选启用 Goal mode 和写入通用配置，requires_openai_auth 设为 false，最后点添加">
+    imageAlt="勾选启用 Goal mode 和写入通用配置的表单截图（截图中的认证字段为旧界面示例，按当前版本与网关要求选择）">
     在表单下方继续勾选：
 
     - ✅ **启用 Goal mode**
     - ✅ **写入通用配置**
-    - 若表单中出现 `requires_openai_auth` 字段，**设为 `false`**
+    - 若表单出现认证字段，按 CC Switch 当前官方说明和网关实际鉴权要求选择，不要根据旧截图强制填写
 
-    设置完毕后，点右下角 **＋ 添加**。CC Switch 会自动写入 `~/.codex/config.toml` 和 `~/.codex/auth.json`。
+    设置完毕后，点右下角 **＋ 添加**。CC Switch 可能写入 `~/.codex/config.toml` 和凭据存储；这些文件含敏感信息，不能上传仓库或排障网站。
   </Frame>
 
   <Frame step="4" title="确认配置添加成功"
@@ -73,16 +77,7 @@ navLabel: "CC Switch 配置"
 
 ## 可用模型
 
-Codex 仅支持 OpenAI 格式（`OpenAI Responses`），Base URL 填 `https://foropencode.com/v1`：
-
-| 模型 ID | 上下文窗口 | 最大输出 | 备注 |
-| --- | --- | --- | --- |
-| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 | OpenAI 当前推荐起点 |
-| `gpt-5.4` | 1,050,000 | 128,000 | 上一代主力 |
-| `gpt-5.4-mini` | 400,000 | 128,000 | 轻量级 |
-| `gpt-5.3-codex-spark` | — | — | Codex 专用线路 |
-
-OpenAI 标注以下模型对**用 ChatGPT 登录**的用户已弃用：`gpt-5.2`、`gpt-5.3-codex`。
+OpenAI 当前 Codex 默认 Power 设置使用 `gpt-5.6-sol`，但这不代表 foropencode 网关已经提供该模型。CC Switch 表单中应以网关实际模型列表为准，不手填未经确认的上下文或最大输出。`gpt-5.2`、`gpt-5.3-codex` 对 ChatGPT 登录的 Codex 已弃用；API 和第三方 provider 的可用性另行核对。
 
 ---
 
@@ -92,10 +87,10 @@ OpenAI 标注以下模型对**用 ChatGPT 登录**的用户已弃用：`gpt-5.2`
 
 | 值 | 备注 |
 | --- | --- |
-| `minimal` | 极速回答 |
-| `low` | 简单代码生成、快速问答 |
-| `medium` | 日常开发任务（推荐） |
-| `high` | 复杂算法、架构设计 |
+| `minimal` | 最低推理档位；是否可用取决于模型 |
+| `low` | 较低推理档位 |
+| `medium` | 中等推理档位 |
+| `high` | 较高推理档位 |
 | `xhigh` | 仅 Responses API 路径下、且模型支持时可用 |
 
 ---
@@ -118,3 +113,5 @@ CC Switch 将配置写入 `~/.codex/config.toml`（CLI 与 Codex App 共用同�
     { route: '/cc-switch', hint: 'CC Switch 工具本身' },
   ]}
 />
+
+资料来源：[OpenAI Codex 配置](https://developers.openai.com/codex/config-basic) · [Codex 模型](https://developers.openai.com/codex/models) · [CC Switch 官方仓库](https://github.com/farion1231/cc-switch)（2026-07-26 核对）

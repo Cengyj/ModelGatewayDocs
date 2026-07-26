@@ -58,6 +58,7 @@ export function Toc() {
                   <a
                     href={`#${root.id}`}
                     className={`${styles.link} ${isActive || childActive ? styles.linkActive : ''}`}
+                    aria-current={isActive ? 'location' : undefined}
                   >
                     {root.text}
                   </a>
@@ -68,6 +69,7 @@ export function Toc() {
                           <a
                             href={`#${child.id}`}
                             className={`${styles.link} ${activeId === child.id ? styles.linkActive : ''}`}
+                            aria-current={activeId === child.id ? 'location' : undefined}
                           >
                             {child.text}
                           </a>

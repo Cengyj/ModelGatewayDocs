@@ -33,6 +33,15 @@ export function Image(props: ImgHTMLAttributes<HTMLImageElement>) {
         src={src}
         className={`${styles.thumb} ${className ?? ''}`}
         onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={alt ? `放大查看：${alt}` : '放大查看图片'}
         {...rest}
       />
       {open ? (

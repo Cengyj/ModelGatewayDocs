@@ -1,17 +1,17 @@
 ---
 title: "Claude Code CLI · 常用命令"
-description: "启动选项、会话命令、自动授权、继续上次对话等日常高频用法。"
+description: "Claude Code CLI 启动、会话、权限控制和非交互模式的常用命令。"
 navLabel: "常用命令"
 ---
 
 # Claude Code CLI · 常用命令
 
-<VersionBadge version="v2.1.183" date="2026-06-19" license="Proprietary" github="https://github.com/anthropics/claude-code" />
+<VersionBadge version="v2.1.220" date="2026-07-25" license="Proprietary" github="https://github.com/anthropics/claude-code" />
 
 <PageHeader
   useCase="快速查启动参数、slash 命令、自动化脚本写法"
   audience="已装好 Claude Code，想熟悉日常用法的开发者"
-  tldr="claude 启动 → /help 查命令 → --continue 接上次 → --dangerously-skip-permissions 免确认"
+  tldr="claude 启动 → /help 查当前命令 → --continue 接上次 → 保留默认权限确认"
 />
 
 ---
@@ -45,9 +45,9 @@ claude --resume abc123
 
 ---
 
-## 自动授权 / 跳过确认
+## 权限控制
 
-Claude Code 默认对每个工具调用（写文件、执行命令等）都会询问你是否允许。以下两个方式可以跳过：
+Claude Code 会根据权限设置决定哪些工具需要确认。对不熟悉的仓库、外部提示或 CI 输入，保留默认确认和最小权限最安全。
 
 ### `--dangerously-skip-permissions`
 
@@ -55,13 +55,9 @@ Claude Code 默认对每个工具调用（写文件、执行命令等）都会�
 claude --dangerously-skip-permissions
 ```
 
-启动后 Claude Code 对**所有**工具调用直接执行，不再弹确认。适合：
+该参数会关闭工具确认，可能允许模型直接删除文件、执行外部命令或访问超出预期的资源。它不应作为日常推荐，也不应仅为减少提示而启用。
 
-- CI/CD 自动化流水线
-- 已充分审查任务、不想被打断的连续工作流
-- 脚本调用 `--print` 模式时不需要交互
-
-<Callout type="warning">**只在你信任任务内容时使用。** `--dangerously-skip-permissions` 不区分危险程度，`rm -rf` 和 `echo hello` 都会直接执行。建议结合 `settings.json` 的 `permissions.deny` 规则做底线保护。</Callout>
+<Callout type="danger">只有在外部已经提供独立、可验证的隔离边界，并且任务输入、仓库内容和命令均已审查时，才考虑使用。默认做法是保留确认并使用细粒度权限规则。</Callout>
 
 ### 细粒度权限规则（推荐替代方案）
 
@@ -70,8 +66,8 @@ claude --dangerously-skip-permissions
 ```json
 {
   "permissions": {
-    "allow": ["Bash(git:*)", "Bash(npm:*)", "Read(*)", "Write(src/**)"],
-    "deny": ["Bash(rm:*)", "Bash(git push --force:*)"]
+    "allow": ["Bash(git status)", "Read(src/**)", "Write(src/**)"],
+    "deny": ["Read(.env)", "Read(.env.*)", "Bash(git push --force:*)"]
   }
 }
 ```
@@ -85,11 +81,10 @@ claude --dangerously-skip-permissions
   { cmd: '--resume <id>',                  desc: '继续指定会话' },
   { cmd: '--print',                        desc: '非交互模式，结果输出 stdout' },
   { cmd: '--output-format json',           desc: '输出 JSON（含 token 用量，适合脚本解析）' },
-  { cmd: '--model <model-id>',             desc: '指定模型，如 claude-opus-4-7' },
-  { cmd: '--dangerously-skip-permissions', desc: '跳过所有工具确认' },
+  { cmd: '--model <model-id>',             desc: '指定当前账户或网关实际可用的模型 ID' },
+  { cmd: '--dangerously-skip-permissions', desc: '高风险：关闭所有工具确认，仅限外部已隔离环境' },
   { cmd: '--safe-mode',                    desc: '禁用所有自定义（CLAUDE.md、Hooks、MCP、Settings），用于排障' },
-  { cmd: '--bare',                         desc: '极简无头模式，关闭 UI 和非必要流量' },
-  { cmd: '--no-update-check',              desc: '跳过版本更新检查' },
+  { cmd: '--bare',                         desc: '最小系统提示与工具集；不加载常规自定义和凭据存储' },
   { cmd: '--verbose',                      desc: '详细日志' },
   { cmd: '--debug',                        desc: '调试模式，输出更多内部信息' },
   { cmd: '--add-dir <path>',               desc: '把额外目录加入上下文' },
@@ -111,10 +106,10 @@ claude --dangerously-skip-permissions
   { cmd: '/compact',                  desc: '压缩历史对话，节省 Token' },
   { cmd: '/status',                   desc: '查看当前会话状态（Token 用量、模型）' },
   { cmd: '/cost',                     desc: '显示本次会话 Token 费用' },
-  { cmd: '/config <key>=<value>',     desc: '临时修改配置，如 /config skipWebFetchPreflight=true' },
+  { cmd: '/config',                   desc: '查看或修改当前版本公开的配置项；先用 /help 核对' },
   { cmd: '/memory',                   desc: '查看或编辑 CLAUDE.md 记忆文件' },
   { cmd: '/mcp',                      desc: '查看 MCP 服务器状态' },
-  { cmd: '/ide',                      desc: '在 IDE 中打开当前文件' },
+  { cmd: '/ide',                      desc: '管理 IDE 集成连接（VS Code / JetBrains 等）' },
   { cmd: '/review',                   desc: '审查当前改动' },
   { cmd: '/init',                     desc: '在当前目录生成 CLAUDE.md 上下文文件' },
 ]} />
@@ -130,13 +125,15 @@ claude --print "用中文总结一下这个 PR 的改动"
 # 输出 JSON（包含 token 用量）
 claude --print --output-format json "列出 src/ 下所有函数名" 
 
-# 配合 CI，跳过确认 + 非交互
-claude --print --dangerously-skip-permissions \
-  "检查 src/api.ts 里有没有 SQL 注入漏洞，输出 JSON 报告"
+# CI 中也应保留最小权限，并在隔离环境中运行
+claude --print --output-format json \
+  "检查 src/api.ts 里有没有 SQL 注入风险，输出报告"
 
 # 把结果传给其他命令
-claude --print "生成 .gitignore for Node.js 项目" > .gitignore
+claude --print "生成 .gitignore for Node.js 项目" > .gitignore.generated
 ```
+
+先检查生成文件，再决定是否合并到现有 `.gitignore`，避免直接覆盖用户内容。
 
 ---
 
@@ -144,18 +141,18 @@ claude --print "生成 .gitignore for Node.js 项目" > .gitignore
 
 ```bash
 # 启动时指定
-claude --model claude-opus-4-7
+claude --model sonnet
 
 # 或在 settings.json 里固定
-# "model": "claude-opus-4-7"
+# "model": "sonnet"
 ```
 
 常用模型 ID：
 
 <CommandTable header={['模型', '特点']} rows={[
-  { cmd: 'claude-sonnet-4-6', desc: '默认推荐，速度与能力均衡' },
-  { cmd: 'claude-opus-4-7',   desc: '最强，适合复杂推理' },
-  { cmd: 'claude-haiku-4-5',  desc: '最快最省，适合简单任务' },
+  { cmd: 'sonnet', desc: '使用当前 Sonnet 别名；具体解析结果以官方 /model 为准' },
+  { cmd: 'opus',   desc: '使用当前 Opus 别名；适合复杂任务' },
+  { cmd: 'haiku',  desc: '使用当前 Haiku 别名；适合轻量任务' },
 ]} />
 
 ---
@@ -170,9 +167,9 @@ claude agents
 claude auth status
 claude auth status --text   # 人可读格式
 
-# 生成 CI/CD 用的长效 Token（不需要浏览器）
-claude setup-token
 ```
+
+认证命令和 Token 保存方式会影响账户安全；以当前 `claude auth --help` 和 Anthropic 官方文档为准，不在脚本或仓库中保存真实 Token。
 
 ---
 
@@ -184,10 +181,9 @@ claude --version
 
 # 更新到最新版（原生安装方式）
 claude update
-
-# 检查更新但不安装
-claude --version --no-update-check
 ```
+
+如需关闭后台自动更新，按官方文档在 `settings.json` 的 `env` 段设置 `"DISABLE_AUTOUPDATER": "1"`；手动 `claude update` 仍然可用。
 
 <RelatedPages
   title="相关"
@@ -197,3 +193,5 @@ claude --version --no-update-check
     { route: '/claude-code/errors', hint: '常见报错按症状排查' },
   ]}
 />
+
+资料来源：[Claude Code 官方文档](https://code.claude.com/docs/en/overview) · [Claude Code 官方 GitHub](https://github.com/anthropics/claude-code)（2026-07-26 核对）

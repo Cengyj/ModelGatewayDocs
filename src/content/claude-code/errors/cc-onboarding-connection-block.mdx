@@ -1,5 +1,6 @@
 ---
 title: "CC-005：首次启动即报 Unable to connect to Anthropic services"
+description: "按官方登录、地区、网络和 LLM Gateway 路径排查首次启动连接问题，不修改内部 onboarding 状态。"
 hidden: true
 ---
 
@@ -7,101 +8,43 @@ hidden: true
 
 <ErrorMeta
   component="Claude Code 本体"
-  version="claude-code ≥ 1.x（2025-07 前后版本）"
-  platform="Linux / macOS / Windows（均可复现）"
-  date="2025-09-21"
-  owner="GordonCC（博客园）"
+  version="v2.1.220 核对"
+  platform="Linux / macOS / Windows"
+  date="2026-07-26"
 />
+
 ---
 
 ## 问题现象
 
-Claude Code 安装完成后，第一次执行 `claude` 或第一次登录时，终端立即打印以下错误并退出，无法进入交互界面：
+Claude Code 安装完成后，第一次执行 `claude` 或登录时显示无法连接 Anthropic 服务：
 
 ```text
 Unable to connect to Anthropic services
-Failed to connect to api.anthropic.com: ERR_BAD_REQUEST
 Please check your internet connection and network settings.
-Note: Claude Code might not be available in your country.
-Check supported countries at https://anthropic.com/supported-countries
 ```
 
-网络正常，代理/中转 URL 配置无误，但错误依旧出现。
-
-示例截图：
-
-![首次启动报错示例](/img/errors/cc-onboarding-connection-block.webp)
+![Claude Code 首次启动连接错误示例](/img/errors/cc-onboarding-connection-block.webp)
 
 ---
 
-## 根因分析
+## 安全边界
 
-```text
-Claude Code 启动
-  → 检查 ~/.claude.json 中 hasCompletedOnboarding 字段
-  → 字段缺失（首次安装默认不写入）
-  → 触发 Onboarding 流程
-  → Onboarding 流程向 api.anthropic.com 发起连通性校验
-  → 国内网络或中转配置在 Onboarding 阶段不生效
-  → 请求失败 → ERR_BAD_REQUEST
-  → 报错退出，拒绝进入正常交互
-```
-
-关键点：`hasCompletedOnboarding: true` 缺失时，Claude Code 会在进入正常会话前额外执行一次官方端点探测，该探测不受 `ANTHROPIC_BASE_URL` 等环境变量影响，导致使用中转地址的用户也会被拦住。
+旧版页面把 `~/.claude.json` 中手写 `hasCompletedOnboarding: true` 描述为标准修复。这是内部状态字段，本次未在 [Anthropic 官方安装文档](https://code.claude.com/docs/en/setup) 或 [LLM Gateway 文档](https://code.claude.com/docs/en/llm-gateway-connect) 中确认，因此已撤下。手动标记 onboarding 完成可能跳过必要的登录、地区、条款或连接检查，不应作为通用方案。
 
 ---
 
-## 修复步骤
+## 支持的排查顺序
 
-**第一步：找到配置文件**
+1. 运行 `claude --version`，确认安装完成且来自 Anthropic 官方渠道
+2. 打开 [Anthropic 支持地区页面](https://www.anthropic.com/supported-countries)，确认官方服务适用于你的所在地与账户
+3. 检查系统时间、DNS、企业防火墙、证书代理和已获授权的系统代理设置
+4. 使用官方 Anthropic 账户/API 时，按应用可见的登录流程完成认证
+5. 使用受支持的 LLM Gateway 时，只配置官方文档列出的 `ANTHROPIC_BASE_URL`，并根据网关要求选择 `ANTHROPIC_API_KEY`（`x-api-key`）或 `ANTHROPIC_AUTH_TOKEN`（Bearer）
+6. 查看 [Anthropic 官方安装文档](https://code.claude.com/docs/en/setup) 与 [LLM Gateway 文档](https://code.claude.com/docs/en/llm-gateway-connect)；仍失败时向 Anthropic 或你实际选择的网关支持渠道反馈完整错误，但不要提交真实 Key
 
-文件路径为 `~/.claude.json`（Windows 为 `C:\Users\\.claude.json`）。
+<Callout type="warning" title="不要用内部字段跳过首次引导">
+如果官方登录或网关配置仍无法进入会话，停止修改 `~/.claude.json` 的 onboarding 状态。也不要关闭安全软件、TLS 校验或组织访问控制来“验证”是否能连接。
+</Callout>
 
-**第二步：在 JSON 最外层添加这一行**
-
-用文本编辑器打开文件，在最外层 JSON 对象中补上：
-
-```json
-"hasCompletedOnboarding": true
-```
-
-如果你需要参考完整写法，可以写成：
-
-```json
-{
-  "installMethod": "unknown",
-  "autoUpdates": true,
-  "firstStartTime": "2025-07-14T06:11:03.877Z",
-  "userID": "...",
-  "projects": { ... },
-  "hasCompletedOnboarding": true
-}
-```
-
-> 注意：`projects` 字段末尾的 `}` 后面要加英文逗号 `,`，再写新字段，否则 JSON 格式非法。
-
-**第三步：验证 JSON 合法性（可选）**
-
-```bash
-cat ~/.claude.json | python3 -m json.tool
-```
-
-无报错即表示格式正确。
-
-**第四步：重新启动 Claude Code**
-
-```bash
-claude
-```
-
-正常进入交互界面即修复成功。
-
----
-
-## 预防措施
-
-| 做法 | 避免的问题 |
-| --- | --- |
-| 安装后立即在 `~/.claude.json` 手动写入 `"hasCompletedOnboarding": true` | 首次启动因 Onboarding 探测失败而无法进入交互 |
-| 使用中转 API 时确认代理/环境变量在 shell 初始化阶段即已生效 | Onboarding 阶段因代理未加载导致连接被拒 |
-| 修改 JSON 后用 `python3 -m json.tool` 或在线工具校验格式 | 手动编辑引入语法错误导致 Claude Code 无法读取配置 |
+资料来源：[Anthropic 安装文档](https://code.claude.com/docs/en/setup) · [LLM Gateway 配置](https://code.claude.com/docs/en/llm-gateway-connect)（2026-07-26 核对）

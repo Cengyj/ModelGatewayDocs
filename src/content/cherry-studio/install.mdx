@@ -6,10 +6,10 @@ navLabel: "安装"
 
 # Cherry Studio · 安装
 
-<VersionBadge version="v1.9.11" date="2026-06-07" license="AGPL-3.0" github="https://github.com/CherryHQ/cherry-studio" />
+<VersionBadge version="v1.9.12" date="2026-07-05" license="AGPL-3.0" github="https://github.com/CherryHQ/cherry-studio" />
 
 <PageHeader
-  useCase="用桌面 GUI 访问 60+ LLM 供应商，内置知识库、MCP 和 300+ 助手模板"
+  useCase="用桌面 GUI 配置多种 LLM 供应商，并使用知识库、MCP 和助手模板"
   audience="不习惯终端、需要本地知识库 / 文件对话 / 图文生成的用户"
   tldr="从官方 Releases 下载安装包，双击安装，无需任何命令行"
 />
@@ -22,28 +22,22 @@ navLabel: "安装"
 
 | 功能 | 说明 |
 | --- | --- |
-| 多供应商支持 | 50+ Provider 预设（Anthropic、OpenAI、Google、DeepSeek、Groq 等）+ 自定义 |
+| 多供应商支持 | 支持多种云端、本地和自定义 Provider；准确清单以当前客户端为准 |
 | 300+ 助手模板 | 内置翻译、写作、代码审查等各类助手，可直接调用 |
 | 本地知识库 | 拖入 PDF / Word / 网页，AI 基于本地文档回答 |
 | MCP 支持 | 内置 MCP 协议，可调用文件系统、搜索、浏览器等工具 |
 | 多模态 | 支持图片输入、图像生成（需对应模型） |
-| 数据本地化 | 所有对话、知识库、配置均存本地，不上传第三方 |
+| 本地数据 | 对话历史、知识库索引和配置主要保存在本机；模型请求仍会发送到你选择的 API 提供商 |
 
 ---
 
 ## 下载
 
-从官方 Releases 页获取对应平台安装包（当前最新：**v1.9.11**，2026-06-07）：
+从发布方 `CherryHQ` 的官方 Releases 页获取对应平台安装包（核对版本：**v1.9.12**，2026-07-05）：
 
-[**→ GitHub Releases 下载页**](https://github.com/CherryHQ/cherry-studio/releases/latest)
+[前往 Cherry Studio 官方 GitHub Releases（github.com/CherryHQ/cherry-studio）](https://github.com/CherryHQ/cherry-studio/releases/latest)
 
-| 平台 | 文件名 | 大小（约） |
-| --- | --- | --- |
-| Windows x64 | `Cherry-Studio-1.9.11-x64-setup.exe` | ~140 MB |
-| Windows ARM64 | `Cherry-Studio-1.9.11-arm64-setup.exe` | ~130 MB |
-| macOS Apple Silicon | `Cherry-Studio-1.9.11-arm64.dmg` | ~160 MB |
-| macOS Intel | `Cherry-Studio-1.9.11-x64.dmg` | ~165 MB |
-| Linux | `Cherry-Studio-1.9.11-x86_64.AppImage` | ~170 MB |
+发布资产的文件名、架构与大小可能变化，请在 Releases 页按当前版本选择 Windows、macOS 或 Linux 构建，并确认仓库所有者为 `CherryHQ`。本站不托管或重新打包安装文件。
 
 ---
 
@@ -51,13 +45,13 @@ navLabel: "安装"
 
 <Tabs defaultValue="win">
   <Tab label="Windows" value="win">
-    双击下载的 `.exe` 文件，一路 Next 即可。安装完桌面会出现 Cherry Studio 快捷方式。
+    从官方 Releases 下载后，打开 `.exe`，核对安装器显示的应用名称和发布信息，再按系统安装向导选择位置与选项。安装完成后从系统应用列表启动 Cherry Studio。
   </Tab>
   <Tab label="macOS" value="mac">
     1. 打开 `.dmg`，拖入 **Applications** 文件夹
-    2. 首次启动若被 Gatekeeper 拦截，进 **系统设置 → 隐私与安全性**，点「仍要打开」
+    2. 首次启动若 Gatekeeper 提示发布方或签名无法验证，先停止打开，回到官方 Releases 核对下载来源，并查阅 Cherry Studio 官方支持说明；不要按教程绕过系统安全提示
 
-    <Callout type="info">Apple Silicon（M1/M2/M3/M4）用户下载 `arm64` 版，Intel Mac 下载 `x64` 版——大小和性能都有差异。</Callout>
+    <Callout type="info">Apple Silicon 用户选择当前 Release 提供的 `arm64` 资产，Intel Mac 选择 `x64` 资产；文件名仍以发布页为准。</Callout>
   </Tab>
   <Tab label="Linux" value="linux">
     ```bash
@@ -65,7 +59,7 @@ navLabel: "安装"
     ./Cherry-Studio-*.AppImage
     ```
 
-    推荐用 [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher) 把它集成到系统菜单和文件关联里。
+    如需集成到系统菜单，请优先查看 Cherry Studio Release 或发行版的 AppImage 说明；第三方 AppImage 管理器不是 Cherry Studio 官方安装所必需。
   </Tab>
 </Tabs>
 
@@ -75,13 +69,13 @@ navLabel: "安装"
 
 <Steps>
   <Step title="打开 Cherry Studio">
-    第一次启动会进入欢迎页，**不强制要求账号登录**——本地配置即可使用所有功能。
+    第一次启动会进入欢迎页。账户要求与可用功能取决于当前客户端版本和你选择的模型供应商；以应用内提示和官方文档为准。
   </Step>
   <Step title="选择主题与语言">
     左下角设置图标 → **常规设置** → 主题（亮 / 暗 / 跟随系统）+ 语言选「简体中文」。
   </Step>
   <Step title="进入「模型服务」准备配 API">
-    左下角设置 → **模型服务**。可以看到 62 个已预设的 Provider，点击对应供应商填入 API Key 即可激活。
+    左下角设置 → **模型服务**，从当前版本显示的 Provider 中选择对应服务。只在该 Provider 或自定义配置的正式界面填写 Key，并核对最终 API 域名。
   </Step>
 </Steps>
 
@@ -94,7 +88,7 @@ navLabel: "安装"
 <RelatedPages
   title="下一步"
   items={[
-    { route: '/cherry-studio/manual', hint: '在设置界面添加供应商、填 API 地址和 Key（推荐）' },
+    { route: '/cherry-studio/manual', hint: '在设置界面添加供应商、填 API 地址和 Key' },
   ]}
 />
 
@@ -103,20 +97,13 @@ navLabel: "安装"
 ## 常见问题
 
 <Callout type="warning" title="启动报缺 GLIBC / OpenSSL（Linux）">
-AppImage 内嵌运行时，但部分系统库仍依赖宿主 glibc。如果启动报错：
-
-- 升级到 Ubuntu 22.04+ / Debian 12+ / Fedora 38+（内核 5.15+）
-- 或编译构建（参考仓库 `BUILD.md`）
+AppImage 仍可能依赖宿主系统库。若启动报错，先核对当前 Release 的资产说明和系统要求；不要根据旧页面固定升级到某个发行版版本。需要自行构建时只参考官方仓库当前的构建说明。
 </Callout>
 
 <Callout type="info" title="数据存哪？">
-Cherry Studio 的所有数据都在本地用户目录：
+Cherry Studio 官方文档当前未逐项公布各平台数据目录。作为桌面（Electron 类）应用，其本地数据通常位于用户目录的应用数据文件夹（macOS 为 `~/Library/Application Support/`、Windows 为 `%APPDATA%`、Linux 为 `~/.config/` 下的对应子目录）；实际位置以应用内设置或官方文档当前说明为准。
 
-| 平台 | 数据目录 |
-| --- | --- |
-| macOS | `~/Library/Application Support/CherryStudio` |
-| Windows | `%APPDATA%\CherryStudio` |
-| Linux | `~/.config/CherryStudio` |
-
-对话历史、知识库索引、Provider 配置、助手模板自定义都在这里——迁移电脑时直接复制此目录即可。
+这些目录通常包含对话历史、知识库索引、Provider 配置和助手模板。备份或迁移前先退出应用，并将其中的 API Key、Token 和账户信息按敏感数据处理。模型请求仍会发送到所选 API 提供商，不能把“本地存储”理解为“所有数据都不离开设备”。
 </Callout>
+
+资料来源：[Cherry Studio 官方 GitHub](https://github.com/CherryHQ/cherry-studio) · [官方 Releases](https://github.com/CherryHQ/cherry-studio/releases/latest) · [官方文档](https://docs.cherryai.com.cn)（2026-07-26 核对）

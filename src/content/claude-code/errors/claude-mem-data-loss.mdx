@@ -1,114 +1,78 @@
 ---
-title: "CM-001：pending_messages 误删导致知识原材料丢失"
+title: "CM-001：claude-mem 队列积压与数据保护"
+description: "第三方 claude-mem 队列积压时的备份、官方诊断和交互式恢复流程。"
 hidden: true
 ---
 
-# CM-001：pending_messages 误删导致知识原材料丢失
+# CM-001：claude-mem 队列积压与数据保护
 
 <ErrorMeta
-  component="claude-mem"
-  version="claude-mem v5.x"
-  platform="Windows 11"
-  date="2026-03-12"
-  owner="天程君（QQ：2459221653）"
+  component="claude-mem（第三方社区插件）"
+  version="v5.x 历史案例；v13.12.4 已复核"
+  platform="Windows / macOS / Linux"
+  date="2026-07-26"
+  severity="high"
+  status="workaround"
 />
+
+<Callout type="warning" title="非 Anthropic 官方组件">
+  claude-mem 由 `thedotmack/claude-mem` 社区项目发布，不是 Anthropic 或 Claude Code 官方插件。它会在本地保存会话观察与摘要；使用前应阅读其隐私、配置和备份说明。
+</Callout>
+
 ---
 
 ## 问题现象
 
-- `observations` 表为 0 条，使用 4 天没有提取出任何知识点
-- `pending_messages` 堆积 1637 条，status 全为 `pending`
-- `sdk_sessions` 无任何 `completed` 记录（active: 6，failed: 18）
-- `worker_port` 全为 `None`
+历史个案中，`pending_messages` 长期积压、`observations` 没有新增，随后手工清理队列造成尚未处理的原始数据丢失。具体表名、状态和恢复能力会随 claude-mem 版本变化。
 
 ---
 
-## 根因分析
+## 本次核对结论
 
-**根本原因：worker 模型通道下线，SDK 子进程持续 503 崩溃。**
-
-```text
-配置文件中 CLAUDE_MEM_MODEL = "claude-sonnet-4-5"
-  → 该模型通道下线，每次调用返回 503 model_not_found
-    → SDK 子进程启动即崩，标记 failed，间隔重试
-      → pending_messages 持续积压，无一条被处理
-        → 积压被误判为"消息队列垃圾"，一键清空
-          → 4 天知识原材料永久丢失
-```
-
-claude-mem v5.x 关闭了自动队列恢复，模型通道恢复后积压也不会重处理。
+- claude-mem 官方排障文档说明：v5.x 后不会在 worker 启动时自动恢复队列，应使用项目提供的队列检查/恢复工具
+- 当前官方 Release 为 `v13.12.4`（2026-07-23）；Release 说明强调迁移时保留孤立 observations/summaries，而不是删除用户数据
+- 旧页硬编码的 `claude-haiku-4-5-20251001` 不能证明在当前 provider 可用，已撤下；模型应按 claude-mem 当前配置文档和实际 provider 模型列表选择
 
 ---
 
-## 修复步骤
+## 安全处理步骤
 
-**1. 确认管道状态（清理前必查）**
+**1. 停止清库并备份**
 
-```python
-python -u -c "
-import sqlite3, sys
-sys.stdout.reconfigure(encoding='utf-8')
-conn = sqlite3.connect(r'C:/Users/<USERNAME>/.claude-mem/claude-mem.db')
-cur = conn.cursor()
+不要执行 `DELETE FROM pending_messages`，也不要删除数据库、PID 文件或整个插件目录。先退出相关会话，并把 `~/.claude-mem/` 数据目录完整复制到单独备份位置。
 
-cur.execute('SELECT COUNT(*) FROM observations')
-print(f'observations: {cur.fetchone()[0]}')
-
-cur.execute('SELECT status, COUNT(*) FROM pending_messages GROUP BY status')
-for row in cur.fetchall():
-    print(f'  pending_messages [{row[0]}]: {row[1]}')
-
-cur.execute('SELECT status, COUNT(*) FROM sdk_sessions GROUP BY status')
-for row in cur.fetchall():
-    print(f'  sdk_sessions [{row[0]}]: {row[1]}')
-
-conn.close()
-"
-```
-
-**2. 修改模型配置**
-
-编辑 `~/.claude-mem/settings.json`，将模型改为当前可用的稳定版本：
-
-```json
-{
-  "CLAUDE_MEM_MODEL": "claude-haiku-4-5-20251001"
-}
-```
-
-> worker 后台不需要最强模型，稳定和低成本优先。
-
-**3. 重启 worker**
+**2. 在官方插件目录检查 worker**
 
 ```bash
-# 删除旧 PID 文件，下次 hook 触发自动用新配置重启
-rm ~/.claude-mem/worker.pid
+cd ~/.claude/plugins/marketplaces/thedotmack
+npm run worker:status
+npm run worker:logs
 ```
 
-**4. 安全清理（仅删已完成/已失败的）**
+如果目录不存在或来源不明，停止执行并从 [claude-mem 官方 GitHub](https://github.com/thedotmack/claude-mem) 核对安装方式。
 
-```python
-cur.execute("DELETE FROM pending_messages WHERE status IN ('completed', 'failed')")
-conn.commit()
+**3. 使用官方交互式恢复工具**
+
+```bash
+cd ~/.claude/plugins/marketplaces/thedotmack
+bun scripts/check-pending-queue.ts
 ```
+
+默认交互流程会先显示 worker 健康状态和队列摘要，再询问是否处理。先查看结果，不使用跳过确认的参数。
+
+**4. 核对版本和 provider**
+
+先阅读 [v13.12.4 Release](https://github.com/thedotmack/claude-mem/releases/tag/v13.12.4) 与 [官方配置说明](https://docs.claude-mem.ai/configuration)。若模型通道返回 503 或 model not found，只从对应 provider 的官方模型列表选择当前可用 ID；不要根据本站旧案例猜测替代模型。
 
 ---
 
 ## 预防措施
 
-- **清库前先看输出端**：`observations` 为 0 说明管道坏了，不是"该清理了"的信号
-- **pending 全堆积 = 异常信号**：不要删，先查 worker 为什么没处理
-- **定期检查 sdk_sessions**：`completed` 为 0 即告警
+| 做法 | 目的 |
+| --- | --- |
+| 升级前备份 `~/.claude-mem/` | 保留数据库和配置的可恢复副本 |
+| 用官方 status、logs 和交互式队列工具诊断 | 避免直接修改内部表导致数据丢失 |
+| 只在对应 provider 当前列表中选择模型 | 避免过期模型造成持续失败 |
+| 提交日志前删除 Key、Token、提示词和私人路径 | 避免排障过程泄露敏感数据 |
 
----
-
-## 表结构速查
-
-| 表 | 作用 | 注意 |
-| --- | --- | --- |
-| `pending_messages` | 知识提取输入队列（原材料） | **别当垃圾删** |
-| `observations` | 提取出的知识点（输出） | 为 0 说明管道坏了 |
-| `sdk_sessions` | 子进程会话状态 | `worker_port` 全 None 即异常 |
-| `session_summaries` | 会话总结 | 同 observations |
-
-Windows 上运行 Python 记得加 `sys.stdout.reconfigure(encoding='utf-8')`，否则中文报 GBK 错误。
+资料来源：[claude-mem 官方排障](https://docs.claude-mem.ai/troubleshooting) · [官方配置](https://docs.claude-mem.ai/configuration) · [v13.12.4 Release](https://github.com/thedotmack/claude-mem/releases/tag/v13.12.4)（Release 发布于 2026-07-23；2026-07-26 核对）

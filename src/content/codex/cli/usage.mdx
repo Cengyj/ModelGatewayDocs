@@ -1,17 +1,17 @@
 ---
 title: "Codex CLI · 常用命令"
-description: "启动选项、审批模式、会话命令、自动化脚本写法等日常高频用法。"
+description: "Codex CLI 交互、非交互、审批、沙箱、模型与 Profile 的当前常用命令。"
 navLabel: "常用命令"
 ---
 
 # Codex CLI · 常用命令
 
-<VersionBadge version="v0.141.0" date="2026-06-18" license="Apache-2.0" github="https://github.com/openai/codex" />
+<VersionBadge version="v0.145.0" date="2026-07-21" license="Apache-2.0" github="https://github.com/openai/codex" />
 
 <PageHeader
-  useCase="快速查启动参数、审批模式、slash 命令、自动化脚本写法"
-  audience="已装好 Codex CLI，想熟悉日常用法的开发者"
-  tldr="codex 启动 → /help 查命令 → --approval-mode full-auto 全自动 → -q 非交互脚本"
+  useCase="查询 Codex CLI 当前交互、自动化、审批和沙箱参数"
+  audience="已安装 Codex CLI 的开发者"
+  tldr="codex 进入交互 → codex exec 非交互 → 用审批与沙箱限制权限"
 />
 
 ---
@@ -19,140 +19,86 @@ navLabel: "常用命令"
 ## 启动方式
 
 <CommandTable header={['命令', '效果']} rows={[
-  { cmd: 'codex',                          desc: '进入交互式对话（最常用）' },
-  { cmd: 'codex "帮我写一个 README"',      desc: '带初始 prompt 启动，直接进入对话' },
-  { cmd: 'codex -q "帮我写一个 README"',   desc: '非交互模式，结果输出到 stdout，适合脚本' },
-  { cmd: 'codex --approval-mode full-auto', desc: '全自动模式，免确认执行所有操作（含 shell）' },
+  { cmd: 'codex',                         desc: '进入交互式 TUI' },
+  { cmd: 'codex "帮我检查当前改动"',      desc: '带初始提示启动交互会话' },
+  { cmd: 'codex exec "总结这个仓库"',      desc: '非交互执行并把结果输出到终端' },
+  { cmd: 'codex app',                     desc: '启动桌面 App；未安装时打开官方安装流程' },
+  { cmd: 'codex --help',                  desc: '查看当前版本的完整参数' },
 ]} />
+
+旧版文档中的 `-q`、`--quiet`、`--approval-mode suggest/auto-edit/full-auto` 已从本页撤下；当前自动化入口是 `codex exec`，权限由审批策略和沙箱两组参数共同控制。
 
 ---
 
-## 审批模式（--approval-mode）
+## 审批与沙箱
 
-Codex 用**审批模式**控制 AI 的执行权限，共三档：
-
-<CommandTable header={['模式', '行为']} rows={[
-  { cmd: 'suggest（默认）',  desc: 'Codex 仅建议，每步需你手动确认并应用' },
-  { cmd: 'auto-edit',        desc: '自动写文件，但 shell 命令仍需确认' },
-  { cmd: 'full-auto',        desc: '自动写文件 + 自动执行 shell，无需任何确认' },
+<CommandTable header={['参数', '当前值']} rows={[
+  { cmd: '--ask-for-approval, -a', desc: 'untrusted / on-request / never' },
+  { cmd: '--sandbox, -s',          desc: 'read-only / workspace-write / danger-full-access' },
 ]} />
+
+常用的受控组合：
 
 ```bash
-# 启动时指定模式
-codex --approval-mode full-auto
-codex --approval-mode auto-edit
+# 只读分析；需要越界动作时再询问
+codex --sandbox read-only --ask-for-approval on-request
 
-# 也可以在 ~/.codex/config.toml 里固定
-# approval_mode = "auto-edit"
+# 允许写当前工作区，网络默认仍受限制
+codex --sandbox workspace-write --ask-for-approval on-request
 ```
 
-<Callout type="warning">**`full-auto` 只在可信任的工作目录使用。** macOS 下 Codex 会用 Apple Sandbox 隔离 shell 命令；Linux/Windows 无沙箱，请在容器或虚拟环境中运行。</Callout>
-
----
-
-## 常用启动参数
-
-<CommandTable rows={[
-  { cmd: '--approval-mode <mode>',           desc: '设置审批模式：suggest / auto-edit / full-auto' },
-  { cmd: '--model <model-id>',               desc: '指定模型，如 gpt-5.5、gpt-5.4、gpt-5.4-mini' },
-  { cmd: '-q / --quiet',                     desc: '非交互模式，结果输出 stdout' },
-  { cmd: '--notify',                         desc: '任务完成后发送桌面通知' },
-  { cmd: '--no-project-doc',                 desc: '跳过 AGENTS.md 上下文注入' },
-  { cmd: '--no-git-context',                 desc: '跳过 git diff / log 上下文注入' },
-  { cmd: '--dangerously-auto-approve-everything', desc: '跳过所有确认（等同 full-auto + 无沙箱）' },
-  { cmd: '--config',                         desc: '显示当前 config.toml 文件路径' },
-  { cmd: '--version',                        desc: '查看版本号' },
-  { cmd: '--help',                           desc: '查看所有参数' },
-]} />
-
----
-
-## 会话内 Slash 命令
-
-进入交互界面后，以 `/` 开头输入以下命令：
-
-<CommandTable header={['Slash 命令', '说明']} rows={[
-  { cmd: '/help',               desc: '查看所有可用命令' },
-  { cmd: '/exit',               desc: '退出 Codex' },
-  { cmd: '/clear',              desc: '清空当前对话，重新开始' },
-  { cmd: '/history',            desc: '查看本次会话历史' },
-  { cmd: '/log',                desc: '打开日志文件' },
-  { cmd: '/model <model-id>',   desc: '切换模型（无需重启）' },
-  { cmd: '/approval <mode>',    desc: '切换审批模式（无需重启）' },
-]} />
-
----
-
-## 非交互模式（脚本场景）
-
-```bash
-# 一次性执行，结果输出到终端
-codex -q "用中文总结一下这个 PR 的改动"
-
-# 全自动 + 非交互，适合 CI
-codex -q --approval-mode full-auto \
-  "检查 src/api.ts 里有没有 SQL 注入漏洞，输出 Markdown 报告"
-
-# 把结果传给其他命令
-codex -q "生成 .gitignore for Node.js 项目" > .gitignore
-```
-
----
-
-## 指定模型
-
-```bash
-# 启动时指定
-codex --model gpt-5.5
-
-# 在 ~/.codex/config.toml 里固定
-# model = "gpt-5.5"
-```
-
-当前可用模型：
-
-<CommandTable header={['模型', '特点']} rows={[
-  { cmd: 'gpt-5.5',      desc: '当前主力，代码能力最强；有效上下文约 272K（见下方说明）' },
-  { cmd: 'gpt-5.4',      desc: '上一代主力，稳定性高；支持 1M 上下文' },
-  { cmd: 'gpt-5.4-mini', desc: '轻量版，速度快、成本低，适合简单任务' },
-]} />
-
-<Callout type="warning" title="gpt-5.5 有效上下文远低于标称值">
-实测在 Codex 实际调用场景中，`gpt-5.5` 的**有效上下文约 272K**，而非对外宣传的更大值：
-
-- **270K 可正常完成**，300K 会返回明确的 `context_length_exceeded` 错误
-- 上游模型映射显示实际上下文仅约 **272K**
-
-需要大上下文时请改用 **`gpt-5.4`**（真实 1M 上下文）。
-
-如果坚持用 `gpt-5.5`，`model_context_window` 建议不超过 **270000**：
-
-```toml
-model_context_window = 270000
-model_auto_compact_token_limit = 240000
-```
+<Callout type="danger" title="不要把无审批等同于安全自动化">
+`--ask-for-approval never` 只是不再询问，并不会自动增加安全边界。`danger-full-access` 或 `--dangerously-bypass-approvals-and-sandbox` 会移除关键保护，只能在外部已经独立加固和隔离的环境中考虑使用，不应作为教程默认值。
 </Callout>
 
 ---
 
-## AGENTS.md（上下文文件）
-
-Codex 读取项目根目录的 `AGENTS.md` 作为持久上下文（类似 Claude Code 的 `CLAUDE.md`）：
+## 非交互模式
 
 ```bash
-# 初始化一个 AGENTS.md 模板
-codex "请为这个项目生成一份 AGENTS.md，概述技术栈和代码规范"
+# 一次性执行
+codex exec "用中文总结这个 PR 的改动"
+
+# 指定只读沙箱
+codex exec --sandbox read-only "检查 src/ 中潜在的注入风险，只输出报告"
+
+# 指定模型（仅当当前登录或 provider 实际提供该模型）
+codex exec --model gpt-5.6-sol "审查当前变更"
 ```
 
-`AGENTS.md` 支持嵌套：子目录里的 `AGENTS.md` 会被当前目录的覆盖。
+在 CI 中应把 API Key 限制在单次命令环境，避免写入仓库或全局日志。官方文档为非交互执行提供 `CODEX_API_KEY`；它只适用于 `codex exec`。
 
 ---
+
+## 模型选择
+
+OpenAI 当前 Codex 文档建议从默认 **Power** 设置开始，该设置使用 `gpt-5.6-sol` 与 medium reasoning；Sol、Terra、Luna 分别覆盖复杂高价值、日常通用和清晰重复任务。交互会话可用 `/model`，启动时可用 `--model` / `-m`。
+
+<Callout type="warning" title="第三方网关模型另行核对">
+OpenAI 官方推荐不代表 foropencode 或其他第三方网关已经提供同名模型。自定义 provider 下应以网关模型列表为准；不要手写未经网关确认的上下文或输出上限。`gpt-5.2` 与 `gpt-5.3-codex` 对 ChatGPT 登录的 Codex 已弃用。
+</Callout>
+
+---
+
+## Profile 与项目配置
+
+```bash
+# ~/.codex/deep-review.config.toml
+codex --profile deep-review
+codex exec --profile deep-review "review this change"
+```
+
+Codex 0.134.0 及以后，Profile 文件为 `~/.codex/<profile-name>.config.toml`，通过 `--profile` 选择；不再使用旧 `CODEX_PROFILE=...` 或 `[profiles.<name>]` 方式。项目级 `.codex/config.toml` 只会在信任该项目时加载。
+
+`AGENTS.md` 用于仓库级持久说明，离当前目录更近的文件对其子树生效。具体 slash 命令会随版本变化，请以会话中的 `/help` 为准。
 
 <RelatedPages
   title="相关"
   items={[
     { route: '/codex/cli/install', hint: '安装 Codex CLI' },
-    { route: '/codex/manual', hint: 'config.toml 完整参数速查' },
-    { route: '/codex/cc-switch', hint: '用 CC Switch 快速配置 API' },
+    { route: '/codex/manual', hint: 'config.toml、登录与自定义 provider' },
+    { route: '/codex/cc-switch', hint: '第三方社区工具配置边界' },
   ]}
 />
+
+资料来源：[OpenAI Codex CLI 参考](https://developers.openai.com/codex/cli/reference) · [沙箱与审批](https://developers.openai.com/codex/sandboxing) · [Codex 模型](https://developers.openai.com/codex/models) · [openai/codex](https://github.com/openai/codex)（2026-07-26 核对）

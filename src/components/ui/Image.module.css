@@ -61,3 +61,7 @@
   .lightbox { padding: 16px; }
   .close { right: 12px; top: 12px; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox { animation: none; }
+}

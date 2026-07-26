@@ -24,15 +24,29 @@ const OUT = path.join(process.cwd(), 'public', 'search-index.json');
 async function main() {
   const slugs = walkMdx();
   const docs = [];
+  const routes = new Set();
   for (const slug of slugs) {
     const { data, content } = readMdx(slug);
     const headings = extractHeadings(content);
     const title = data?.title ?? headings.find((h) => h.level === 1)?.text ?? slug;
+    const route = slugToRoute(slug);
+    const invalidHeading = headings.find((h) => !h.text.trim() || !h.id.trim());
+    if (invalidHeading) {
+      throw new Error(`Invalid empty search heading in ${slug}`);
+    }
+    if (routes.has(route)) {
+      throw new Error(`Duplicate search route: ${route}`);
+    }
+    routes.add(route);
+    const text = extractText(content).slice(0, 4000);
+    if (!title.trim() || !text.trim()) {
+      throw new Error(`Empty search title or body in ${slug}`);
+    }
     docs.push({
-      route: slugToRoute(slug),
+      route,
       title,
       headings: headings.filter((h) => h.level > 1),
-      text: extractText(content).slice(0, 4000),
+      text,
     });
   }
   await fs.mkdir(path.dirname(OUT), { recursive: true });

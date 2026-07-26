@@ -23,9 +23,9 @@ const SEVERITY_LABEL: Record<Severity, string> = {
 };
 
 const STATUS_LABEL: Record<Status, string> = {
-  fixed: '已修复',
-  workaround: '有变通方案',
-  unresolved: '未解决',
+  fixed: '案例中已恢复',
+  workaround: '案例中有处理方式',
+  unresolved: '仍待核实',
 };
 
 /**
@@ -71,7 +71,7 @@ export function ErrorMeta({
         ) : null}
         {status ? (
           <Row
-            label="当前状态"
+            label="案例状态"
             value={
               <span className={`${styles.tag} ${styles[`status-${status}`]}`}>
                 {STATUS_LABEL[status]}
@@ -80,6 +80,10 @@ export function ErrorMeta({
           />
         ) : null}
       </dl>
+      <p className={styles.note}>
+        本页记录特定版本与环境中的排障案例，不代表厂商对所有版本确认了相同根因。
+        操作前请备份配置，并优先核对页面列出的官方文档。
+      </p>
     </aside>
   );
 }

@@ -1,33 +1,29 @@
 ---
 title: "OpenClaw · 安装"
-description: "网关型 AI Agent 客户端的安装与初始化向导。支持 23+ 通讯渠道。"
+description: "OpenClaw 官方安装、初始化、渠道与第三方模型 provider 的安全说明。"
 navLabel: "安装"
 ---
 
 # OpenClaw · 安装
 
-<VersionBadge version="v2026.6.8" date="2026-06-08" license="自定义" github="https://github.com/openclaw/openclaw" />
+<VersionBadge version="v2026.7.1" date="2026-07-13" license="MIT" github="https://github.com/openclaw/openclaw" />
 
 <PageHeader
-  useCase="用 OpenClaw 把 Discord / Telegram / 飞书等 23 个渠道接到统一 AI 代理"
+  useCase="用 OpenClaw 把受支持的消息渠道接到统一 AI 代理"
   audience="想做消息驱动 AI 工作流、在聊天 App 里直接调 AI 的用户"
   tldr="npm 装 → onboard 向导走一遍 → 配 API（下一步）"
 />
 
-> OpenClaw 是网关型客户端，**只有一种部署形态**（`openclaw` 守护进程 + Web UI），不分 CLI / 桌面版。
+> 本教程聚焦 `openclaw` CLI、Gateway 守护进程和 Control UI。OpenClaw 官方仓库还列出 Windows Hub、macOS 菜单栏应用以及 iOS/Android nodes；可用形态会随平台与版本变化，不应理解为只有一种部署方式。
 
 ---
 
 ## 支持的通讯渠道
 
-OpenClaw 支持 23+ 个通讯渠道，涵盖国际主流和国内常用平台：
+OpenClaw 的渠道与插件清单会随版本变化。Discord、Telegram、Slack、WhatsApp、飞书等仅为示例；请以 [OpenClaw 官方 Channels 文档](https://docs.openclaw.ai/channels) 当前列表为准：
 
 <Callout type="info">
-国际平台：Discord、Google Chat、iMessage、Matrix、Microsoft Teams、Signal、Slack、Telegram、WhatsApp、Zalo、WebChat
-
-国内平台：飞书（Feishu / Lark）、微信（WeChat）、企业微信（WeCom）、钉钉、QQ、Line
-
-开发者接入：WebHook、REST API、WebSocket、MQTT、自定义协议桥
+当前官方仓库列出的示例包括 WhatsApp、Telegram、Slack、Discord、Google Chat、Signal、iMessage、Microsoft Teams、Matrix、Feishu、LINE、QQ 和内置 WebChat 等。是否可用、需要哪些账户或插件，以当前 Channels 文档为准。
 
 默认 Dashboard 地址：`http://127.0.0.1:18789/`
 </Callout>
@@ -36,10 +32,10 @@ OpenClaw 支持 23+ 个通讯渠道，涵盖国际主流和国内常用平台：
 
 ## 系统要求
 
-<Callout type="warning" title="Node.js 22.14+ 为必要条件，推荐 24+">
-OpenClaw 最低要求 **Node.js 22.14+**，官方推荐 **Node.js 24+** 以获得最佳兼容性。运行 `node --version` 检查，版本不足时请先升级：
+<Callout type="warning" title="Node.js 版本要求">
+OpenClaw 当前官方资料建议 **Node.js 24.15+**，并支持 **22.22.3+** 或 **25.9+**。运行 `node --version` 检查，版本不足时请先升级：
 
-- [下载 Node.js LTS](https://nodejs.org/en/download)（选 Latest LTS 即为 22.x/24.x）
+- [下载 Node.js LTS](https://nodejs.org/en/download)（选 Latest LTS，当前为 24.x；22.x 为仍在维护的旧 LTS 线，亦满足最低版本要求）
 - 或用 `nvm use 24` 切换（需先安装 nvm）
 </Callout>
 
@@ -48,7 +44,7 @@ OpenClaw 最低要求 **Node.js 22.14+**，官方推荐 **Node.js 24+** 以获�
 ## 步骤一：安装
 
 ```bash
-node --version   # 确认 v22.14+（推荐 v24+）
+node --version   # 推荐 v24.15+；最低按官方当前要求核对
 npm install -g openclaw@latest
 ```
 
@@ -66,13 +62,15 @@ openclaw onboard --install-daemon
 
     ![引导界面](/img/openclaw/image-20260302193450327.webp)
   </Step>
-  <Step title="跳过供应商选择，选全模型">
+  <Step title="按实际账户选择供应商">
     ![模型选择](/img/openclaw/image-20260302193546649.webp)
 
     ![确认选择](/img/openclaw/image-20260302193625924.webp)
+
+    截图来自旧版界面，仅用于定位。不要为了稍后替换配置而随意选择未知 provider；按实际账户与官方 onboarding 提示操作，模型清单以当前版本为准。
   </Step>
   <Step title="保持默认模型">
-    主要用于生成配置文件，后续在 [CC Switch 配置](/openclaw/cc-switch) 中替换为本站 provider。
+    选择你确实有权使用的 provider 和模型。若之后改用第三方网关，先阅读[手动配置的协议与数据边界](/openclaw/manual)。
 
     ![默认模型](/img/openclaw/image-20260302193650282.webp)
   </Step>
@@ -82,13 +80,13 @@ openclaw onboard --install-daemon
 
 ## 步骤三：选择通知渠道
 
-| 渠道 | 上手难度 | 备注 |
-| --- | --- | --- |
-| Telegram | ⭐ 最简单 | 找 [@BotFather](https://t.me/BotFather) 新建 bot 拿 Token |
-| Discord | ⭐⭐ 较简单 | Discord Developer Portal 创建应用 |
-| 飞书 | ⭐⭐⭐ 步骤多 | [OpenClaw 飞书渠道官方文档 →](https://docs.openclaw.ai/zh-CN/channels) |
-| 微信 / 企业微信 | ⭐⭐⭐ 需企业认证 | 企业微信接入更稳定 |
-| Slack / Teams / Matrix | ⭐⭐ | 参考 [OpenClaw 官方文档](https://docs.openclaw.ai/zh-CN/channels) |
+渠道配置所需账户、Token、回调地址和组织权限不同，不使用主观星级判断难度：
+
+| 渠道 | 配置前先确认 |
+| --- | --- |
+| Telegram | 通过 [@BotFather](https://t.me/BotFather) 创建你有权管理的 bot，并按当前 Channels 文档保护 Token |
+| Discord | 在 Discord Developer Portal 创建应用，按最小权限配置 bot |
+| Feishu / Slack / Teams / Matrix | 查看 [OpenClaw Channels 官方文档](https://docs.openclaw.ai/channels) 的当前支持状态与平台要求 |
 
 ![渠道选择界面](/img/openclaw/image-20260302194558941.webp)
 
@@ -96,7 +94,7 @@ openclaw onboard --install-daemon
 
 ## 步骤四：选 Skills
 
-<Callout type="warning">Skills 无内置审核机制，来源不明的 Skills 存在安全风险，请仅安装可信来源的内容。</Callout>
+<Callout type="warning">Skills 可能调用工具、读取数据或执行代码。安装前查看来源、内容和所需权限，只使用你能审阅并信任的 Skill；不要因为名称或排行而默认其安全。</Callout>
 
 ![Skills 配置](/img/openclaw/image-20260302195806334.webp)
 
@@ -104,7 +102,7 @@ openclaw onboard --install-daemon
 
 ## 步骤五：选 Hooks
 
-建议勾选 `session-memory`（按空格选中）：
+`session-memory` 会处理和保存会话相关信息。只有在理解其数据范围和保留方式后才启用；界面可能与截图不同：
 
 ![Hooks 配置](/img/openclaw/image-20260302200210544.webp)
 
@@ -112,12 +110,14 @@ openclaw onboard --install-daemon
 
 ## 验证
 
-引导完成后，浏览器打开 [http://127.0.0.1:18789/](http://127.0.0.1:18789/) 能看到 OpenClaw Dashboard 即装好。下一步是配 API：
+引导完成后先运行 `openclaw gateway status`，再用 `openclaw dashboard` 打开当前 Control UI。默认本机地址通常为 [http://127.0.0.1:18789/](http://127.0.0.1:18789/)；若当前版本输出不同地址，以命令结果为准。下一步是配 API：
 
 <RelatedPages
   title="下一步"
   items={[
-    { route: '/openclaw/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/openclaw/cc-switch', hint: '用第三方社区工具管理 provider' },
     { route: '/openclaw/manual', hint: '直接改 openclaw.json' },
   ]}
 />
+
+资料来源：[OpenClaw 官方文档](https://docs.openclaw.ai/) · [配置文档](https://docs.openclaw.ai/gateway/configuration) · [openclaw/openclaw Releases](https://github.com/openclaw/openclaw/releases/latest)（2026-07-26 核对）

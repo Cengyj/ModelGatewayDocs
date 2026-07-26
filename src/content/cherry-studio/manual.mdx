@@ -6,13 +6,17 @@ navLabel: "软件配置"
 
 # Cherry Studio · 软件配置
 
-<VersionBadge version="v1.9.11" date="2026-06-07" license="AGPL-3.0" github="https://github.com/CherryHQ/cherry-studio" />
+<VersionBadge version="v1.9.12" date="2026-07-05" license="AGPL-3.0" github="https://github.com/CherryHQ/cherry-studio" />
 
 <PageHeader
   useCase="通过 Cherry Studio 界面添加 New API 供应商、填入 Key 和地址并获取模型"
   audience="已安装 Cherry Studio，准备接入外部 API"
   tldr="设置 → 搜索 new-api → 填 API 地址和密钥 → 获取模型列表"
 />
+
+<Callout type="warning" title="第三方网关与密钥说明">
+本页的 `foropencode.com` 是第三方网关，不是 OpenAI、Anthropic 或 Cherry Studio 官方 API。粘贴密钥前请核对最终域名、计费主体和隐私政策；页面示例只使用 `sk-xxx` 占位符，模型列表以客户端实际获取结果为准。
+</Callout>
 
 ---
 
@@ -32,26 +36,26 @@ navLabel: "软件配置"
   <Frame
     title="添加模型，关闭弹窗"
     image="/img/cherry-studio/cherry-studio-model-add.png"
-    imageAlt="New API 模型列表弹窗，展示 gpt-5.5、gpt-5.4 等模型，右侧 + 按钮用于添加"
-    caption="弹窗里会列出所有可用模型。搜索或浏览找到需要的模型，点右侧 + 添加。添加完成后点右上角 × 关闭弹窗。"
+    imageAlt="旧版 New API 模型列表弹窗，右侧加号按钮用于添加模型"
+    caption="弹窗会显示该网关当前返回的模型。搜索或浏览找到已由网关确认的模型，点右侧 + 添加；截图中的旧模型名称不代表当前仍可用。"
   />
   <Frame
     title="配置成功"
     image="/img/cherry-studio/cherry-studio-settings-success.png"
-    imageAlt="设置页 New API 显示 ON 开关，模型列表出现 gpt-5.5，表示配置成功"
-    caption="New API 显示 ON 且右上角开关已开启，模型列表中出现 gpt-5.5，说明配置已生效。"
+    imageAlt="旧版设置页的 New API 开关和示例模型列表"
+    caption="New API 显示 ON 且开关已开启，只表示客户端保存并启用了配置；仍需核对最终请求域名并用低风险请求验证。"
   />
   <Frame
     title="开始对话"
     image="/img/cherry-studio/cherry-studio-chat-ready.png"
-    imageAlt="对话界面顶部模型选择器显示「gpt-5.5 | New API」，输入框等待发送消息"
-    caption="切到对话页，顶部显示「gpt-5.5 | New API」表示已选中刚添加的模型。在下方输入框发送消息即可开始使用。"
+    imageAlt="旧版对话界面顶部显示 New API 示例模型，输入框等待发送消息"
+    caption="切到对话页，在顶部选中刚添加的模型。先发送不含敏感数据的测试消息，并确认响应来自预期供应商。"
   />
 </Walkthrough>
 
 ---
 
-<Callout type="info">Cherry Studio 的供应商配置存在本地数据库里，没有可直接编辑的 JSON 文件——所有改动均通过界面表单完成。</Callout>
+<Callout type="info">Cherry Studio 的供应商配置保存在本机应用数据中。API 请求仍会发送到你选择的供应商；备份或分享应用数据时要把其中的 Key 和账户信息视为敏感内容。</Callout>
 
 <RelatedPages
   title="相关"
@@ -59,3 +63,5 @@ navLabel: "软件配置"
     { route: '/cherry-studio/install', hint: '安装 Cherry Studio' },
   ]}
 />
+
+资料来源：[Cherry Studio 官方 GitHub](https://github.com/CherryHQ/cherry-studio) · [官方 Releases](https://github.com/CherryHQ/cherry-studio/releases/latest)（2026-07-26 核对）。foropencode 的端点和模型能力须以其当前控制台为准。

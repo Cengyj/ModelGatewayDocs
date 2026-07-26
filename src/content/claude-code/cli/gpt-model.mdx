@@ -1,19 +1,23 @@
 ---
 title: "Claude Code CLI · 使用 GPT 模型"
-description: "通过 CC Switch 路由功能，在 Claude Code CLI / VSCode 扩展中接入 gpt-5.5 / gpt-5.4 / gpt-5.4-mini 等 GPT 系列模型。"
+description: "通过第三方 CC Switch 路由功能，在 Claude Code CLI 中测试 OpenAI Responses 兼容网关，并说明模型与数据安全边界。"
 navLabel: "使用 GPT 模型"
 ---
 
 # Claude Code CLI · 使用 GPT 模型
 
 <PageHeader
-  useCase="在 Claude Code CLI / VSCode 扩展中切换到 GPT 系列模型（gpt-5.5 / gpt-5.4 / gpt-5.4-mini）"
+  useCase="在 Claude Code CLI 中测试第三方网关提供的 OpenAI Responses 兼容模型"
   audience="想体验 GPT 模型的 Claude Code 用户"
   tldr="CC Switch → 选对图标 → 添加供应商（OpenAI Responses API）→ 设置 → 路由 → 开启总开关 + Claude 开关"
 />
 
 <Callout type="info" title="需要 gpt_plus 分组密钥">
-  GPT 系列模型归属 `gpt_plus` 分组。请先[创建一个绑定 gpt_plus 分组的 API 密钥](/get-key/create)，再继续以下步骤。
+  `gpt_plus` 是本站所述第三方网关的控制台分组名，不是 OpenAI 官方分组。请先在控制台确认该分组当前支持的模型、协议、计费和数据处理方式，再[创建绑定该分组的 API 密钥](/get-key/create)。
+</Callout>
+
+<Callout type="warning" title="非官方兼容方案">
+  CC Switch 是第三方社区工具，协议路由也不是 Anthropic 或 OpenAI 对 Claude Code 的官方集成。开启前备份配置；仅在 CC Switch 官方版本中使用该功能，并核对最终请求域名确为你选择的网关。
 </Callout>
 
 ---
@@ -62,15 +66,16 @@ navLabel: "使用 GPT 模型"
 
 ---
 
-## 可用 GPT 模型
+## 模型选择与兼容性
 
-配置完成后，在 Claude Code 中使用 `/model` 命令切换模型：
+配置完成后，可在 Claude Code 中使用 `/model` 查看当前会话实际暴露的模型。
 
-| 模型 ID | 说明 |
-| --- | --- |
-| `gpt-5.5` | 旗舰推理模型（推荐） |
-| `gpt-5.4` | 标准版 |
-| `gpt-5.4-mini` | 轻量版，速度更快 |
+- 不再根据本站旧截图列出静态 GPT 模型 ID；第三方网关是否提供某个 OpenAI 模型，以其控制台或模型列表的实时结果为准
+- 模型名称是否属于 OpenAI 当前公开模型，以 [OpenAI 官方模型目录](https://developers.openai.com/api/docs/models) 为准
+- “OpenAI Responses API”表示接口兼容选项，不代表第三方网关、CC Switch 或本站获得 OpenAI 官方背书
+- 若模型不出现在 `/model` 或请求返回不兼容错误，恢复备份配置并向 CC Switch 或网关运营方核对，不要伪造客户端身份或关闭安全校验
+
+资料来源：[OpenAI Models](https://developers.openai.com/api/docs/models) · [OpenAI Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses) · [CC Switch 官方 GitHub](https://github.com/farion1231/cc-switch)（2026-07-26 核对）
 
 ---
 

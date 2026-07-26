@@ -1,5 +1,6 @@
 ---
 title: "CC-020：Permission denied（操作被拒绝）"
+description: "区分操作系统权限、Claude Code rules、sandbox 与组织策略，并按最小权限处理。"
 hidden: true
 ---
 
@@ -21,16 +22,7 @@ Claude Code 尝试读取或修改文件时，操作被终止，终端或对话�
 
 ## 根因分析
 
-`Permission denied` 有三类独立根因，对应不同的处理路径：
-
-```text
-Claude Code 尝试访问文件
-  → 系统层：文件/目录权限位不含当前用户读写权 → 根因 A
-  → CC 层：用户曾选择"总是拒绝"该类操作      → 根因 B
-  → CC 层：.claudeignore 规则匹配了目标路径  → 根因 C
-```
-
----
+`Permission denied` 可能来自操作系统权限、Claude Code permission rules、sandbox、组织管理策略或目标工具本身。旧版页面把原因固定成三类，并使用未在当前官方资料中确认的 `.claudeignore`，现已撤下该确定性结论。
 
 ## 修复步骤
 
@@ -38,30 +30,22 @@ Claude Code 尝试访问文件
 
 系统层拒绝通常附有具体文件路径；Claude Code 层拒绝会在对话框或提示中明确说明权限设置。
 
-**第二步（根因 A）：修复系统文件权限**
+**第二步：只读检查系统文件权限**
 
 ```bash
-# 查看文件或目录权限
-ls -la /path/to/file
-
-# 修复普通文件权限
-chmod 644 /path/to/file
-
-# 修复目录权限
-chmod 755 /path/to/dir
+# 查看目标及父目录权限，不直接改权限
+ls -ld /path/to /path/to/file
 ```
 
-**第三步（根因 B）：修改 Claude Code 权限规则**
+不要对项目递归执行 `chmod`，也不要机械套用 644/755；这可能暴露密钥或破坏可执行文件。若所有者或组织策略不符合预期，请由文件所有者或管理员按最小权限修复。
 
-按 `Cmd+Shift+P`（macOS）或 `Ctrl+Shift+P`（Windows/Linux）→ 搜索 `Claude: Manage Permissions` → 找到对应规则 → 将其改为"询问"或"允许"。
+**第三步：检查 Claude Code 权限规则**
 
-**第四步（根因 C）：检查 .claudeignore**
+在会话中运行 `/permissions` 查看 allow/ask/deny 规则，并运行 `/status` 确认是否存在 managed settings。只放行完成当前任务所需的具体工具或路径，不要使用 `bypassPermissions` 作为通用修复。
 
-```bash
-cat .claudeignore
-```
+**第四步：检查 sandbox 与实际命令**
 
-逐行检查是否有 glob 规则误匹配到目标文件，删除或精确化有问题的规则。
+用 `claude doctor` 获取只读诊断；确认报错是 Claude Code 的权限决定，还是它运行的 shell 命令返回了操作系统错误。组织管理策略不能由本地项目覆盖。
 
 ---
 
@@ -69,6 +53,8 @@ cat .claudeignore
 
 | 做法 | 避免的问题 |
 | --- | --- |
-| `.claudeignore` 使用精确路径而非宽泛通配符 | 避免误匹配到需要访问的文件 |
-| 定期检查 Permission 设置中的"总是拒绝"规则 | 避免误设置的规则长期阻碍正常操作 |
-| 项目目录文件权限保持 644（文件）/ 755（目录） | 避免 Claude Code 进程因权限不足无法读取 |
+| `permissions.deny` 精确匹配敏感文件 | 避免意外读取 Key、Token 和环境文件 |
+| 定期检查 `/permissions` 与 `/status` | 识别本地规则和组织策略 |
+| 文件权限按数据敏感度和实际执行需求设置 | 避免过度放宽权限 |
+
+资料来源：[Claude Code Permissions](https://code.claude.com/docs/en/permissions) · [Sandboxing](https://code.claude.com/docs/en/sandboxing) · [配置诊断](https://code.claude.com/docs/en/debug-your-config)（2026-07-26 核对）

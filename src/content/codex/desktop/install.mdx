@@ -1,64 +1,61 @@
 ---
 title: "Codex 桌面版 · 安装"
-description: "ChatGPT 桌面客户端集成的 Codex 工作区安装。"
+description: "通过 OpenAI Codex CLI 的 codex app 命令启动或安装 Codex 桌面 App。"
 navLabel: "安装"
 ---
 
 # Codex 桌面版 · 安装
 
-<VersionBadge version="ChatGPT App" date="2026-06-18" license="Proprietary" />
+<VersionBadge version="Codex App" date="2026-07-26 核对" license="Proprietary" github="https://github.com/openai/codex" />
 
 <PageHeader
-  useCase="不想开终端，在 ChatGPT 桌面客户端里用 Codex"
-  audience="偏好图形化的开发者"
-  tldr="装 ChatGPT 桌面客户端 → 登录账号 → 切到 Codex 工作区"
+  useCase="用桌面图形界面打开本地仓库并运行 Codex"
+  audience="偏好桌面 App 的开发者"
+  tldr="先安装官方 Codex CLI → 在仓库运行 codex app"
 />
 
-> Codex App 是 ChatGPT 桌面客户端里内置的代理形态，与 CLI **共享** `~/.codex/config.toml`。
-
-<Callout type="info">如果已经按 [Codex CLI · 安装](/codex/cli/install) 装过、并在 [CC Switch 配置](/codex/cc-switch) 中配过，桌面版启动后会自动读到同一份 `config.toml`，不需要重复配置。</Callout>
+旧版页面把 Codex 描述成“ChatGPT 桌面客户端内置工作区”，并建议使用“临时账号”。当前 Codex CLI 提供独立的 `codex app` 命令来启动桌面 App，缺少 App 时会打开安装流程；账户应使用你有权使用的 ChatGPT 工作区或官方 API Key，不应使用来源不明的临时账号。
 
 ---
 
-## 步骤
+## 启动或安装
 
-<Steps>
-  <Step title="装 ChatGPT 桌面客户端">
-    从 OpenAI 官方下载页获取对应平台的安装包并安装。
-  </Step>
-  <Step title="登录 OpenAI 账号">
-    第一次启动会要求登录。临时账号也行——后面接入第三方 API 后实际请求并不会发到官方。
-  </Step>
-  <Step title="进入 Codex 工作区">
-    打开桌面客户端 → 切到 Codex 工作区 / 模式（具体入口随版本变化）。
-  </Step>
-</Steps>
+```bash
+# 在当前目录打开 Codex App
+codex app
+
+# 打开指定工作区
+codex app /path/to/project
+```
+
+<Callout type="warning" title="保持官方安装流程">
+OpenAI 官方仓库提供 `codex app` 和 Codex App 页面作为入口。不要改用未知镜像、重打包安装器或无法识别最终域名的下载链接；本站不托管或代理 Codex App 安装包。
+</Callout>
+
+---
+
+## 登录与配置
+
+Codex 本地工作支持 ChatGPT 登录或 OpenAI API Key 登录。通过 API Key 登录时，部分依赖 ChatGPT workspace 或云服务的功能可能不可用。使用第三方 custom provider 时，请阅读 [Codex 手动配置](/codex/manual)，并明确第三方网关的数据、计费和模型边界。
+
+CLI、IDE 扩展和桌面 App 共享 `~/.codex/config.toml` 配置层。修改 provider、模型或权限后，新建会话核对实际值；不要把“共享配置”理解为第三方请求绝不会触达 OpenAI，实际数据流由当前登录方式、provider 和功能共同决定。
 
 ---
 
 ## 验证
 
-进入 Codex 工作区后，在模型选择处能看到模型下拉即 OK。下一步配 API：
+- `codex app` 由官方 `openai/codex` CLI 提供
+- 安装流程使用默认官方地址，没有通过第三方镜像或 `--download-url` 覆盖
+- App 显示的工作区、登录方式、provider 与你的预期一致
+- 保持默认沙箱和审批设置，按任务需要最小化放宽
 
 <RelatedPages
-  title="下一步"
+  title="相关"
   items={[
-    { route: '/codex/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
-    { route: '/codex/manual', hint: '直接改 config.toml' },
-    { route: '/codex/cli/install', hint: '想用终端？装 Codex CLI' },
+    { route: '/codex/cli/install', hint: '安装官方 Codex CLI' },
+    { route: '/codex/manual', hint: '官方登录、config.toml 与第三方 provider' },
+    { route: '/codex/cc-switch', hint: 'CC Switch 第三方社区工具说明' },
   ]}
 />
 
----
-
-## 与 CLI 的差异
-
-| 维度 | CLI | App |
-| --- | --- | --- |
-| 启动方式 | 终端跑 `codex` | 打开桌面客户端进入 Codex |
-| 配置文件 | `~/.codex/config.toml` | 同上，**共享** |
-| 推理深度 | `/effort` 或 config.toml | UI 切换 |
-| 历史会话 | CLI session | App 内会话列表 |
-| 适合场景 | 项目里跑命令、写脚本 | 浏览代码、对话式调试 |
-
-<Callout type="warning">两者共享 `~/.codex/config.toml`，**改一边会影响另一边**。如果你想各走各的，需要在 App 内单独切 provider。</Callout>
+资料来源：[openai/codex 官方仓库](https://github.com/openai/codex) · [OpenAI Codex 官方文档](https://developers.openai.com/codex) · [认证文档](https://developers.openai.com/codex/auth)（2026-07-26 核对）

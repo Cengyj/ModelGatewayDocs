@@ -1,183 +1,140 @@
 ---
 title: "Codex · 手动配置"
-description: "~/.codex/config.toml + auth.json；CLI 与 App 共享。"
+description: "Codex config.toml、官方登录、Profile 与第三方自定义 provider 的安全配置。"
 navLabel: "手动配置"
 ---
 
 # Codex · 手动配置
 
-<VersionBadge version="v0.141.0" date="2026-06-18" license="Apache-2.0" github="https://github.com/openai/codex" />
+<VersionBadge version="v0.145.0" date="2026-07-21" license="Apache-2.0" github="https://github.com/openai/codex" />
 
 <PageHeader
-  useCase="不用 CC Switch，直接改 ~/.codex/config.toml 与 auth.json"
-  audience="多供应商要手写 TOML；想用 Profile / 项目级覆盖"
-  tldr="config.toml 写 model_providers 段 → auth.json 存 Key → 重启 codex"
+  useCase="配置 Codex 的模型、审批、沙箱、Profile 或第三方 provider"
+  audience="需要手写 TOML、项目级覆盖或多 provider 的开发者"
+  tldr="config.toml 保存设置 → codex login 管理官方认证 → 第三方 Key 用独立环境变量"
 />
-
-<Callout type="info">CLI 和 Codex App **共享同一份** `~/.codex/config.toml`。改一边两边都生效。</Callout>
 
 ---
 
-## 配置文件位置
+## 配置位置
 
 | 范围 | 路径 |
 | --- | --- |
-| 用户级（默认） | `~/.codex/config.toml` |
-| 项目级（覆盖用户级） | 项目根目录 `.codex/config.toml` |
-| Profile 切换 | `$CODEX_HOME/<profile-name>.config.toml` |
-| 鉴权 | `~/.codex/auth.json` |
+| 用户级 | `~/.codex/config.toml` |
+| 项目级 | 项目根目录 `.codex/config.toml`（仅信任项目时加载） |
+| Profile | `~/.codex/<profile-name>.config.toml`，用 `--profile <name>` 选择 |
+| Codex 主目录 | `CODEX_HOME` 可改变默认 `~/.codex` 位置 |
 
-Windows 路径中 `~` = `%USERPROFILE%`。`CODEX_HOME` 环境变量可改默认目录。
+CLI、IDE 扩展和 Codex 桌面 App 共享配置层。修改后启动新会话核对实际 provider、模型与权限。
 
 ---
 
-## config.toml 最小模板
+## 官方 OpenAI 登录
+
+```bash
+# 默认：浏览器完成 ChatGPT 登录
+codex login
+
+# 从环境变量通过 stdin 使用 OpenAI API Key
+printenv OPENAI_API_KEY | codex login --with-api-key
+
+# 查看当前认证方式
+codex login status
+```
+
+不要手工编辑 `auth.json`。Codex 可能把凭据保存在 `~/.codex/auth.json` 或操作系统凭据存储中；如果使用文件存储，应把它当作密码文件，绝不能上传仓库、截图或排障网站。
+
+---
+
+## 第三方自定义 provider
+
+下面是基于 OpenAI 官方 custom provider schema 的最小模板；`foropencode.com` 是第三方网关，不是 OpenAI：
 
 ```toml
 model_provider = "foropencode"
-model = "gpt-5.5"
+model = "gateway-model-id"
 model_reasoning_effort = "medium"
-disable_response_storage = true
 
 [model_providers.foropencode]
-name = "foropencode"
+name = "foropencode (third-party gateway)"
 base_url = "https://foropencode.com/v1"
+env_key = "FOROPENCODE_API_KEY"
 wire_api = "responses"
-requires_openai_auth = true
 ```
 
-<Callout type="warning">Codex 的 `base_url` **必须**带 `/v1` 后缀，和 Claude Code 反着。漏了会 404。</Callout>
+在启动 Codex 的 shell 中提供 Key：
 
-<Callout type="tip" title="wire_api 填 responses 还是 chat？">
-`wire_api` 只有两个合法值：**`"responses"`**（走 OpenAI `/responses` 端点）和 **`"chat"`**（走 `/chat/completions`）。不少第三方网关**只支持 Chat Completions**，这时填 `responses` 会失败——请改成 `wire_api = "chat"`。本站分组支持 `responses`，所以模板用它；接别的网关前先确认对方支持哪个端点。
+<Tabs defaultValue="mac">
+  <Tab label="macOS / Linux" value="mac">
+    ```bash
+    export FOROPENCODE_API_KEY="sk-xxx"
+    codex
+    ```
+  </Tab>
+  <Tab label="Windows PowerShell" value="win">
+    ```powershell
+    $env:FOROPENCODE_API_KEY = "sk-xxx"
+    codex
+    ```
+  </Tab>
+</Tabs>
 
-> 注意是 `"chat"` 不是 `"chat_completions"`。以上取值经本机已装的 Codex `v0.141.0` 二进制核对（serde 枚举值）。
+`env_key` 让 Codex 从环境变量读取第三方凭据，避免手写到 TOML。当前官方配置参考中 `wire_api` 仅支持 `responses`（省略时的默认值）；Chat Completions（`wire_api = "chat"`）已不在受支持取值之列。若网关只支持 Chat Completions，应向网关确认当前 Codex 兼容方案，不要自行猜字段。
+
+<Callout type="warning" title="模型能力以第三方网关为准">
+将 OpenAI 官方模型名写进 `model` 不会让第三方网关自动支持它。请先查看网关实际模型列表，再填写模型 ID；上下文、输出限制、价格、数据保留和故障处理也由网关决定。
 </Callout>
 
 ---
 
-## auth.json
-
-```json
-{
-  "OPENAI_API_KEY": "sk-xxx"
-}
-```
-
-文件存在但字段空 = Codex 启动时报 401。Codex 文档把这个文件叫 `cli_auth_credentials_store`，实际文件名是 `auth.json`。
-
----
-
-## 顶层字段
-
-| 字段 | 含义 | 可选值 |
-| --- | --- | --- |
-| `model_provider` | 当前用哪个 provider ID | 必须对应下面 `[model_providers.<id>]` |
-| `model` | 用哪个模型 | 见上方模型表 |
-| `model_reasoning_effort` | 推理深度 | `minimal` / `low` / `medium` / `high` / `xhigh` |
-| `model_context_window` | 上下文 token 数 | 整数；具体值看供应商支持 |
-| `model_auto_compact_token_limit` | 自动压缩阈值 | 整数，应小于上面 |
-| `disable_response_storage` | 关闭响应存储 | `true` 推荐 |
-| `wire_api` | API 协议 | 在 provider 段里设 |
-
----
-
-## `[model_providers.<id>]` 段
+## 审批与沙箱默认值
 
 ```toml
-[model_providers.foropencode]
-name = "foropencode"
-base_url = "https://foropencode.com/v1"
-wire_api = "responses"
-requires_openai_auth = true
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+network_access = false
 ```
 
-| 字段 | 含义 |
-| --- | --- |
-| `name` | provider 显示名 |
-| `base_url` | API 根地址（含 `/v1`） |
-| `wire_api` | `responses`（默认）或 `chat`——见上方说明，**不是 `chat_completions`** |
-| `requires_openai_auth` | `true` = 需要 OpenAI API Key |
-
-内置 provider ID：`openai`（默认）、`ollama`、`lmstudio`。开源 / 本地模型走 `oss_provider`，取值 `lmstudio` 或 `ollama`。
+默认保持网络关闭和工作区写入边界。只有任务确实需要时再放宽；不要把 `danger-full-access` 作为解决权限报错的通用方式。
 
 ---
 
-## 多 provider / 多分组
+## Profile
 
 ```toml
-model_provider = "foropencode-codex"
-
-[model_providers.foropencode-codex]
-name = "foropencode (Codex 分组)"
-base_url = "https://foropencode.com/v1"
-wire_api = "responses"
-requires_openai_auth = true
-
-[model_providers.foropencode-image]
-name = "foropencode (Image 分组)"
-base_url = "https://foropencode.com/v1"
-wire_api = "responses"
-requires_openai_auth = true
+# ~/.codex/read-only.config.toml
+sandbox_mode = "read-only"
+approval_policy = "on-request"
 ```
-
-切 provider 时改 `model_provider` 字段，重启 `codex` 即可。
-
----
-
-## Profile 切换（不改主 config）
 
 ```bash
-CODEX_PROFILE=profile-a codex
+codex --profile read-only
+codex exec --profile read-only "review this change"
 ```
 
-Profile 文件放 `$CODEX_HOME/<name>.config.toml`，结构与 `config.toml` 一样。适合多账号 / 多分组场景。
+旧 `CODEX_PROFILE=...`、顶层 `profile = ...` 与 `[profiles.<name>]` 不适用于 Codex 0.134.0 及以后。
 
 ---
 
-## 1M 上下文
-
-```toml
-model_context_window = 1000000
-model_auto_compact_token_limit = 900000
-```
-
-`model_context_window` 是 OpenAI 文档定义的字段，但具体写多少**取决于供应商和模型支持**。本站某些分组支持 1M，其它分组写了也没用。
-
-`model_auto_compact_token_limit` 在接近上限前提前触发压缩，避免对话直接撞满。
-
----
-
-## CLI vs App 的差异
-
-| 维度 | CLI | App |
-| --- | --- | --- |
-| 配置文件 | `~/.codex/config.toml` | **同一个文件** |
-| 鉴权 | `~/.codex/auth.json` 或 OAuth | 同 |
-| 切 provider | 改 `model_provider` + 重启终端 | App 内 UI 切，或同样改 config 重启 App |
-| Profile | `CODEX_PROFILE=<name>` | UI 不支持，要走 env |
-
-改完 config：
-
-- **CLI**：重启终端
-- **App**：**完全退出**（菜单栏图标关一次，不只是关窗口），再启动
-
----
-
-## 常见排查
+## 排查
 
 | 现象 | 检查 |
 | --- | --- |
-| 启动报 401 | `auth.json` 是否存在，Key 是否对 |
-| 启动报 404 | `base_url` 是否带 `/v1` |
-| 请求报错 / 端点不支持 | 网关只支持 Chat Completions？把 `wire_api` 改成 `"chat"` |
-| 推理慢 | 把 `model_reasoning_effort` 调低 |
-| App 改 config 后不生效 | 完全退出菜单栏图标，不是关窗口 |
+| 401 | `codex login status`；或第三方 `env_key` 对应环境变量是否存在 |
+| 404 | 第三方网关给出的 Base URL 与协议是否匹配 |
+| 项目配置不生效 | 项目是否已信任；`.codex/config.toml` 路径是否正确 |
+| Profile 不生效 | 文件是否为 `~/.codex/<name>.config.toml`，启动时是否传 `--profile <name>` |
+| App 与 CLI 不一致 | 完全退出旧会话，再核对共享配置层和实际登录方式 |
 
 <RelatedPages
   title="相关"
   items={[
-    { route: '/codex/cc-switch', hint: '回到 CC Switch 流程' },
-    { route: '/codex/cli/install', hint: '装客户端' },
+    { route: '/codex/cc-switch', hint: 'CC Switch 第三方配置说明' },
+    { route: '/codex/cli/install', hint: '安装 Codex CLI' },
+    { route: '/codex/cli/usage', hint: '当前 CLI 命令与权限参数' },
   ]}
 />
+
+资料来源：[OpenAI Codex 配置](https://developers.openai.com/codex/config-basic) · [高级配置](https://developers.openai.com/codex/config-advanced) · [认证](https://developers.openai.com/codex/auth)（2026-07-26 核对）

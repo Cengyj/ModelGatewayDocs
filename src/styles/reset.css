@@ -20,6 +20,13 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* Smooth anchor scrolling (TOC, heading anchors) for users who allow motion */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   background: var(--c-bg);
   color: var(--c-text);
@@ -72,4 +79,41 @@ video {
   outline: 2px solid var(--c-brand);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+/* Print: hide app chrome, let the article flow full-width */
+@media print {
+  header,
+  footer,
+  aside,
+  [class*="MobileDocBar"],
+  [class*="BackToTop"],
+  [class*="ScrollProgress"],
+  [class*="Pager"] {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  article {
+    max-width: 100% !important;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  /* Show resolved URLs for external references */
+  article a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+
+  pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
 }

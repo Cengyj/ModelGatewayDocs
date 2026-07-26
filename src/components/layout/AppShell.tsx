@@ -22,9 +22,10 @@ export function AppShell({ children }: Props) {
 
   return (
     <div className={styles.shell}>
+      <a href="#main-content" className={styles.skipLink}>跳到正文</a>
       <ScrollProgress />
       <Header onOpenSearch={() => setSearchOpen(true)} />
-      <main className={styles.main}>{children}</main>
+      <main id="main-content" className={styles.main}>{children}</main>
       <Footer />
       <BackToTop />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />

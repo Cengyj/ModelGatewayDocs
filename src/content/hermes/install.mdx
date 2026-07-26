@@ -6,15 +6,15 @@ navLabel: "安装"
 
 # Hermes Agent · 安装
 
-<VersionBadge version="v2026.6.19" date="2026-06-19" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
+<VersionBadge version="v0.19.0 (tag v2026.7.20)" date="2026-07-20" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
 
 <PageHeader
   useCase="装 Hermes——一个会自我学习、跨终端持久记忆的 AI 代理"
   audience="想长期沉淀 AI 使用习惯、要跨终端 / 跨容器记忆的高级用户"
-  tldr="curl 脚本装 → hermes setup --portal 走一遍向导"
+  tldr="查看 Nous Research 官方安装方式 → 核对脚本域名 → hermes setup --portal 或 hermes model"
 />
 
-> Hermes 只有 CLI 形态（`hermes` 命令）。
+> 本页介绍 Hermes 的 CLI 安装入口（`hermes` 命令）。macOS 和 Windows 用户也可从官网下载 **Hermes Desktop 桌面安装器**；CLI 安装后可用 `hermes desktop` 启动桌面界面。消息网关和其他集成仍通过该项目的配置与命令管理。
 
 ---
 
@@ -27,21 +27,26 @@ Hermes Agent 的核心区别在于**持久学习**机制，而不是单次会话
 | 跨会话记忆（GEPA） | 每次对话后自动提炼并写入长期记忆，下次打开直接延续上下文 |
 | Cron 定时任务 | 可配置后台定时执行代理任务（日报生成、数据同步等） |
 | 持久 Shell | 同一 shell 进程在多次对话间保持活跃，不丢失工作目录和环境变量 |
-| 多平台 | 同一配置文件（`~/.hermes/config.yaml`）跨 macOS / Linux / Windows / Termux 同步 |
+| 多平台 | macOS / Linux / Windows / Termux 使用同一套配置结构；迁移配置前仍应核对路径、权限和敏感字段 |
 
 ---
 
 ## 系统要求
 
 <Callout type="info" title="环境要求">
-- **Python** 3.10+（`uv` 会自动处理，源码安装需要手动装）
-- **操作系统**：Linux、macOS、Windows（PowerShell）、Android Termux
-- **Termux 特别注意**：请用 `[termux]` extra，不要装完整 extra（有 Android 不兼容的语音依赖）
+- **Python** 3.11（官方脚本会通过 `uv` 自动安装，无需手动装；同时自动安装 Node.js 22、ripgrep、ffmpeg）
+- **需要自备**：`git`；Linux 还需 `curl` 与 `xz-utils`
+- **操作系统**：Linux、macOS、Windows（桌面安装器或 PowerShell 脚本）、Android Termux
+- **Termux 特别注意**：官方脚本会自动使用 Termux 兼容依赖集，跳过 Android 不兼容的语音依赖
 </Callout>
 
 ---
 
 ## 安装
+
+<Callout type="warning" title="远程安装脚本安全说明">
+以下脚本来自 Hermes Agent 官方文档域名 `hermes-agent.nousresearch.com`，会下载并安装软件。运行前请先查看 [官方配置文档](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) 或下载脚本审阅；不要关闭系统安全机制。
+</Callout>
 
 <Tabs defaultValue="unix">
   <Tab label="Linux / macOS / WSL2" value="unix">
@@ -67,15 +72,17 @@ Hermes Agent 的核心区别在于**持久学习**机制，而不是单次会话
     curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
     ```
 
-    <Callout type="warning">Termux 下脚本会自动使用 `[termux]` extra，跳过语音依赖。若手动 pip 安装，请用 `pip install hermes-agent[termux]` 而非 `[all]`。</Callout>
+    <Callout type="warning">Termux 下官方脚本会自动使用 Android 兼容的依赖集并跳过语音依赖。官方当前不提供面向用户的 pip 安装路径；如需手动安装，请按官方仓库当前的源码安装说明操作。</Callout>
   </Tab>
   <Tab label="开发者源码" value="src">
-    需要先安装 [uv](https://github.com/astral-sh/uv)：
+    官方不提供面向用户的 pip 包安装路径；源码方式需要克隆官方仓库并按其当前 Contributing/开发文档配置环境（官方脚本内部使用 [uv](https://github.com/astral-sh/uv) 管理 Python）：
 
     ```bash
-    pip install uv
-    uv pip install -e ".[all,dev]"
+    git clone https://github.com/NousResearch/hermes-agent
+    cd hermes-agent
     ```
+
+    后续依赖安装步骤以 [官方仓库](https://github.com/NousResearch/hermes-agent) 当前开发文档为准，不要照抄旧教程中的 extras 组合。
   </Tab>
 </Tabs>
 
@@ -89,7 +96,7 @@ Hermes Agent 的核心区别在于**持久学习**机制，而不是单次会话
 hermes setup --portal
 ```
 
-向导会引导你配置 API Provider（支持 Anthropic、OpenAI、OpenRouter 等）、记忆存储路径、Shell 集成。
+`hermes setup --portal` 是官方为 Nous Portal 提供的 OAuth 快速路径，会配置 provider 和 Tool Gateway；是否订阅、计费与工具路由以 Nous Research 官方说明为准。已有安装或要选其他 provider 时，可运行 `hermes model`。
 
 ---
 
@@ -97,7 +104,7 @@ hermes setup --portal
 
 ```bash
 hermes --version
-# 输出示例：hermes-agent 2026.6.19
+# 输出示例：hermes-agent 0.19.0
 ```
 
 能输出版本号即装好。下一步配 API：
@@ -105,7 +112,9 @@ hermes --version
 <RelatedPages
   title="下一步"
   items={[
-    { route: '/hermes/cc-switch', hint: '用 CC Switch 配 API（推荐）' },
+    { route: '/hermes/cc-switch', hint: '用第三方图形界面管理 API 配置' },
     { route: '/hermes/manual', hint: '直接改 config.yaml' },
   ]}
 />
+
+资料来源：[Hermes Agent 安装文档](https://hermes-agent.nousresearch.com/docs/getting-started/installation) · [配置文档](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) · [NousResearch/hermes-agent Releases](https://github.com/NousResearch/hermes-agent/releases/latest)（2026-07-26 核对）

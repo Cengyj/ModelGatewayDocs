@@ -33,6 +33,86 @@ export function slugToRoute(slug) {
 }
 
 /**
+ * Remove MDX/HTML tags while preserving their line breaks and child text.
+ *
+ * A plain `<[^>]+>` regex stops at `>` characters inside quoted props or JSX
+ * expressions (for example `cmd="claude --resume <id>"` or `icon={<>…</>}`).
+ * That leaked component props into search text and could make a following
+ * thematic break look like a Setext heading. This small scanner closes a tag
+ * only when it is outside quotes and JSX braces.
+ */
+function stripMdxTags(source) {
+  let out = '';
+  let i = 0;
+  let inlineCodeTicks = 0;
+  while (i < source.length) {
+    if (source[i] === '`') {
+      let run = 1;
+      while (source[i + run] === '`') run += 1;
+      out += source.slice(i, i + run);
+      if (inlineCodeTicks === 0) inlineCodeTicks = run;
+      else if (inlineCodeTicks === run) inlineCodeTicks = 0;
+      i += run;
+      continue;
+    }
+
+    // Angle-bracket placeholders inside Markdown code spans (for example
+    // `<provider>/<model-id>`) are searchable text, not MDX tags.
+    if (inlineCodeTicks > 0) {
+      out += source[i];
+      i += 1;
+      continue;
+    }
+
+    const next = source[i + 1] ?? '';
+    const looksLikeTag = source[i] === '<' && /[A-Za-z/!?>]/.test(next);
+    if (!looksLikeTag) {
+      out += source[i];
+      i += 1;
+      continue;
+    }
+
+    const start = i;
+    let quote = null;
+    let braceDepth = 0;
+    let closed = false;
+    i += 1;
+    while (i < source.length) {
+      const ch = source[i];
+      if (quote) {
+        if (ch === '\\') i += 2;
+        else {
+          if (ch === quote) quote = null;
+          i += 1;
+        }
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === '`') {
+        quote = ch;
+        i += 1;
+        continue;
+      }
+      if (ch === '{') braceDepth += 1;
+      else if (ch === '}' && braceDepth > 0) braceDepth -= 1;
+      else if (ch === '>' && braceDepth === 0) {
+        i += 1;
+        closed = true;
+        break;
+      }
+      i += 1;
+    }
+
+    if (!closed) {
+      out += source[start];
+      i = start + 1;
+      continue;
+    }
+    out += source.slice(start, i).replace(/[^\r\n]/g, ' ');
+  }
+  return out;
+}
+
+/**
  * Extract level-2/3 ATX headings as TOC entries. IDs come from a per-document
  * github-slugger instance — identical to rehype-slug's output, including the
  * `-1`/`-2` suffixes for duplicate headings.
@@ -49,7 +129,7 @@ export function extractToc(source, levels = [2, 3]) {
  * collision suffixes match a single rendered document.
  */
 export function extractHeadings(source, slugger = new GithubSlugger()) {
-  const lines = source.split(/\r?\n/);
+  const lines = stripMdxTags(source).split(/\r?\n/);
   const out = [];
   let fence = null; // active code-fence marker: '```' or '~~~'
   const cleanText = (raw) =>
@@ -101,10 +181,10 @@ export function extractHeadings(source, slugger = new GithubSlugger()) {
  * `~/.claude`, and `--flag` survive intact in the output.
  */
 export function extractText(source) {
-  return source
+  const withoutFencedCode = source
     .replace(/```[\s\S]*?```/g, ' ')          // fenced code
-    .replace(/~~~[\s\S]*?~~~/g, ' ')           // alt-fenced code
-    .replace(/<[^>]+>/g, ' ')                   // JSX / HTML tags
+    .replace(/~~~[\s\S]*?~~~/g, ' ');          // alt-fenced code
+  return stripMdxTags(withoutFencedCode)
     .replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')      // images
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')    // links -> text
     .split(/\r?\n/)

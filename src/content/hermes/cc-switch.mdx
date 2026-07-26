@@ -1,12 +1,12 @@
 ---
 title: "Hermes Agent · CC Switch 配置"
-description: "用 CC Switch 一键配 Hermes Agent。"
+description: "使用第三方社区工具 CC Switch 管理 Hermes Agent provider 的安全边界。"
 navLabel: "CC Switch 配置"
 ---
 
 # Hermes Agent · CC Switch 配置
 
-<VersionBadge version="v2026.6.19" date="2026-06-19" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
+<VersionBadge version="v0.19.0 (tag v2026.7.20)" date="2026-07-20" license="MIT" github="https://github.com/NousResearch/hermes-agent" />
 
 <PageHeader
   useCase="可视化配置 Hermes 的 provider；GPT / Claude 两条路径均支持"
@@ -15,6 +15,10 @@ navLabel: "CC Switch 配置"
 />
 
 > 还没装 CC Switch？先看 [CC Switch 安装](/cc-switch)。
+
+<Callout type="warning" title="先确认当前版本仍支持 Hermes">
+CC Switch 是第三方社区工具，不是 Nous Research 产品。其支持客户端会变化；请先在 [CC Switch 官方仓库](https://github.com/farion1231/cc-switch) 核对 v3.18.0 的当前列表并备份 `~/.hermes/`。如果当前版本未列出 Hermes，请改用官方 `hermes model`，不要按旧截图强行写配置。
+</Callout>
 
 <Callout type="info">Hermes 字段名与 OpenClaw 相同——**API 协议**（非「接口格式」）和 **API 端点**（非「Base URL」），注意对应填写。</Callout>
 
@@ -31,21 +35,21 @@ navLabel: "CC Switch 配置"
 
   <Frame step="2" title="填写供应商信息（按模型类型选 API 协议）"
     image="/img/cc-switch/cc-switch-openclaw-gpt-form.png"
-    imageAlt="GPT 分组：API 协议选 OpenAI Responses，API 端点填 https://foropencode.com/v1">
-    弹出「添加新供应商」表单，按模型类型选择 **API 协议**：
+    imageAlt="添加供应商表单示例（截图取自 OpenClaw 配置表单，字段布局与 Hermes 相同，仅供参考）">
+    弹出「添加新供应商」表单，按模型类型选择 **API 协议**。以下截图取自 OpenClaw 的同款表单，Hermes 表单字段相同，仅供参考：
 
-    **GPT 分组**（gpt-5.5 / gpt-5.4 等，上图示例）：API 协议选 `OpenAI Responses`，填入 API Key，API 端点填：
+    **OpenAI 兼容分组**（上图是旧界面示例）：Hermes 官方说明其通用 custom endpoint 面向 OpenAI Chat Completions（`/v1/chat/completions`）；选择 Responses 或其他协议模式前，先确认 Hermes 当前版本与网关支持（参考下方「三类 API 模式」表与[手动配置](/hermes/manual)）。填入 API Key。本站截图中的第三方网关端点为：
 
     <CommandTable header={false} rows={[
-      { cmd: 'https://foropencode.com/v1', desc: 'GPT 系列必须带 /v1' },
+      { cmd: 'https://foropencode.com/v1', desc: '第三方网关示例；以当前控制台或正式文档为准' },
     ]} />
 
     **Claude 分组**（claude-sonnet 等，下图示例）：API 协议选 `Anthropic Messages`，填入 API Key，API 端点填：
 
-    <img src="/img/cc-switch/cc-switch-openclaw-claude-form.png" alt="Claude 分组：API 协议选 Anthropic Messages，API 端点填 https://foropencode.com（不带 /v1）" style={{width:'100%', borderRadius:'8px', margin:'8px 0'}} />
+    <img src="/img/cc-switch/cc-switch-openclaw-claude-form.png" alt="Claude 分组表单示例（截图取自 OpenClaw 配置表单，仅供参考）：API 协议选 Anthropic Messages，API 端点填 https://foropencode.com（不带 /v1）" style={{width:'100%', borderRadius:'8px', margin:'8px 0'}} />
 
     <CommandTable header={false} rows={[
-      { cmd: 'https://foropencode.com', desc: 'Claude 系列不带 /v1' },
+      { cmd: 'https://foropencode.com', desc: '第三方网关示例；以当前 Anthropic 兼容说明为准' },
     ]} />
 
     <Callout type="warning">**暂不要点「添加」**，先向下滚动完成模型配置。</Callout>
@@ -60,19 +64,10 @@ navLabel: "CC Switch 配置"
     2. 填入 **API Key**
     3. 点击 **获取模型列表** 拉取可用模型
     4. 点击 **＋ 添加模型** 插入一行
-    5. 展开模型条目，从下拉列表选择 **模型 ID**（如 `gpt-5.4`、`gpt-5.5`）
-    6. 填写 **上下文长度**：
-
-    | 模型 | 上下文长度 | 最大输出 |
-    | --- | --- | --- |
-    | `gpt-5.5` | `270000` | `128000` |
-    | `gpt-5.4` | `1050000` | `128000` |
-    | `gpt-5.4-mini` | `400000` | `128000` |
-
-    <Callout type="warning">**gpt-5.5 实际有效上下文约 270K**——填 1M 会触发 `context_length_exceeded`，建议上下文长度填 `270000`。</Callout>
-
-    7. 在「供应商高级选项」中将 **请求间隔（秒）** 设为 `0.5`，以避免触发速率限制
-    8. 点右下角 **＋ 添加**，CC Switch 自动写入 Hermes 配置
+    5. 展开模型条目，从网关实时返回的下拉列表选择 **模型 ID**；不要照抄旧截图中的名称
+    6. 只有网关或模型正式文档明确时才填写上下文与最大输出；截图中的旧模型数值不是当前保证
+    7. 请求间隔按网关公开的速率限制设置，不固定写成 `0.5`
+    8. 点右下角 **＋ 添加**，再用 `hermes config` 与 `hermes model` 核对实际 provider
   </Frame>
 
   <Frame step="4" title="确认配置添加成功"
@@ -88,37 +83,19 @@ navLabel: "CC Switch 配置"
 
 ## 可用模型
 
-### OpenAI 模型
-
-API 协议选 `OpenAI Responses`，API 端点填 `https://foropencode.com/v1`：
-
-| 模型 ID | 上下文窗口 | 最大输出 |
-| --- | --- | --- |
-| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 |
-| `gpt-5.4` | 1,050,000 | 128,000 |
-| `gpt-5.4-mini` | 400,000 | 128,000 |
-
-### Anthropic 模型
-
-API 协议选 `Anthropic Messages`，API 端点填 `https://foropencode.com`（**不带 `/v1`**）：
-
-| 模型 ID | 上下文窗口 | 最大输出 |
-| --- | --- | --- |
-| `claude-opus-4-8` | 1,000,000 | 128,000 |
-| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
-| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+模型以 `hermes model` 和第三方网关实际列表为准。CC Switch 的表单选项、Nous Research 官方 provider 清单和 OpenAI/Anthropic 官方模型清单不能证明 foropencode 已提供同名模型。
 
 ---
 
 ## 三类 API 模式
 
-Hermes 支持三种 API 协议，对应不同的模型分组：
+Hermes 对不同 provider 支持多种协议，`api_mode` 并非所有 provider 的通用必填字段。若 CC Switch 当前仍提供以下选项，应与 Hermes 和网关双方文档交叉核对：
 
 | API 协议 | 适用场景 | API 端点 |
 | --- | --- | --- |
-| `OpenAI Responses` | GPT 模型（gpt-5.5、gpt-5.4 等） | `https://foropencode.com/v1` |
-| `Anthropic Messages` | Claude 模型（claude-sonnet 等） | `https://foropencode.com` |
-| `OpenAI Chat Completions` | 其他 OpenAI 兼容端点 | `https://foropencode.com/v1` |
+| `OpenAI Responses` | 网关实际提供且 Hermes 支持的 Responses 兼容模型 | `https://foropencode.com/v1`（示例） |
+| `Anthropic Messages` | 网关实际提供且 Hermes 支持的 Anthropic 兼容模型 | `https://foropencode.com`（示例） |
+| `OpenAI Chat Completions` | 其他经双方文档确认的 OpenAI 兼容端点 | `https://foropencode.com/v1`（示例） |
 
 多个分组可以各建一份配置，在 CC Switch 里互相切换。
 
@@ -141,3 +118,5 @@ Hermes 支持三种 API 协议，对应不同的模型分组：
     { route: '/cc-switch', hint: 'CC Switch 工具本身' },
   ]}
 />
+
+资料来源：[Hermes Configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) · [AI Providers](https://hermes-agent.nousresearch.com/docs/integrations/providers) · [CC Switch 官方仓库](https://github.com/farion1231/cc-switch)（2026-07-26 核对）

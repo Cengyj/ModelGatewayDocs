@@ -35,12 +35,56 @@ const withMDX = createMDX({
   },
 });
 
+const productionSecurityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self'",
+      "frame-src 'none'",
+      "manifest-src 'self'",
+      "worker-src 'self' blob:",
+      'upgrade-insecure-requests',
+    ].join('; '),
+  },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  // Legacy-browser complement to CSP frame-ancestors 'none'
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), geolocation=(), microphone=(), payment=(), usb=()',
+  },
+  // Do not cover subdomains until the operator confirms every subdomain is
+  // HTTPS-only. HSTS is ignored on local HTTP and only takes effect over HTTPS.
+  { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
   reactStrictMode: true,
+  poweredByHeader: false,
   experimental: {
     mdxRs: false,
+  },
+  async headers() {
+    if (process.env.NODE_ENV !== 'production') return [];
+    return [
+      {
+        source: '/:path*',
+        headers: productionSecurityHeaders,
+      },
+    ];
   },
   async redirects() {
     return [

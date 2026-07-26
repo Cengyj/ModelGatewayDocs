@@ -1,6 +1,6 @@
 ---
 title: "密钥管理 · 创建密钥"
-description: "在 foropencode 控制台创建 API 密钥，选择令牌分组并保存，即可用于各 AI 客户端。"
+description: "在 foropencode 控制台创建 API 密钥、选择令牌分组，并在已确认兼容的 AI 客户端中配置。"
 navLabel: "创建密钥"
 ---
 
@@ -11,6 +11,10 @@ navLabel: "创建密钥"
   audience="首次使用 foropencode 的新用户"
   tldr="控制台 → API 密钥 → 创建 → 填名称 → 选分组 → 保存更改"
 />
+
+<Callout type="warning" title="这是第三方网关密钥，不是厂商官方 Key">
+本页介绍 `foropencode.com` 模型网关（本站的配套网关，相对 OpenAI/Anthropic 属第三方服务）的控制台，不是 OpenAI 或 Anthropic 官方密钥平台。文档页面本身不提供密钥上传表单；请只在你确认的控制台或客户端中输入 Key，并在创建前核对计费主体、数据处理和最终 API 域名。官方厂商 Key 应在对应厂商官方平台创建和管理。本站与该网关的关系见[站点说明](/site-info#contact)。
+</Callout>
 
 ---
 
@@ -42,10 +46,10 @@ navLabel: "创建密钥"
   />
   <Frame
     title="⑤ 选择对应分组"
-    caption="在「分组」下拉框选择该密钥要绑定的令牌分组。不同分组对应不同的模型访问权限和倍率。"
+    caption="在「分组」下拉框选择该密钥要绑定的令牌分组。按项目内现有控制台截图，分组可能影响可用模型与倍率；当前规则须以登录后的控制台为准。"
   >
     <Callout type="info" title="分组决定可用模型">
-      选择分组后，该密钥只能调用该分组内的模型。若需要同时使用 Claude 和 GPT，建议分别创建两个密钥并绑定不同分组。详见[令牌分组](/get-key/groups)。
+      当前截图显示密钥需要选择分组，但没有公开网关文档可证明其权限规则。创建后请用控制台或客户端返回的模型列表核对实际范围；如需区分用途，可分别创建用途单一、可独立撤销的密钥。详见[令牌分组](/get-key/groups)。
     </Callout>
   </Frame>
   <Frame
@@ -59,7 +63,7 @@ navLabel: "创建密钥"
 ## 复制密钥
 
 <Callout type="warning" title="密钥只显示一次">
-  创建成功后请立即复制完整密钥字符串（格式为 `sk-...`）。列表页后续只显示密钥的前几位，无法再查看完整内容。若遗失，需要重新创建。
+  按当前控制台界面，创建后应立即在安全位置保存密钥；示例格式仅写作 `sk-xxx`。不要把真实 Key 粘贴到本站文档、在线 JSON 校验站、公开 Issue、截图或聊天记录。控制台的显示与找回规则可能变化，以实际界面为准。
 </Callout>
 
 ---
@@ -71,7 +75,7 @@ navLabel: "创建密钥"
 <RelatedPages
   title="选择客户端"
   items={[
-    { route: '/cc-switch', label: 'CC Switch', hint: '用图形界面一键配置，推荐新手' },
+    { route: '/cc-switch', label: 'CC Switch', hint: '第三方社区图形化配置工具' },
     { route: '/claude-code/cli/install', label: 'Claude Code CLI', hint: '配置 Claude Code CLI 版本' },
     { route: '/claude-code/desktop/install', label: 'Claude Code 桌面版', hint: '配置 Claude Code 桌面版' },
     { route: '/codex/cli/install', label: 'Codex CLI', hint: '配置 Codex CLI' },
@@ -79,3 +83,13 @@ navLabel: "创建密钥"
     { route: '/cherry-studio/install', label: 'Cherry Studio', hint: '配置 Cherry Studio 桌面客户端' },
   ]}
 />
+
+---
+
+## 资料来源与限制
+
+页面流程依据项目内现有控制台截图整理（2026-07-26 核对），但当前没有可引用的公开网关文档。字段、分组、有效期和权限以登录后的真实控制台为准；运营方应在上线前补充公开的密钥管理、计费、隐私和纠错说明。
+
+<Callout type="info" title="模型支持以网关实时结果为准">
+OpenAI、Anthropic 等厂商的官方模型清单不等于 foropencode 网关已接入的模型清单。配置前请查看网关控制台或客户端实际获取的模型列表；倍率、价格和可用性也可能变化。
+</Callout>

@@ -1,5 +1,6 @@
 ---
 title: "CC-021：401 Invalid API Key format（Key 含不可见字符）"
+description: "不回显密钥地检查空白或控制字符，并核对 Key 与 Base URL 是否属于同一服务。"
 hidden: true
 ---
 
@@ -25,7 +26,7 @@ Invalid API Key format
 API Error: 401 Unauthorized
 ```
 
-重新填写 Key 后问题依然复现。
+重新填写 Key 后问题依然复现。相同提示也可能来自 Key 与 Base URL 不属于同一服务，不应只按不可见字符处理。
 
 ---
 
@@ -48,7 +49,7 @@ API Error: 401 Unauthorized
 | 截图 OCR 识别 | 字符误识别（如 `0` → `O`，`l` → `1`） |
 | 粘贴到终端 | 末尾混入 `\r`（Windows 换行符） |
 
-> 本条目与 CC-002（ANTHROPIC_BASE_URL 未配置）、CC-016（旧服务遗留环境变量覆盖）属于不同根因。
+> 这是一个可能原因，不是官方对所有 401 的统一根因。先用 `/status` 核对最终域名和活动配置来源。
 
 ---
 
@@ -56,25 +57,15 @@ API Error: 401 Unauthorized
 
 **第一步：检测 Key 是否含有不可见字符**
 
+以下命令只报告长度和是否含空白/控制字符，不打印 Key 本身：
+
 ```bash
-echo "$ANTHROPIC_API_KEY" | cat -A
-```
-
-正常输出示例（行尾只有 `$`）：
-
-```text
-sk-ant-api03-xxxxxxx$
-```
-
-异常示例（行尾出现多余字符）：
-
-```text
-sk-ant-api03-xxxxxxx ^M$
+python3 -c 'import os; v=os.getenv("ANTHROPIC_API_KEY", ""); print({"set": bool(v), "length": len(v), "has_whitespace": any(c.isspace() for c in v), "has_control": any(ord(c) < 32 for c in v)})'
 ```
 
 **第二步：重新获取干净的 Key**
 
-前往 [console.anthropic.com/settings/apiKeys](https://console.anthropic.com/settings/apiKeys)，点击"复制"按钮直接获取，不要手动输入，不要经由 PDF 或截图中转。
+如果 Base URL 是 Anthropic 官方端点，先从 [Anthropic Console](https://platform.claude.com/) 进入当前 API Key 管理页重新复制或轮换 Key；如果是第三方网关，只能在该网关自己的正式控制台管理 Key。不要依赖可能变化的深层设置 URL，也不要混用两边的密钥。
 
 **第三步：重新写入环境变量**
 
@@ -82,8 +73,8 @@ sk-ant-api03-xxxxxxx ^M$
 # 编辑配置文件
 nano ~/.zshrc   # macOS/Linux，或对应的 ~/.bashrc
 
-# 删除旧行，粘贴新行（不加引号）
-export ANTHROPIC_API_KEY=sk-ant-api03-你的key
+# 删除旧值后，粘贴从对应控制台复制的新值
+export ANTHROPIC_API_KEY='sk-xxx'
 
 # 使配置生效
 source ~/.zshrc
@@ -91,10 +82,7 @@ source ~/.zshrc
 
 **第四步：验证**
 
-```bash
-echo "$ANTHROPIC_API_KEY" | cat -A
-# 正常：行尾只有一个 $，无其他字符
-```
+重新运行上面的非回显检查，然后用 `claude doctor` 与 `/status` 核对配置。若真实 Key 曾进入截图、剪贴板同步、在线 JSON 校验站或公共日志，应立即在对应平台轮换，而不只是重新粘贴。
 
 ---
 
@@ -103,5 +91,7 @@ echo "$ANTHROPIC_API_KEY" | cat -A
 | 做法 | 避免的问题 |
 | --- | --- |
 | 始终从 Console 的复制按钮获取 Key | 避免手打或 OCR 引入字符错误 |
-| 环境变量赋值不加引号（`export KEY=value`） | 避免引号在某些 Shell 配置下被纳入变量值 |
-| 配置完成后用 `cat -A` 验证变量内容 | 在使用前发现不可见字符问题 |
+| 使用 shell 正常引号并避免把 Key 写入命令历史 | 降低特殊字符解析与泄露风险 |
+| 使用不回显内容的检查 | 在不暴露 Key 的前提下发现空白或控制字符 |
+
+资料来源：[Claude Code 环境变量参考](https://code.claude.com/docs/en/env-vars) · [Anthropic Console API Keys](https://platform.claude.com/settings/keys) · [配置诊断](https://code.claude.com/docs/en/debug-your-config)（2026-07-26 核对）

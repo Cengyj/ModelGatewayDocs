@@ -1,5 +1,6 @@
 ---
 title: "CC-016：无效令牌（曾购买过第三方服务后切换）"
+description: "切换第三方服务后，安全检查和清理旧 Anthropic Base URL 与鉴权环境变量。"
 hidden: true
 ---
 
@@ -30,7 +31,7 @@ API Error: 401 {"error":{"type":"authentication_error","message":"invalid x-api-
 ```text
 旧服务遗留了系统环境变量
   → ANTHROPIC_BASE_URL 指向旧服务地址
-  → ANTHROPIC_API_KEY / ANTHROPIC_API_TOKEN 保存旧令牌
+  → ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN 保存旧令牌
   → 环境变量优先级高于配置文件
   → Claude Code 忽略新配置，向旧端点发送旧令牌
   → 旧端点拒绝 → 401 认证失败
@@ -48,12 +49,12 @@ API Error: 401 {"error":{"type":"authentication_error","message":"invalid x-api-
 
 也可以在任务栏搜索「环境变量」直接打开。
 
-**第二步：分别在「用户变量」和「系统变量」中删除以下三个变量**
+**第二步：分别在「用户变量」和「系统变量」中核对以下三个变量**
 
 ```text
 ANTHROPIC_BASE_URL
 ANTHROPIC_API_KEY
-ANTHROPIC_API_TOKEN
+ANTHROPIC_AUTH_TOKEN
 ```
 
 **第三步：保存退出，重新打开 cmd 或 PowerShell**
@@ -62,14 +63,7 @@ ANTHROPIC_API_TOKEN
 claude
 ```
 
-**如果仍然报错，删除 Claude Code 配置文件：**
-
-```text
-C:\Users\<USERNAME>\.claude\claude.json
-C:\Users\<USERNAME>\.claude\claude.json.backup
-```
-
-删除后重新配置 Base URL 和 API Key（推荐使用 CC Switch）。
+只删除明确属于旧服务的值；先导出或截图变量名（遮盖值）用于回滚。不要删除整个 `~/.claude`、`~/.claude.json` 或组织管理配置。
 
 ---
 
@@ -90,7 +84,7 @@ vi ~/.bashrc
 ```bash
 export ANTHROPIC_BASE_URL=...
 export ANTHROPIC_API_KEY=...
-export ANTHROPIC_API_TOKEN=...
+export ANTHROPIC_AUTH_TOKEN=...
 ```
 
 **第三步：使配置生效**
@@ -112,5 +106,9 @@ claude
 | 做法 | 避免的问题 |
 | --- | --- |
 | 切换服务时优先检查并清理旧环境变量 | 旧变量静默覆盖新配置导致认证失败 |
-| 使用 CC Switch 统一管理配置，减少手动设置环境变量 | 多处配置冲突难以定位 |
-| 切换完成后执行 `claude --version` 验证连通性 | 切换后未及时发现配置冲突 |
+| 用 `/status` 与 `claude doctor` 检查活动配置源 | 多处配置冲突难以定位 |
+| 切换后核对 Base URL 并发起不含敏感数据的测试请求 | `claude --version` 只能验证安装版本，不能验证 API 连通性 |
+
+官方当前变量名是 `ANTHROPIC_API_KEY`（`X-Api-Key`）和 `ANTHROPIC_AUTH_TOKEN`（Bearer）。旧文中的 `ANTHROPIC_API_TOKEN` 未出现在本次官方变量表中，已移除。
+
+资料来源：[Claude Code 环境变量参考](https://code.claude.com/docs/en/env-vars) · [配置诊断](https://code.claude.com/docs/en/debug-your-config)（2026-07-26 核对）

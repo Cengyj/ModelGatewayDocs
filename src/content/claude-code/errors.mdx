@@ -1,12 +1,12 @@
 ---
 title: "Claude Code · 排障"
-description: "Claude Code 与相关插件常见报错按症状分类，每条都有真实根因和修复步骤。"
+description: "Claude Code 与第三方插件排障索引：区分官方资料、第三方网关问题和特定环境案例。"
 navLabel: "排障"
 ---
 
 # Claude Code · 排障
 
-<Callout type="info">本页按**症状分类**索引所有 CC-xxx 与 CM-xxx。每篇详细页统一采用「**现象 → 根因 → 修复步骤 → 预防措施**」结构。先按症状定位类别，再点编号进入详细页。</Callout>
+<Callout type="info">本页按**症状分类**索引 CC-xxx 与 CM-xxx 案例。案例中的根因只适用于记录时的版本、网关和本机环境；先运行官方诊断并核对服务状态，再把症状相近的案例作为排查线索。</Callout>
 
 ---
 
@@ -16,25 +16,25 @@ navLabel: "排障"
 
 | 编号 | 现象 | 根因 | 状态 |
 | --- | --- | --- | --- |
-| [CC-005](/claude-code/errors/cc-onboarding-connection-block) | 首次启动即报 Unable to connect to Anthropic services | `hasCompletedOnboarding` 字段缺失，Onboarding 探测绕过中转直连官方端点失败 | ✅ 已解决 |
+| [CC-005](/claude-code/errors/cc-onboarding-connection-block) | 首次启动即报 Unable to connect to Anthropic services | 登录、地区、网络或 LLM Gateway 配置需按官方路径核对 | 排查指引 |
 | [CC-009](/claude-code/errors/cc-connection-error) | API Error (Connection error.) | 本地到服务器链路不通，代理节点失效或网络路由异常 | 常见 |
 | [CC-010](/claude-code/errors/cc-request-timed-out) | API Error (Request timed out.) | 网络延迟过高（情况 A）或上下文 token 过多处理超时（情况 B） | 常见 |
-| [CC-017](/claude-code/errors/cc-webfetch-preflight-fail) | WebFetch 报错，目标网站可访问但联网失效 | CC 抓取前向 claude.ai 发预检请求，国内网络拦截 claude.ai 导致预检失败 | ✅ 已解决 |
-| CC-008 | 403 / Missing API Key | 配置冲突或 settings.json 被意外修改，推荐用 CC Switch 重新写入 | 常见 |
+| [CC-017](/claude-code/errors/cc-webfetch-preflight-fail) | WebFetch 报错，目标网站可访问但联网失效 | 需按官方网络、权限和目标站点规则逐项诊断 | 案例 |
+| CC-008 | 403 / Missing API Key | 先用 `/status` 和 `claude doctor` 检查实际配置来源 | 排查指引 |
 | CC-012 | Overloaded / 500 | 官方服务过载或故障，查 [status.anthropic.com](https://status.anthropic.com) 确认状态 | 常见 |
 
 ---
 
 ## 🔑 认证 / Key 类
 
-返回 401 / Invalid API Key / 鉴权失败。**优先排查配置覆盖关系**：环境变量 > settings.json > CC Switch。
+返回 401 / Invalid API Key / 鉴权失败。配置优先级会受管理策略、命令行、环境变量和 user/project/local settings 共同影响，不应简化成固定三层关系。
 
 | 编号 | 现象 | 根因 | 状态 |
 | --- | --- | --- | --- |
 | CC-002 | 401 / Invalid API Key | 中转 API 的 `ANTHROPIC_BASE_URL` 未正确配置，请求打到官方端点 | 常见 |
-| [CC-007](/claude-code/errors/cc-401-ide-mcp-conflict) | 401 无效令牌（sk 开头令牌） | IDE 插件或 MCP 服务器覆盖了 settings.json 中的 apiKey / baseURL | 常见 |
-| [CC-016](/claude-code/errors/cc-401-leftover-env) | 无效令牌（曾买过第三方服务后切换） | 旧服务遗留的环境变量覆盖了新配置 | ✅ 已解决 |
-| [CC-018](/claude-code/errors/cc-oauth-conflict) | 登录过官网后 API Key 失效 | OAuth 令牌写入 `~/.claude.json`，优先级高于 settings.json | ✅ 已解决 |
+| [CC-007](/claude-code/errors/cc-401-ide-mcp-conflict) | 401 无效令牌 | 某个活动配置源、端点或鉴权方式与预期不一致 | 排查指引 |
+| [CC-016](/claude-code/errors/cc-401-leftover-env) | 切换第三方服务后仍使用旧端点或令牌 | 旧环境变量可能仍在当前 shell 或启动配置中 | 案例 |
+| [CC-018](/claude-code/errors/cc-oauth-conflict) | 登录方式与 API Key 配置不一致 | 先核对 `/status` 显示的认证、端点和配置来源 | 排查指引 |
 | [CC-021](/claude-code/errors/cc-invalid-key-format) | 401 Invalid API Key format，Key 目视正确仍报错 | 从 PDF / 网页 / 截图复制 Key 时混入零宽空格、换行符等不可见字符 | 常见 |
 
 ---
@@ -45,12 +45,12 @@ navLabel: "排障"
 
 | 编号 | 现象 | 根因 | 状态 |
 | --- | --- | --- | --- |
-| [CC-006](/claude-code/errors/cc-400-experimental-betas) | 请求返回 400，与内容无关 | CC 附加了实验性 Beta 请求头，中转服务不支持 | ✅ 已解决 |
+| [CC-006](/claude-code/errors/cc-400-experimental-betas) | 网关拒绝 `anthropic-beta` 或 Beta schema | 可按官方变量关闭实验性 Beta 后验证兼容性 | 官方兼容选项 |
 | CC-011 | API Error 400（非内容原因） | CC 本身 bug 导致请求体格式异常，重发或 `/compact` 后通常恢复 | 常见 |
 | CC-013 | Command timed out after 2m 0.0s | CC 等待 shell 命令返回超时，与 API 请求无关，可手动执行对应命令 | 常见 |
-| [CC-014](/claude-code/errors/cc-413-invalid-model) | 413 请求体过大 / 400 Invalid model name | 上下文超限（413）或 Opus 并发配额不足（400） | 常见 |
-| CC-015 | API Error: response exceeded the 32000 | 单次回复超出默认输出 token 上限，设置 `CLAUDE_CODE_MAX_OUTPUT_TOKENS=32000` 解决 | ✅ 已解决 |
-| [CC-024](/claude-code/errors/cc-024-third-party-system-role-400) | 第三方 / 国产模型 400 `messages[].role: unknown variant system` | CC 启用 `mid_conversation_system` Beta，第三方端点未跟进，仍只接受 user / assistant 两种 role | ✅ 已解决 |
+| [CC-014](/claude-code/errors/cc-413-invalid-model) | 413 请求体过大 / 400 Invalid model name | 分别核对请求体限制与当前端点实际模型列表 | 排查指引 |
+| CC-015 | API Error: response exceeded the 32000 | 输出上限取决于模型；需按官方环境变量说明和模型上限调整 | 排查指引 |
+| [CC-024](/claude-code/errors/cc-024-third-party-system-role-400) | 第三方模型端点返回 role/schema 400 | 端点协议与 Claude Code 当前请求结构不兼容 | 排查指引 |
 | CC-003 | 503 model_not_found | 所选模型在当前渠道下线或不可用 | 常见 |
 | CC-004 | context window 超限，对话被截断 | 单次会话积累 token 过多，未及时 `/compact` 或新开会话 | 常见 |
 
@@ -72,17 +72,19 @@ navLabel: "排障"
 
 | 编号 | 现象 | 根因 | 状态 |
 | --- | --- | --- | --- |
-| [CC-022](/claude-code/errors/cc-022-duplicate-cache-billing) | 重复创建缓存，单场重复收费 | 备用负载切号后二次转发携带相关请求头，误路由触发重复建缓存 | ✅ 已解决 |
+| [CC-022](/claude-code/errors/cc-022-duplicate-cache-billing) | 怀疑同一请求出现重复缓存计费 | 需要网关按请求 ID、路由和账单记录核实，本站不能从延迟推定根因 | 待网关核实 |
 
 ---
 
-## 🧠 claude-mem（持久化记忆）类
+## 🧠 claude-mem（第三方社区插件）类
+
+<Callout type="warning">claude-mem 是 `thedotmack/claude-mem` 社区插件，不是 Anthropic 或 Claude Code 官方组件。排障前备份本地数据，并优先升级到其官方 GitHub Release 当前版本。</Callout>
 
 | 编号 | 现象 | 根因 | 状态 |
 | --- | --- | --- | --- |
-| CC-001 | 响应极慢，像卡住 | hook 持续尝试连挂死的 worker，每次超时拖慢 CLI | ✅ 已解决 |
-| [CM-001](/claude-code/errors/claude-mem-data-loss) | 知识库连续 4 天无产出，pending_messages 堆积 1637 条 | worker 模型通道下线（503 死循环），积压数据被误判为垃圾清空 | ✅ 已解决 |
-| [CM-002](/claude-code/errors/claude-mem-worker-zombie) | Claude Code 命令卡死不返回，终端无报错 | 升级后 worker 挂死，端口残留，进程假活 | ✅ 已解决 |
+| CC-001 | 响应极慢，像卡住 | 可先在插件官方目录检查 worker 状态和日志 | 排查指引 |
+| [CM-001](/claude-code/errors/claude-mem-data-loss) | 队列有积压但没有新摘要 | 先按插件官方恢复工具检查，不直接删数据库记录 | 数据保护 |
+| [CM-002](/claude-code/errors/claude-mem-worker-zombie) | Claude Code 变慢且插件 worker 无响应 | 使用插件官方 status/logs/restart 流程；当前 Release 已修复一类 Windows 端口占用问题 | 已更新 |
 
 ---
 
@@ -98,3 +100,5 @@ navLabel: "排障"
 - 出现 `pending_messages` / `worker` → claude-mem 类
 
 实在找不到的，先回 [CC Switch 配置](/claude-code/cli/cc-switch) 检查 Base URL / Key / 模型。
+
+资料来源：[Claude Code 配置诊断](https://code.claude.com/docs/en/debug-your-config) · [Claude Code 安装与登录排障](https://code.claude.com/docs/en/troubleshoot-install) · [claude-mem 官方 GitHub](https://github.com/thedotmack/claude-mem)（2026-07-26 核对）

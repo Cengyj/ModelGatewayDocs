@@ -1,12 +1,12 @@
 ---
 title: "Claude Code CLI · CC Switch 配置"
-description: "用 CC Switch 给 Claude Code CLI 一键配 API。"
+description: "用第三方社区工具 CC Switch 管理 Claude Code LLM Gateway 配置。"
 navLabel: "CC Switch 配置"
 ---
 
 # Claude Code CLI · CC Switch 配置
 
-<VersionBadge version="v2.1.183" date="2026-06-19" license="Proprietary" github="https://github.com/anthropics/claude-code" />
+<VersionBadge version="v2.1.220" date="2026-07-25" license="Proprietary" github="https://github.com/anthropics/claude-code" />
 
 <PageHeader
   useCase="不动配置文件，可视化切多分组 / 多 Key"
@@ -15,6 +15,10 @@ navLabel: "CC Switch 配置"
 />
 
 > 还没装 CC Switch？先看 [CC Switch 安装](/cc-switch)。装完再回这里。
+
+<Callout type="warning" title="CC Switch 和 foropencode 都不是 Anthropic 产品">
+CC Switch 是第三方社区配置工具，`foropencode.com` 是第三方网关。使用前备份 `~/.claude/settings.json`，核对最终 API 域名、网关数据处理与计费；鉴权应按网关正式说明选择 `ANTHROPIC_API_KEY` 或 `ANTHROPIC_AUTH_TOKEN`。
+</Callout>
 
 <Callout type="info">CC Switch 把所有配置写入 `~/.claude/settings.json`。要看 CC Switch 写了什么 / 自己手改，见 [手动配置](/claude-code/cli/manual)。</Callout>
 
@@ -25,8 +29,8 @@ navLabel: "CC Switch 配置"
 <Walkthrough title="CC Switch · 配置 Claude Code CLI">
   <Frame step="1" title="选中 Claude Code CLI 图标，点击添加"
     image="/img/cc-switch/cc-switch-cli-main-add.png"
-    imageAlt="CC Switch 主界面：选中第一个 Claude 图标，点右上角添加按钮">
-    打开 CC Switch，顶部工具栏选中**第一个 Claude 图标**（Claude Code CLI）。如有旧配置会显示在列表里；点右上角 **＋** 按钮新建一项。
+    imageAlt="CC Switch 主界面：选中 Claude Code CLI 图标，点右上角添加按钮">
+    打开 CC Switch，顶部工具栏按名称选中 **Claude Code CLI 图标**。如有旧配置会显示在列表里；点右上角 **＋** 按钮新建一项，不要依赖图标排列位置。
   </Frame>
 
   <Frame step="2" title="填写供应商信息"
@@ -70,13 +74,7 @@ navLabel: "CC Switch 配置"
 
 ## 可用模型
 
-Claude Code CLI 使用 **Anthropic 格式**，请求地址填 `https://foropencode.com`（不带 `/v1`）：
-
-| 模型 ID | 上下文窗口 | 最大输出 |
-| --- | --- | --- |
-| `claude-opus-4-8` | 1,000,000 | 128,000 |
-| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
-| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+Anthropic 当前官方模型包括 Claude Fable 5、Opus 5、Sonnet 5 和 Haiku 4.5，但这不证明 foropencode 网关已经接入相同模型。通过 CC Switch 或 `/model` 选择前，先查看网关实时模型列表；上下文、最大输出和功能支持也以网关实际能力为准。
 
 ---
 
@@ -99,3 +97,5 @@ CC Switch 将供应商配置写入 `~/.claude/settings.json`：
     { route: '/claude-code/errors', hint: '遇到 401 / 429 等报错' },
   ]}
 />
+
+资料来源：[Claude Code LLM Gateway](https://code.claude.com/docs/en/llm-gateway-connect) · [Anthropic Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) · [CC Switch 官方仓库](https://github.com/farion1231/cc-switch)（2026-07-26 核对）

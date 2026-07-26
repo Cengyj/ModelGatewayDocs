@@ -44,6 +44,7 @@ export function Header({ onOpenSearch }: Props) {
                 key={item.route}
                 href={item.route}
                 className={isActive(item, current) ? styles.active : undefined}
+                aria-current={isActive(item, current) ? 'page' : undefined}
               >
                 {item.label}
               </Link>
@@ -77,6 +78,7 @@ export function Header({ onOpenSearch }: Props) {
                   href={item.route}
                   onClick={() => setMenuOpen(false)}
                   className={isActive(item, current) ? styles.active : undefined}
+                  aria-current={isActive(item, current) ? 'page' : undefined}
                 >
                   {item.label}
                 </Link>

@@ -1,116 +1,48 @@
 ---
-title: "CC-024：接入第三方模型时 400 messages[1].role: unknown variant system"
+title: "CC-024：第三方 Anthropic 兼容端点返回 system role 400"
+description: "第三方模型端点返回 system role 或 schema 400 时的协议兼容性排查。"
 hidden: true
 ---
 
-# CC-024：接入第三方模型时 400 messages[1].role: unknown variant system
+# CC-024：第三方 Anthropic 兼容端点返回 system role 400
 
 <ErrorMeta
-  component="Claude Code 本体（接入第三方 / 国产模型时）"
-  version="不限版本"
+  component="Claude Code 与第三方兼容端点"
+  version="v2.1.220 核对"
   platform="Linux / macOS / Windows"
-  date="2026-05-29"
-  owner="哈雷彗星"
+  date="2026-07-26"
 />
+
 ---
 
 ## 问题现象
 
-将 Claude Code 接入第三方厂商（如 DeepSeek 等）的 Anthropic 兼容端点时，对话请求返回 400，错误信息明确指出 `messages` 数组中出现了非法 role：
+第三方端点返回类似错误：
 
 ```text
-API Error: 400 Failed to deserialize the JSON body into the target type: messages[1].role: unknown variant `system`, expected `user` or `assistant` at line 1 column 994
+400 ... messages[1].role: unknown variant `system`, expected `user` or `assistant`
 ```
 
-错误与对话内容无关，新建会话依然复现，且只在第三方端点上出现，官方端点正常。
+这通常表示第三方所谓“Anthropic 兼容”接口没有实现 Claude Code 当前使用的完整 Messages API 行为。兼容范围应由该端点发布方证明，不能仅凭 Base URL 可连接就认定兼容。
 
 ---
 
-## 根因分析
+## 已撤下的旧方案
 
-```text
-Claude Code 启用 mid_conversation_system Beta
-  → 请求体中允许把 system 消息穿插进 messages 数组（role: "system"）
-  → 第三方厂商的 Anthropic 兼容端点未跟进该 Beta，仍按旧 schema 校验
-  → messages[].role 只接受 user / assistant，反序列化失败
-  → 返回 400 invalid_request_error
-```
-
-简言之：CC 端在按新协议发请求，第三方端在按旧协议解请求，schema 对不上。
+旧版页面建议把任意第三方端点伪装成 Microsoft Foundry，设置 `CLAUDE_CODE_USE_FOUNDRY` 与 `ANTHROPIC_FOUNDRY_*`，并引用非官方论坛作为“标准做法”。Anthropic 官方资料只把相应变量用于实际的 Foundry 集成，本次没有官方依据支持将其用于无关端点，因此该方案已撤下。
 
 ---
 
-## 修复步骤
+## 最小排查
 
-绕过该 Beta 的标准做法是用 **Foundry 路由模式**，把第三方端点写到 `ANTHROPIC_FOUNDRY_*` 环境变量里。Foundry 模式不会附加 `mid_conversation_system`，因此请求体不会再出现 `role: system`。
+1. 向第三方端点发布方确认其明确支持 Claude Code 当前版本和 Anthropic Messages API，而不只是基础 Chat Completions
+2. 使用该发布方正式记录的协议、Base URL、模型 ID 与鉴权头；不要从同名模型或搜索结果推断
+3. 用新的空会话发送最小请求，保存去除 Key/Token 后的响应状态与 request ID
+4. 如果端点只支持 OpenAI Chat Completions，应改用官方支持该协议的客户端，不要强行把它伪装成 Anthropic/Foundry
+5. 如果使用的确实是 Microsoft Foundry，按 [Anthropic LLM Gateway 文档](https://code.claude.com/docs/en/llm-gateway-connect) 与 Microsoft 官方资料配置
 
-**第一步：单独保存一份第三方配置**
+<Callout type="warning">
+不要通过未记录的 Beta 开关、伪装 provider 身份或虚构模型能力来消除 400。实际结果取决于第三方端点的协议实现。
+</Callout>
 
-以 DeepSeek 为例，新建 `~/.claude/settings.deepseek.json`，与默认 `settings.json` 分开维护：
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_USE_FOUNDRY": "1",
-    "ANTHROPIC_FOUNDRY_BASE_URL": "https://api.deepseek.com/anthropic",
-    "ANTHROPIC_FOUNDRY_API_KEY": "sk-xxx",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro[1m]",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES": "thinking,adaptive_thinking,temperature,effort,max_effort",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-flash[1m]",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES": "thinking,adaptive_thinking,temperature,effort,max_effort",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash[1m]",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES": "thinking,adaptive_thinking,temperature,effort,max_effort"
-  },
-  "model": "opus",
-  "effortLevel": "max"
-}
-```
-
-> 把 `sk-xxx`、`deepseek-v4-pro` / `deepseek-v4-flash` 替换成自己实际的 Key 与模型 id；其他第三方厂商按相同思路填 `ANTHROPIC_FOUNDRY_BASE_URL` 与对应模型 id 即可。
-
-**第二步：用 `--settings` 指定该配置启动**
-
-#### macOS / Linux
-
-```bash
-claude --settings ~/.claude/settings.deepseek.json
-```
-
-#### Windows PowerShell
-
-```powershell
-claude --settings "$env:USERPROFILE\.claude\settings.deepseek.json"
-```
-
-跑通后无 400 即代表该 Beta 已被绕过。
-
-**第三步：理解 `[1m]` 后缀只能出现在一处**
-
-`*_SUPPORTED_CAPABILITIES` 的匹配机制是通过模型 id 去对应配置项。如果用 `"model": "opus[1m]"` 来标注 1M 上下文，能力配置就匹配不到（因为对照的是 `ANTHROPIC_DEFAULT_OPUS_MODEL`）。所以正确写法是把 `[1m]` 写在路由模型名上：
-
-```jsonc
-{
-  "env": {
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro[1m]",                    // ← 标记在这里
-    "ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES": "thinking,..."     // ← 这里就能匹配上
-  },
-  "model": "opus"                                                              // ← 这里不再带 [1m]
-}
-```
-
-同一模型只在一处带 `[1m]`：要么写路由模型名上，要么写 `model` 字段上，不要两边都写。
-
-**第四步：保留来源链接，便于后续核对**
-
-参考反馈来源：[linux.do — 哈雷彗星](https://linux.do/t/topic/2266592)
-
----
-
-## 预防措施
-
-| 做法 | 避免的问题 |
-| --- | --- |
-| 接入第三方 / 国产模型走 Foundry 路由（`CLAUDE_CODE_USE_FOUNDRY=1` + `ANTHROPIC_FOUNDRY_*`） | 避免 CC 给第三方端点附加官方专用的 Beta 头导致 schema 校验失败 |
-| 第三方配置单独存一份 `settings..json`，用 `--settings` 切换 | 避免与官方 / 中转配置互相覆盖，定位问题更快 |
-| `[1m]` 后缀只写在 `ANTHROPIC_DEFAULT_*_MODEL` 上 | 避免 `*_SUPPORTED_CAPABILITIES` 匹配不到模型 id，能力配置静默失效 |
-| 切换模型源后先发一条最简对话验证 | 避免在长对话中才暴露 schema 兼容性问题，丢失上下文 |
+资料来源：[Anthropic LLM Gateway 文档](https://code.claude.com/docs/en/llm-gateway-connect)（2026-07-26 核对）

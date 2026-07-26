@@ -1,12 +1,12 @@
 ---
 title: "foropencode"
-description: "Claude Code、Codex、OpenCode、OpenClaw、Cherry Studio、Hermes 六款 AI 编程客户端的中文接入手册：安装、接入网关、跑起来、排障，一步步照着做。"
+description: "foropencode 网关的配套中文配置文档：Claude Code、Codex、OpenCode、OpenClaw、Cherry Studio、Hermes 的接入配置、官方安装入口与排障。"
 ---
 
 <Hero
   name="foropencode"
   text="AI Coding 中文配置手册"
-  tagline="Claude Code · Codex · OpenCode · OpenClaw · Cherry Studio · Hermes"
+  tagline="foropencode 网关配套文档 · 含各客户端官方安装入口与接入配置"
   actions={[
     { label: "Claude Code 快速上手", href: "/claude-code/cli/install", variant: "primary" },
     { label: "遇到报错？", href: "/claude-code/errors", variant: "secondary" },
@@ -16,23 +16,27 @@ description: "Claude Code、Codex、OpenCode、OpenClaw、Cherry Studio、Hermes
 <FeatureGrid>
   <Feature icon={<>🔑</>} title="密钥管理" details="创建 API 密钥、切换令牌分组、查看各分组倍率与可用模型。" href="/get-key/create" />
   <Feature icon={<>🧭</>} title="Claude Code" details="CLI 与桌面版各自的安装、CC Switch 配置、手动配置。" href="/claude-code/cli/install" />
-  <Feature icon={<>⚡</>} title="Codex" details="OpenAI 深度推理编码工具，CLI 与桌面版共享配置。" href="/codex/cli/install" />
+  <Feature icon={<>⚡</>} title="Codex" details="OpenAI 的编码代理；本站同时说明官方登录与第三方 API 配置边界。" href="/codex/cli/install" />
   <Feature icon={<>🌐</>} title="OpenCode" details="一个客户端调多家供应商，CLI 与桌面版。" href="/opencode/cli/install" />
-  <Feature icon={<>🐾</>} title="OpenClaw" details="自托管 AI 助手网关，接 Discord / Telegram / 飞书等渠道 + Web UI 多模型管理。" href="/openclaw/install" />
+  <Feature icon={<>🐾</>} title="OpenClaw" details="自托管 AI 助手，包含 CLI、Gateway、Control UI、消息渠道和配套应用。" href="/openclaw/install" />
   <Feature icon={<>🍒</>} title="Cherry Studio" details="桌面 LLM 客户端，300+ 助手 + 知识库 + MCP，统一接多家供应商。" href="/cherry-studio/install" />
-  <Feature icon={<>🦉</>} title="Hermes Agent" details="自学习的终端代理，含消息网关、多终端后端、MCP 集成。" href="/hermes/install" />
-  <Feature icon={<>🖼️</>} title="GPT Image 2" details="通过 foropencode gpt_plus 分组在 image.foropencode.com 使用 gpt-image-2 图片生成。" href="/gpt-image" />
-  <Feature icon={<>🛠</>} title="排障" details="Claude Code 常见报错的根因、修复步骤与预防措施。" href="/claude-code/errors" />
+  <Feature icon={<>🦉</>} title="Hermes Agent" details="终端代理，含持久记忆、消息网关、多终端后端和 MCP 集成。" href="/hermes/install" />
+  <Feature icon={<>🖼️</>} title="GPT Image 2" details="核对第三方网关是否提供 gpt-image-2，并说明图片工具的数据与计费边界。" href="/gpt-image" />
+  <Feature icon={<>🛠</>} title="排障" details="Claude Code 常见报错的官方诊断入口、案例线索与安全处理步骤。" href="/claude-code/errors" />
 </FeatureGrid>
 
 <HomeProse>
 
-<Callout type="warning" title="安装 / 启动卡住，先看这里">
-安装命令下不动，或启动后报 `ConnectionRefused` / `Connection error`，**九成是网络问题**，按顺序自查：
+<Callout type="info" title="本站身份与第三方关系">
+本站是 foropencode.com API 网关的配套中文配置文档，与该网关由同一运营方提供；两者都不是 OpenAI、Anthropic 或文中其他产品厂商的官方网站。CC Switch、Cherry Studio、OpenCode、OpenClaw、Hermes Agent 均为第三方或社区工具，与本站无付费推广关系，也不因出现在本站而获得模型厂商背书。详见[关于本站与安全说明](/site-info)。
+</Callout>
 
-1. **开了梯子的，关掉梯子**再试
-2. **没开梯子的，开启梯子**再试
-3. 仍不行，开启代理软件的**网卡 TUN 模式**（系统级代理），而非仅浏览器代理
+<Callout type="warning" title="安装或连接失败时先核对来源">
+安装命令无法访问，或启动后出现 `ConnectionRefused` / `Connection error` 时，先核对命令是否来自页面标注的官方域名，并查看产品官方状态页、系统代理和组织网络策略：
+
+1. 用浏览器打开产品官方安装文档，确认最终域名与证书正常
+2. 检查 DNS、系统时间、企业防火墙和已获授权的代理设置
+3. 不要为完成安装而关闭安全软件、证书校验或组织访问控制
 
 详细排查见 [CC-009：API Error (Connection error.)](/claude-code/errors/cc-connection-error)。
 </Callout>
@@ -43,13 +47,15 @@ description: "Claude Code、Codex、OpenCode、OpenClaw、Cherry Studio、Hermes
 
 ### Claude Code
 
+以下脚本由 `claude.ai` 提供。执行前请先查看 [Anthropic 官方安装文档](https://code.claude.com/docs/en/setup)；不希望直接执行远程脚本时，按官方页面选择可审阅的安装方式。
+
 ```bash
 # 1. 安装（macOS / Linux / WSL）
 curl -fsSL https://claude.ai/install.sh | bash
 # Windows PowerShell：irm https://claude.ai/install.ps1 | iex
 
-# 2. 在 CC Switch 选 foropencode 预设供应商，填入 API Key
-#    → CC Switch 自动写入 Base URL，无需手动配置
+# 2. 如选择第三方网关，在 CC Switch 表单中填入核对过的 Base URL 与 API Key
+#    → CC Switch 会写入 ~/.claude/settings.json，无需手动编辑文件
 
 # 3. 启动
 claude
@@ -63,8 +69,9 @@ claude
 # 1. 安装 Codex CLI
 npm install -g @openai/codex
 
-# 2. 在 CC Switch 选 foropencode 预设（框架选 Codex），填入 API Key
-#    model 推荐 gpt-5.5
+# 2. 在 CC Switch 的 Codex 向导中新建供应商，填入 API Key
+#    与请求地址（详见 Codex · CC Switch 配置页）
+#    模型以网关控制台或 /models 实际返回为准
 
 # 3. 启动
 codex
@@ -75,7 +82,7 @@ codex
 ### OpenClaw
 
 ```bash
-# 1. 装 Node.js 22.14+（推荐 24+），然后安装 OpenClaw
+# 1. 装 Node.js 24.15+（推荐；最低 22.22.3），然后安装 OpenClaw
 npm install -g openclaw@latest
 
 # 2. 初始化向导（一次性）
@@ -88,10 +95,12 @@ openclaw onboard --install-daemon
 
 ## 选令牌分组
 
-接入网关时要选一个令牌分组，再按它的「`model` 填写建议」配到客户端。全部分组按用途分类、可筛选搜索：
+选择第三方网关时，需要按该网关的实际控制台选择令牌分组，再按其「`model` 填写建议」配到客户端：
 
 [→ 令牌分组速查](/get-key/groups)
 
-> 最新倍率与可用模型以 [模型广场](https://foropencode.com/pricing) 为准。
+> 最新倍率、计费与可用模型以登录后的第三方网关控制台为准；本站与网关的商业或关联关系仍需运营方公开披露。
+
+资料来源：[Claude Code Setup](https://code.claude.com/docs/en/setup) · [OpenAI Codex](https://developers.openai.com/codex) · [OpenCode 官方文档](https://opencode.ai/docs/) · [OpenClaw 官方文档](https://docs.openclaw.ai/) · [Hermes Agent 官方文档](https://hermes-agent.nousresearch.com/docs/)（2026-07-26 核对）
 
 </HomeProse>

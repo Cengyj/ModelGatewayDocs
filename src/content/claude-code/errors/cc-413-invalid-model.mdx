@@ -1,5 +1,6 @@
 ---
 title: "CC-014：413 请求体过大 / 400 Invalid model name"
+description: "分别排查请求体限制和当前端点不识别或未授权的模型 ID。"
 hidden: true
 ---
 
@@ -27,7 +28,7 @@ API Error: 413 Request Entity Too Large
 API Error: 400 Invalid model name
 ```
 
-两者均为请求阶段报错，与网络无关。
+两者都发生在请求阶段，但不是同一种错误，也不能仅凭状态码排除网关层限制。
 
 ---
 
@@ -40,9 +41,8 @@ API Error: 400 Invalid model name
   → 返回 413
 
 现象 B（400 Invalid model name）：
-  请求模型为 Claude Opus
-  → Opus 并发配额不足，服务端降级拒绝
-  → 以 400 Invalid model name 形式返回
+  请求中的模型 ID 未被当前端点识别、未开放给该 Key，或协议映射不一致
+  → 端点拒绝模型参数
 ```
 
 ---
@@ -67,9 +67,11 @@ API Error: 400 Invalid model name
 
 保留摘要后继续，避免完全丢失对话记录。
 
-### 现象 B：400 Invalid model name（Opus 并发不足）
+### 现象 B：400 Invalid model name
 
-此为服务端并发限制问题，无需修改配置，稍等片刻后重试即可。
+1. 用 `/status` 核对 Base URL，避免把第三方 Key 发往 Anthropic 官方端点或反过来
+2. 用 `/model` 查看客户端实际模型选择，并对照 Anthropic 官方模型清单或第三方网关实时模型列表
+3. 检查模型 ID 拼写、访问权限和网关协议映射；不要把“Invalid model”一律解释为 Opus 并发不足
 
 ---
 
@@ -78,4 +80,6 @@ API Error: 400 Invalid model name
 | 做法 | 避免的问题 |
 | --- | --- |
 | 长任务中定期执行 `/compact` | 上下文堆积触发 413 |
-| Opus 并发失败时稍等重试，而非反复修改配置 | 无效排查浪费时间 |
+| 模型名只从当前官方清单或网关实时列表复制 | 避免使用过期、猜测或未授权模型 ID |
+
+资料来源：[Claude 模型概览](https://platform.claude.com/docs/en/about-claude/models/overview) · [Claude Code 配置诊断](https://code.claude.com/docs/en/debug-your-config) · [LLM Gateway](https://code.claude.com/docs/en/llm-gateway-connect)（2026-07-26 核对）

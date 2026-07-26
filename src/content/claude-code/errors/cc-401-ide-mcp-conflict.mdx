@@ -1,9 +1,10 @@
 ---
-title: "CC-007：401 无效令牌（IDE 或 MCP 覆盖配置）"
+title: "CC-007：401 无效令牌（活动配置源与预期不一致）"
+description: "使用 claude doctor 与 /status 排查 Base URL、鉴权和多层配置来源导致的 401。"
 hidden: true
 ---
 
-# CC-007：401 无效令牌（IDE 或 MCP 覆盖配置）
+# CC-007：401 无效令牌（活动配置源与预期不一致）
 
 <ErrorMeta
   component="Claude Code 本体"
@@ -27,55 +28,50 @@ API Error: 401 {"error":{"type":"authentication_error","message":"invalid x-api-
 Invalid API key · Please run /login
 ```
 
-API Key 以 `sk-` 开头，确认填写正确，但错误持续出现。
+已在预期平台创建 Key，但错误持续出现。不要仅凭 `sk-` 前缀判断密钥属于哪个平台或仍然有效。
 
 ---
 
 ## 根因分析
 
-```text
-IDE 插件或 MCP 服务器写入 settings.json
-  → 覆盖 Claude Code 的 apiKey / baseURL 字段
-  → Claude Code 读到被覆盖的旧值或错误值
-  → 向错误端点发送请求 → 401 认证失败
-```
-
-常见触发场景：
-
-- 安装了带 Claude Code 集成的 IDE 插件（如 Cursor、Continue 等）
-- MCP 服务器自动写入了 `~/.claude/settings.json` 或全局配置
+Claude Code 会合并 managed、user、project、local settings，并可能受命令行和环境变量影响。某个值被更高优先级来源覆盖、Base URL 与 Key 不属于同一服务、或网关要求了不同鉴权头，都可能返回 401。官方资料没有把普通 IDE/MCP 插件列为此错误的必然根因。
 
 ---
 
 ## 修复步骤
 
-**方式一（推荐）：用 CC Switch 重新配置**
-
-下载并打开 [CC Switch](https://github.com/farion1231/cc-switch/)，重新填写 Base URL 和 API Key 后一键写入，覆盖被修改的配置。
-
-**方式二：手动修复环境变量**
-
-检查并设置以下环境变量，确保其优先于 settings.json 中的值生效：
+**方式一（推荐）：先做只读诊断**
 
 ```bash
-# macOS / Linux
-export ANTHROPIC_BASE_URL=https://你的中转地址
-export ANTHROPIC_API_KEY=sk-xxx
+claude doctor
+```
+
+进入会话后运行 `/status`，记录活动 settings 来源、认证方式和 Base URL；截图或反馈前遮盖 Key、Token 和私人 URL。
+
+**方式二：在当前 shell 检查变量是否存在**
+
+```bash
+printf 'BASE_URL=%s API_KEY=%s AUTH_TOKEN=%s\n' \
+  "${ANTHROPIC_BASE_URL:+set}" \
+  "${ANTHROPIC_API_KEY:+set}" \
+  "${ANTHROPIC_AUTH_TOKEN:+set}"
 ```
 
 ```powershell
-# Windows（PowerShell）
-[System.Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL","https://你的中转地址","User")
-[System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY","sk-xxx","User")
+# Windows（PowerShell，只显示是否存在）
+'ANTHROPIC_BASE_URL','ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN' |
+  ForEach-Object { "$_=" + [bool](Get-Item "Env:$_" -ErrorAction SilentlyContinue) }
 ```
 
-**方式三：检查并还原 settings.json**
+不要打印变量值。若发现旧变量，按 [CC-016](/claude-code/errors/cc-401-leftover-env) 逐项清理；不要用新的全局变量强行盖住未知来源。
 
-找到被修改的配置文件（路径因平台而异），删除或修正其中的 `apiKey` / `baseURL` 字段：
+**方式三：检查 settings scopes**
+
+找到被修改的配置文件（路径因平台而异），检查 `env` 段中的 `ANTHROPIC_BASE_URL`、`ANTHROPIC_API_KEY`、`ANTHROPIC_AUTH_TOKEN` 以及 `apiKeyHelper` 设置是否与预期一致；官方 settings.json 中没有顶层 `apiKey` / `baseURL` 字段：
 
 | 平台 | 配置文件路径 |
 | --- | --- |
-| Windows | `C:\Users\\.claude\settings.json` |
+| Windows | `%USERPROFILE%\.claude\settings.json` |
 | macOS / Linux | `~/.claude/settings.json` |
 
 ---
@@ -84,6 +80,10 @@ export ANTHROPIC_API_KEY=sk-xxx
 
 | 做法 | 避免的问题 |
 | --- | --- |
-| 使用 CC Switch 统一管理配置，避免手动编辑 settings.json | IDE 插件再次覆盖手动配置 |
-| 安装新的 IDE 插件或 MCP 后，重新验证 Claude Code 连通性 | 插件静默写入配置导致认证失效 |
-| 优先通过环境变量设置 API Key 和 Base URL | 环境变量优先级高于配置文件，不易被覆盖 |
+| 用 `/status` 和 `claude doctor` 确认活动来源 | 避免把猜测当成根因 |
+| Base URL 与 Key 只按同一服务的正式说明配对 | 避免把密钥发送到错误端点 |
+| 修改前备份并只改一个 scope | 便于恢复和定位覆盖关系 |
+
+CC Switch 是第三方社区配置工具；如选择使用，只从 [官方 GitHub](https://github.com/farion1231/cc-switch) 获取，并先查看它准备写入的文件和备份提示。
+
+资料来源：[Claude Code 配置诊断](https://code.claude.com/docs/en/debug-your-config) · [Settings scopes](https://code.claude.com/docs/en/settings) · [环境变量参考](https://code.claude.com/docs/en/env-vars)（2026-07-26 核对）

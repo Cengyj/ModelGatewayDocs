@@ -1,5 +1,6 @@
 ---
 title: "CC-019：429 Rate Limit Exceeded / insufficient_quota"
+description: "区分 Anthropic 与第三方网关 429，按最终响应方核对限流、额度和重试规则。"
 hidden: true
 ---
 
@@ -18,35 +19,27 @@ hidden: true
 调用过程中请求中断，终端输出含 `429` 字样，例如：
 
 ```text
-API Error: 429 {"type":"error","error":{"type":"rate_limit_error","message":"..."}}`
+API Error: 429 {"type":"error","error":{"type":"rate_limit_error","message":"..."}}
 ```
 
 或：
 
 ```text
-API Error: 429 {"type":"error","error":{"type":"insufficient_quota","message":"..."}}`
+API Error: 429 {"type":"error","error":{"type":"insufficient_quota","message":"..."}}
 ```
 
-Claude 停止响应，重试后仍然报错。
+当前请求被服务端限流或被第三方网关以 429 拒绝；错误体的含义取决于最终响应方。
 
 ---
 
 ## 根因分析
 
-429 错误存在两种子类型，根因和处理方式完全不同：
-
-```text
-请求到达 Anthropic API
-  → 服务端校验请求频率 → 超出每分钟上限 → rate_limit_error
-  → 服务端校验账号余额 → 当月额度归零   → insufficient_quota
-```
-
-两种错误消息外观相似，但处理路径截然不同：
+先区分最终请求域名和错误类型：
 
 | 子类型 | 含义 | 是否自动恢复 |
 | --- | --- | --- |
 | `rate_limit_error` | 短时间请求过于频繁 | 是，等待后自动恢复 |
-| `insufficient_quota` | 当月 API 额度已耗尽 | 否，必须充值或等下月重置 |
+| `insufficient_quota` 或网关余额提示 | 常见于第三方兼容网关，不能直接归因于 Anthropic | 按该网关正式账单说明处理 |
 
 ---
 
@@ -54,18 +47,15 @@ Claude 停止响应，重试后仍然报错。
 
 **第一步：判断子类型**
 
-前往 [https://foropencode.com](https://foropencode.com) 查看是否是余额不足：
-
-- 用量未耗尽 → 是频率限制（`rate_limit_error`），执行第二步
-- 用量已归零 → 是额度耗尽（`insufficient_quota`），执行第三步
+先用 `/status` 核对 Base URL，并在对应服务的控制台查看用量和限制。不要在报错截图中显示 Key、账单或私人账号信息。
 
 **第二步：处理频率限制**
 
-若因批处理脚本并发过高触发限流，如有分发需求更改新的API。
+遵守服务端返回的重试时间，降低并发并使用指数退避；不要用轮换账号或批量 Key 规避速率限制。
 
 **第三步：处理额度耗尽**
 
-前往 [foropencode.com 充值 / 查看额度](https://foropencode.com/pricing)
+如果最终域名是第三方网关，只在其登录后的正式账单页核对额度、价格和退款规则。本站与该网关的商业或关联关系尚待运营方披露，因此本页不把充值写成唯一处理方式。
 
 ---
 
@@ -74,3 +64,6 @@ Claude 停止响应，重试后仍然报错。
 | 做法 | 避免的问题 |
 | --- | --- |
 | 遇到 429 先查 Console 用量，再排查配置 | 避免额度耗尽时在 Key 配置上浪费时间 |
+| 对自动化请求使用退避与并发上限 | 避免持续触发服务端限制 |
+
+资料来源：[Anthropic Rate limits](https://platform.claude.com/docs/en/api/rate-limits) · [Claude Code LLM Gateway](https://code.claude.com/docs/en/llm-gateway-connect)（2026-07-26 核对）

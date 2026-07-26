@@ -1,5 +1,6 @@
 ---
 title: "CC-006：请求返回 400，含实验性 Beta 参数"
+description: "第三方网关拒绝 Anthropic Beta 请求头或 schema 时的官方兼容选项与影响。"
 hidden: true
 ---
 
@@ -15,7 +16,7 @@ hidden: true
 
 ## 问题现象
 
-使用 Claude Code 的 AWS 分组时，执行对话请求后终端返回 400 错误，日志中可见类似：
+通过第三方兼容网关执行对话请求时返回 400，日志中可见类似：
 
 ```text
 API Error: 400 {"error":{"type":"invalid_request_error","message":"...invalid beta flag..."}}
@@ -30,11 +31,11 @@ API Error: 400 {"error":{"type":"invalid_request_error","message":"...invalid be
 ```text
 Claude Code 构造请求
   → 自动附加实验性 Beta 功能请求头（anthropic-beta）
-  → AWS 分组对应上游不接受该请求头
+  → 部分网关或上游端点不接受该请求头（具体路由需由网关方按请求日志确认）
   → 返回 400 Invalid Request
 ```
 
-Claude Code 默认携带实验性 Beta 参数，部分 AWS 分组对应的上游不支持该参数，导致请求被直接拒绝并返回 400。
+Claude Code 会发送自身需要的 Anthropic Beta 请求头或相关 schema。官方提供 `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1`，用于兼容拒绝这些字段的代理网关；它不是所有 400 错误的通用修复。
 
 ---
 
@@ -42,21 +43,21 @@ Claude Code 默认携带实验性 Beta 参数，部分 AWS 分组对应的上游
 
 **第一步：先用环境变量确认问题**
 
-#### macOS / Linux
+### macOS / Linux
 
 ```bash
 export CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1
 claude
 ```
 
-#### Windows PowerShell
+### Windows PowerShell
 
 ```powershell
 $env:CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS = "1"
 claude
 ```
 
-如果加上该变量后可正常请求，说明当前 400 错误由实验性 Beta 参数触发。
+如果加上该变量后可正常请求，说明错误很可能与网关的 Beta 兼容性有关；仍应由网关按请求日志确认。
 
 **第二步：写入全局配置文件，避免每次手动设置**
 
@@ -65,7 +66,7 @@ Claude Code 全局配置文件路径：
 | 平台 | 路径 |
 | --- | --- |
 | macOS / Linux | `~/.claude/settings.json` |
-| Windows | `C:\\Users\\\\.claude\\settings.json` |
+| Windows | `%USERPROFILE%\.claude\settings.json` |
 
 如果文件中已有 `env` 字段，在原有内容下追加这一项，不要覆盖已有配置：
 
@@ -97,9 +98,9 @@ Claude Code 全局配置文件路径：
 claude
 ```
 
-**第四步：保留来源链接，便于后续核对**
+**第四步：确认功能影响**
 
-参考反馈来源： [QuantumNous/new-api issue #2772](https://github.com/QuantumNous/new-api/issues/2772)
+该变量会移除 Anthropic 专用 Beta 请求头和部分 Beta tool schema，并禁用 MCP tool search、改为预先加载全部 MCP 工具。确认兼容性后再决定是否长期保留，不要把它预写入所有用户配置。
 
 ---
 
@@ -107,5 +108,9 @@ claude
 
 | 做法 | 避免的问题 |
 | --- | --- |
-| 使用 AWS 分组时，在全局配置文件中预先写入 `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1` | 每次打开新终端都要重复设置，或再次触发 400 |
+| 仅在网关明确拒绝 Beta 字段时启用该变量 | 避免无故关闭 Claude Code 功能 |
 | 修改 `settings.json` 后彻底关闭终端再重开 | 旧会话沿用旧配置，误以为修复无效 |
+
+`foropencode.com` 是第三方网关，不是 Anthropic。网关若要求此兼容选项，应在自己的正式说明中披露支持范围和功能影响。
+
+资料来源：[Claude Code 环境变量参考](https://code.claude.com/docs/en/env-vars) · [LLM Gateway](https://code.claude.com/docs/en/llm-gateway-connect)（2026-07-26 核对）

@@ -1,110 +1,70 @@
 ---
-title: "Claude 桌面版 · 手动配置"
-description: "直接编辑 Claude-3p 目录下的配置文件，不依赖 CC Switch。"
+title: "Claude 桌面版 · 配置边界"
+description: "核对 Claude 桌面版第三方推理入口、配置来源和 API Key 安全边界。"
 navLabel: "手动配置"
 ---
 
-# Claude 桌面版 · 手动配置
+# Claude 桌面版 · 配置边界
 
-<VersionBadge version="v1.13576.4" date="2026-06-19" license="Proprietary" github="https://claude.com/download" />
+<VersionBadge version="滚动发布" date="2026-07-26 核对" license="Proprietary" github="https://claude.com/download" sourceLabel="官方下载" />
 
 <PageHeader
-  useCase="不装 CC Switch，直接手动编辑桌面版的 JSON 配置文件"
-  audience="临时机器、排障、或想精确控制配置内容的用户"
-  tldr="找到 Claude-3p 目录 → 编辑 claude_desktop_config.json → 完全重启桌面版"
+  useCase="确认当前 Claude 桌面版是否公开支持第三方推理配置"
+  audience="准备接入第三方网关或排查旧配置的用户"
+  tldr="优先使用当前官方界面；不手写未记录的 Claude-3p 内部配置"
 />
 
-<Callout type="info">推荐用 <a href="/claude-code/desktop/cc-switch">CC Switch</a> 写入配置——它写的就是这里的文件。手动改适合排障或无法安装额外工具的场景。</Callout>
-
----
-
-## 配置文件位置
-
-Claude 桌面版（Cowork 3P 模式）的第三方中转配置存在 `Claude-3p` 目录下：
-
-| 系统 | 路径 |
-| --- | --- |
-| macOS | `~/Library/Application Support/Claude-3p/claude_desktop_config.json` |
-| Windows | `%LOCALAPPDATA%\Claude-3p\claude_desktop_config.json` |
-
-<Callout type="tip">快速定位：macOS 按 <kbd>⌘ Shift G</kbd> 打开「前往文件夹」，粘贴路径；Windows 在地址栏粘贴 `%LOCALAPPDATA%\Claude-3p\` 回车。</Callout>
-
----
-
-## 配置文件内容
-
-`claude_desktop_config.json` 是标准 JSON 格式。最小可用模板：
-
-```json
-{
-  "thirdPartyApiInfo": {
-    "baseUrl": "https://foropencode.com",
-    "apiKey": "sk-xxx"
-  }
-}
-```
-
-字段说明：
-
-| 字段 | 说明 |
-| --- | --- |
-| `baseUrl` | 中转站根地址，**不带 `/v1`、不带斜杠结尾** |
-| `apiKey` | 你在 [foropencode.com](https://foropencode.com) 生成的 `sk-xxx` |
-
-`baseUrl` 快捷复制：
-
-<CommandTable header={false} rows={[
-  { cmd: 'https://foropencode.com', desc: '不带 /v1，不带斜杠结尾' },
-]} />
-
----
-
-## 修改步骤
-
-<Steps>
-  <Step title="完全退出 Claude 桌面版">
-    **macOS**：菜单栏 `Claude → Quit Claude`（或 <kbd>⌘ Q</kbd>），确保 Dock 里没有残留进程。
-
-    **Windows**：系统托盘右键图标 → **退出**，不能只关窗口。
-  </Step>
-  <Step title="打开或创建配置文件">
-    导航到上方路径。如果 `Claude-3p` 目录不存在，手动创建该文件夹，再在里面新建 `claude_desktop_config.json`。
-  </Step>
-  <Step title="填写并保存">
-    把上方模板粘进去，替换 `apiKey` 为你的真实 Key，保存文件（UTF-8 无 BOM 编码）。
-  </Step>
-  <Step title="重启 Claude 桌面版">
-    重新启动，登录界面会出现 **Continue with Gateway** 按钮，点击即进入第三方中转模式。
-  </Step>
-</Steps>
-
----
-
-## 常见问题
-
-<Callout type="warning" title="登录界面没有 Continue with Gateway？">
-1. 确认文件路径正确，名字是 `claude_desktop_config.json`（不是 `.txt`）
-2. 确认 JSON 格式合法——可用 [jsonlint.com](https://jsonlint.com) 验证
-3. 确认是**完全退出**后重启，不是只关窗口
-</Callout>
-
-<Callout type="warning" title="保存后报 401？">
-1. `baseUrl` 不带 `/v1`、不带末尾 `/`
-2. `apiKey` 正确且有余额
-3. 完全退出 + 重启桌面版再试
-</Callout>
-
-<Callout type="info" title="如何验证配置是否被 CC Switch 覆盖？">
-CC Switch 写入的就是这个文件。如果你手改后 CC Switch 又 Enable 了某个供应商，文件内容会被覆盖。两者选一套用即可。
+<Callout type="warning" title="不要手写内部配置文件">
+旧版页面建议手动创建 `Claude-3p/claude_desktop_config.json` 并写入 `thirdPartyApiInfo`。官方 [LLM Gateway 文档](https://code.claude.com/docs/en/llm-gateway-connect) 现已提供受支持的配置入口（管理员分发配置，或应用内 Developer Mode 表单），因此不应再手写未记录的内部文件或用它强制显示 Gateway 按钮。
 </Callout>
 
 ---
+
+## 推荐核对顺序
+
+1. 从 [Claude 官方下载页](https://claude.com/download) 安装当前版本
+2. 若组织已分发第三方推理配置，桌面版无需额外设置即路由到网关
+3. 个人设备按官方文档启用：**Help → Troubleshooting → Enable Developer Mode**（重启后出现 Developer 菜单）→ **Developer → Configure Third-Party Inference**，填写网关 Base URL
+4. 确认请求最终域名、网关运营方、数据处理与计费方式
+5. 界面没有该入口或表单只读时停止操作，不创建内部目录、不修改 onboarding 状态，也不从同名 GitHub 项目推断配置 schema
+
+---
+
+## JSON 仅做本地校验
+
+如果产品官方支持要求你编辑 JSON，请在本机验证语法，避免把可能含密钥的文件粘贴到在线 JSON 校验网站：
+
+<Tabs defaultValue="mac">
+  <Tab label="macOS / Linux" value="mac">
+    ```bash
+    python3 -m json.tool /path/to/config.json >/dev/null
+    ```
+  </Tab>
+  <Tab label="Windows PowerShell" value="win">
+    ```powershell
+    Get-Content "C:\path\to\config.json" -Raw | ConvertFrom-Json | Out-Null
+    ```
+  </Tab>
+</Tabs>
+
+这些命令只检查 JSON 语法，不会证明字段受 Claude 当前版本支持。
+
+---
+
+## API Key 安全
+
+- 示例只使用 `sk-xxx`；不要在截图、Issue、聊天或文档页面公开真实 Key
+- 官方 Anthropic Key 应在 Anthropic 官方平台创建和管理；第三方网关 Key 应在该网关自己的控制台管理
+- 第三方网关不是 Anthropic，网关支持的模型和上下文以其实际模型列表为准
+- 若工具要求关闭系统安全软件、绕过签名或修改内部状态才能启用，停止使用并向官方支持核实
 
 <RelatedPages
   title="相关"
   items={[
-    { route: '/claude-code/desktop/cc-switch', hint: '用 CC Switch 自动写入配置' },
-    { route: '/claude-code/desktop/install', hint: '桌面版安装与首次启动' },
-    { route: '/claude-code/errors', hint: '遇到 401 / 403 等报错' },
+    { route: '/claude-code/desktop/install', hint: '从 Claude 官方来源安装桌面版' },
+    { route: '/claude-code/desktop/cc-switch', hint: 'CC Switch 第三方配置的安全边界' },
+    { route: '/site-info', hint: '本站身份、下载与隐私说明' },
   ]}
 />
+
+资料来源：[Claude 官方下载页](https://claude.com/download) · [LLM Gateway · Desktop app](https://code.claude.com/docs/en/llm-gateway-connect)（2026-07-26 核对）

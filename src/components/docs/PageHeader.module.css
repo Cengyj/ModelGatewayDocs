@@ -32,7 +32,7 @@
 }
 
 .label {
-  color: var(--c-text-subtle);
+  color: var(--c-text-muted);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;

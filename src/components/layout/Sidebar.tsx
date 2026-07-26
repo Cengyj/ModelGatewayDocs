@@ -151,6 +151,7 @@ export function Sidebar({ onNavigate }: Props) {
                   <Link
                     href={group.route}
                     className={current === normalize(group.route) ? styles.headingLinkActive : styles.headingLink}
+                    aria-current={current === normalize(group.route) ? 'page' : undefined}
                     onClick={onNavigate}
                   >
                     {group.label}
@@ -187,6 +188,7 @@ export function Sidebar({ onNavigate }: Props) {
                           key={item.route}
                           href={item.route}
                           className={current === stripHash(item.route) ? styles.itemActive : styles.item}
+                          aria-current={current === stripHash(item.route) ? 'page' : undefined}
                           onClick={onNavigate}
                         >
                           {filtering ? highlight(item.label, filter.trim()) : item.label}
@@ -210,6 +212,7 @@ export function Sidebar({ onNavigate }: Props) {
                             className={
                               current === stripHash(item.route) ? styles.itemActive : styles.item
                             }
+                            aria-current={current === stripHash(item.route) ? 'page' : undefined}
                             onClick={onNavigate}
                           >
                             {filtering ? highlight(item.label, filter.trim()) : item.label}
@@ -231,6 +234,7 @@ export function Sidebar({ onNavigate }: Props) {
                                 className={
                                   current === stripHash(child.route) ? styles.childActive : styles.child
                                 }
+                                aria-current={current === stripHash(child.route) ? 'page' : undefined}
                                 onClick={onNavigate}
                               >
                                 {filtering ? highlight(child.label, filter.trim()) : child.label}

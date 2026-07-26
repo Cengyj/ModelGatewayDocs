@@ -12,7 +12,7 @@ type FeatureProps = {
 
 export function Feature({ icon, title, details, href, external }: FeatureProps) {
   const Comp: React.ElementType = external ? 'a' : Link;
-  const extra = external ? { target: '_blank', rel: 'noreferrer' } : {};
+  const extra = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
   return (
     <Comp href={href} className={styles.feature} {...extra}>
       <article className={styles.box}>

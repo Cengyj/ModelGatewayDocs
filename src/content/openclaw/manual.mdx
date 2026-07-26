@@ -1,361 +1,138 @@
 ---
 title: "OpenClaw · 手动配置"
-description: "~/.openclaw/openclaw.json 网关配置 + 多 provider + UA。"
+description: "OpenClaw JSON5、热重载与第三方 custom model provider 的安全配置。"
 navLabel: "手动配置"
 ---
 
 # OpenClaw · 手动配置
 
-<VersionBadge version="v2026.6.8" date="2026-06-08" license="自定义" github="https://github.com/openclaw/openclaw" />
+<VersionBadge version="v2026.7.1" date="2026-07-13" license="MIT" github="https://github.com/openclaw/openclaw" />
 
 <PageHeader
-  useCase="直接改 openclaw.json 配多个 provider 与 UA"
-  audience="同时接 Claude / Codex / 国产模型；要程序化生成配置"
-  tldr="provider 写 models.providers.<name>；UA 必须按类型填；改完 pkill 再启"
+  useCase="直接配置 OpenClaw custom provider 与默认模型"
+  audience="需要自定义 Base URL、环境变量或多 provider 的用户"
+  tldr="openclaw.json 使用 JSON5 → Key 用环境变量 → 多数设置自动热重载"
 />
 
-<Callout type="warning">OpenClaw 守护进程**不会自动重读** `openclaw.json`，改完必须 `pkill -f openclaw` 再起。</Callout>
+---
+
+## 配置文件与格式
+
+默认文件为 `~/.openclaw/openclaw.json`，格式是 **JSON5**，支持注释与尾逗号。`OPENCLAW_CONFIG_PATH` 可指向其他真实文件；官方文档不建议把配置路径做成符号链接，因为 OpenClaw 的原子写入可能替换链接本身。
+
+<Callout type="warning" title="不要把 Key 写进公开配置">
+官方配置支持 `${ENV_VAR}` 环境变量替换。第三方网关 Key、渠道 Token 和 Gateway auth token 都是敏感凭据，不要上传仓库、截图、在线 JSON 校验站或公开 Issue。
+</Callout>
 
 ---
 
-## 配置文件位置
+## OpenAI 兼容 custom provider
 
-| 平台 | 路径 |
-| --- | --- |
-| macOS / Linux | `~/.openclaw/openclaw.json` |
-| Windows | `%USERPROFILE%\.openclaw\openclaw.json` |
-| 工作区 | `~/.openclaw/workspace/`（agent 工作目录） |
-| Agents | `~/.openclaw/agents/<id>/` |
+只有网关明确支持对应协议时才添加 custom provider。下面使用 OpenClaw 官方文档记录的 `openai-completions` schema；`foropencode.com` 是第三方网关：
 
-文件**严格 JSON**，不能写注释。
-
----
-
-## 顶层结构
-
-```json
+```json5
+// ~/.openclaw/openclaw.json
 {
-  "agents": { },
-  "channels": { },
-  "commands": { },
-  "gateway": { },
-  "hooks": { },
-  "messages": { },
-  "models": { "providers": { } },
-  "plugins": { },
-  "session": { },
-  "tools": { }
-}
-```
-
-本页只讲 `models.providers.*` —— 其它段（飞书 / Hooks / Skills）按 OpenClaw 自己的 onboarding 流程走，详见 [OpenClaw 安装](/openclaw/install)。
-
----
-
-## 可用模型规格
-
-| 模型 | 上下文窗口 | 最大输出 |
-| --- | --- | --- |
-| `gpt-5.5` | 270,000（普通渠道）/ 1,050,000（Pro/Plus Codex） | 128,000 |
-| `gpt-5.4` | 1,050,000 | 128,000 |
-| `gpt-5.4-mini` | 400,000 | 128,000 |
-| `claude-opus-4-8` | 1,000,000 | 128,000 |
-| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
-| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
-
----
-
-## `models.providers.<name>` 段
-
-每个 provider 一段。下面是三种典型模板。
-
-### Claude 模型
-
-```json
-{
-  "models": {
-    "providers": {
-      "foropencode-claude": {
-        "api": "anthropic-messages",
-        "apiKey": "sk-xxx",
-        "baseUrl": "https://foropencode.com",
-        "headers": {
-          "Authorization": "Bearer sk-xxx",
-          "User-Agent": "claude-cli/2.0.76 (external, cli)"
-        },
-        "models": [
-          { "id": "claude-sonnet-4-6", "name": "claude-sonnet-4-6", "contextWindow": 1000000, "maxTokens": 64000 },
-          { "id": "claude-opus-4-8",   "name": "claude-opus-4-8",   "contextWindow": 1000000, "maxTokens": 128000 },
-          { "id": "claude-haiku-4-5-20251001", "name": "claude-haiku-4-5-20251001", "contextWindow": 200000, "maxTokens": 64000 }
-        ]
-      }
-    }
-  }
-}
-```
-
-### Codex / GPT 模型
-
-```json
-{
-  "models": {
-    "providers": {
-      "foropencode-codex": {
-        "api": "openai-responses",
-        "apiKey": "sk-xxx",
-        "baseUrl": "https://foropencode.com/v1",
-        "headers": {
-          "Authorization": "Bearer sk-xxx",
-          "User-Agent": "codex_cli_rs/0.77.0 (Windows 10.0.26100; x86_64) WindowsTerminal"
-        },
-        "models": [
-          { "id": "gpt-5.5",      "name": "gpt-5.5",      "contextWindow": 270000,  "maxTokens": 128000 },
-          { "id": "gpt-5.4",      "name": "gpt-5.4",      "contextWindow": 1050000, "maxTokens": 128000 },
-          { "id": "gpt-5.4-mini", "name": "gpt-5.4-mini", "contextWindow": 400000,  "maxTokens": 128000 }
-        ]
-      }
-    }
-  }
-}
-```
-
-### 国产模型
-
-```json
-{
-  "models": {
-    "providers": {
-      "foropencode-cn": {
-        "api": "openai-responses",
-        "apiKey": "sk-xxx",
-        "baseUrl": "https://foropencode.com/v1",
-        "headers": {
-          "Authorization": "Bearer sk-xxx",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0"
-        },
-        "models": [
-          { "id": "deepseek-chat", "name": "deepseek" }
-        ]
-      }
-    }
-  }
-}
-```
-
----
-
-## 字段说明
-
-| 字段 | 含义 |
-| --- | --- |
-| `api` | API 协议；`anthropic-messages` / `openai-responses` / `openai-chat-completions` |
-| `apiKey` | API Key |
-| `baseUrl` | API 根地址；Anthropic 不带 `/v1`，OpenAI 兼容带 `/v1` |
-| `headers.Authorization` | 必须重复一遍 `Bearer <apiKey>` |
-| `headers.User-Agent` | **关键**，外接场景必填，缺会 403 |
-| `models` | 该 provider 暴露给 OpenClaw 的模型列表 |
-| `models[].id` | 真实模型 ID（请求里用） |
-| `models[].name` | 在 OpenClaw UI 显示的名字 |
-| `models[].contextWindow` | 上下文窗口（可选，影响 UI 显示） |
-| `models[].maxTokens` | 单次最大输出（可选） |
-| `models[].cost` | 计费信息（可选；本站走 Key 余额，留 0） |
-
----
-
-## User-Agent 规则
-
-外接场景下 OpenClaw 不带或带错 UA 就会报 `403 block`：
-
-| API 类型 | UA 类型 | 示例 |
-| --- | --- | --- |
-| Claude（外接） | claude-cli | `claude-cli/2.0.76 (external, cli)` |
-| Codex / GPT | codex_cli_rs | `codex_cli_rs/0.77.0 (Windows 10.0.26100; x86_64) WindowsTerminal` |
-| 国产模型 | 浏览器 | `Mozilla/5.0 (...) Firefox/149.0` |
-| Gemini | gemini-cli | 按版本写 |
-
-**不能复用** —— Claude UA 配到 Codex provider 上 = 403。
-
----
-
-## 切 provider / 多分组
-
-```json
-{
-  "agents": {
-    "defaults": {
-      "model": {
-        "primary": "foropencode-codex/gpt-5.5"
-      }
-    }
-  }
-}
-```
-
-格式：`<provider 名>/<model ID>`。改完重启守护进程。
-
----
-
-## 完整配置 JSON 参考
-
-<details>
-<summary>展开查看 ~/.openclaw/openclaw.json 示例</summary>
-
-```json
-{
-  "agents": {
-    "defaults": {
-      "compaction": {
-        "mode": "safeguard"
+  models: {
+    mode: "merge",
+    providers: {
+      foropencode: {
+        baseUrl: "https://foropencode.com/v1",
+        apiKey: "${FOROPENCODE_API_KEY}",
+        api: "openai-completions",
+        models: [
+          { id: "gateway-model-id", name: "gateway-model-id" },
+        ],
       },
-      "maxConcurrent": 4,
-      "model": {
-        "primary": "foropencode-codex/gpt-5.4"
-      },
-      "subagents": {
-        "maxConcurrent": 8
-      },
-      "workspace": "C:\\Users\\\\.openclaw\\workspace"
     },
-    "list": [
-      {
-        "agentDir": "C:\\Users\\\\.openclaw\\agents\\main\\agent",
-        "id": "main",
-        "name": "main",
-        "workspace": "C:\\Users\\\\.openclaw\\workspace"
-      }
-    ]
   },
-  "channels": {
-    "feishu": {
-      "appId": "",
-      "appSecret": "",
-      "domain": "feishu",
-      "enabled": true,
-      "groupPolicy": "disabled"
-    }
-  },
-  "commands": {
-    "native": "auto",
-    "nativeSkills": "auto",
-    "ownerDisplay": "raw",
-    "restart": true
-  },
-  "gateway": {
-    "auth": {
-      "mode": "token",
-      "token": ""
+  agents: {
+    defaults: {
+      model: { primary: "foropencode/gateway-model-id" },
     },
-    "bind": "loopback",
-    "mode": "local",
-    "nodes": {
-      "denyCommands": [
-        "camera.snap",
-        "camera.clip",
-        "screen.record",
-        "calendar.add",
-        "contacts.add",
-        "reminders.add"
-      ]
-    },
-    "port": 18789,
-    "tailscale": {
-      "mode": "off",
-      "resetOnExit": false
-    }
   },
-  "hooks": {
-    "internal": {
-      "enabled": true,
-      "entries": {
-        "session-memory": {
-          "enabled": true
-        }
-      }
-    }
-  },
-  "messages": {
-    "ackReactionScope": "group-mentions"
-  },
-  "models": {
-    "mode": "merge",
-    "providers": {
-      "foropencode-claude": {
-        "api": "anthropic-messages",
-        "apiKey": "sk-xxx",
-        "baseUrl": "https://foropencode.com",
-        "headers": {
-          "Authorization": "Bearer sk-xxx",
-          "User-Agent": "claude-cli/2.0.76 (external, cli)"
-        },
-        "models": [
-          { "id": "claude-sonnet-4-6", "name": "claude-sonnet-4-6" },
-          { "id": "claude-opus-4-7", "name": "claude-opus-4-7" }
-        ]
-      },
-      "foropencode-codex": {
-        "api": "openai-responses",
-        "apiKey": "sk-xxx",
-        "baseUrl": "https://foropencode.com/v1",
-        "headers": {
-          "Authorization": "Bearer sk-xxx",
-          "User-Agent": "codex_cli_rs/0.77.0 (Windows 10.0.26100; x86_64) WindowsTerminal"
-        },
-        "models": [
-          { "id": "gpt-5.5", "name": "gpt-5.5" },
-          { "id": "gpt-5.4", "name": "gpt-5.4" }
-        ]
-      }
-    }
-  },
-  "plugins": {
-    "entries": {
-      "feishu": { "enabled": true }
-    }
-  },
-  "session": {
-    "dmScope": "per-channel-peer"
-  },
-  "tools": {
-    "profile": "coding"
-  }
 }
 ```
-
-</details>
-
----
-
-## 改完之后
-
-OpenClaw 守护进程不会自动重读：
 
 ```bash
-# Linux / macOS
-pkill -f openclaw
-openclaw onboard --install-daemon
-
-# Windows PowerShell
-Get-Process | Where-Object { $_.ProcessName -like "*openclaw*" } | Stop-Process -Force
-openclaw onboard --install-daemon
+export FOROPENCODE_API_KEY="sk-xxx"
 ```
 
-验证：浏览器打开 `http://127.0.0.1:18789/`，模型选择列表里能看到新 provider 即 OK。
+如果网关只支持 Responses 或其他协议，必须使用 OpenClaw 与网关双方当前文档共同支持的 `api` 值；不要把协议名称当成可随意互换的标签。
 
 ---
 
-## 常见排查
+## Anthropic 兼容 custom provider
 
-| 现象 | 检查 |
-| --- | --- |
-| 403 block / 403 Forbidden | UA 是不是按 API 类型对应 |
-| `provider not found` | `agents.defaults.model.primary` 的 provider 名拼错 |
-| 改 JSON 不生效 | `pkill` 守护进程没真杀掉，`ps aux \| grep openclaw` 确认 |
-| 端口被占 | `18789` 被别的进程占了，改 `gateway.port` |
+OpenClaw 官方 custom provider schema也支持 `anthropic-messages`。只有第三方端点明确实现当前 Anthropic Messages 行为时才使用：
+
+```json5
+{
+  models: {
+    mode: "merge",
+    providers: {
+      gatewayClaude: {
+        baseUrl: "https://foropencode.com",
+        apiKey: "${FOROPENCODE_ANTHROPIC_KEY}",
+        api: "anthropic-messages",
+        models: [
+          { id: "gateway-model-id", name: "gateway-model-id" },
+        ],
+      },
+    },
+  },
+  agents: {
+    defaults: {
+      model: { primary: "gatewayClaude/gateway-model-id" },
+    },
+  },
+}
+```
+
+<Callout type="info" title="不需要伪造 User-Agent">
+旧版页面声称 custom provider 必须伪装成 Claude CLI、Codex CLI 或浏览器 User-Agent，否则必然 403。本次未在 OpenClaw 官方 model provider 文档中确认该规则，故已删除。若第三方网关返回 403，应由网关说明正式鉴权要求，而不是伪造客户端身份。
+</Callout>
+
+---
+
+## 模型元数据
+
+`contextWindow`、`contextTokens`、`maxTokens`、`input` 和兼容性字段均可影响运行行为。OpenClaw 官方文档允许 custom provider 省略部分元数据并使用默认值；只有得到模型或网关正式资料时才手写，不要从截图或其他 provider 复制。
+
+OpenAI 当前 OpenClaw fresh setup 可使用 `openai/gpt-5.6`，Anthropic 官方 provider 示例包括 `anthropic/claude-opus-5`，但这些官方 provider 事实不证明第三方网关提供同名模型。可用 `openclaw models list --provider <provider>` 核对当前账户和安装的实际列表。
+
+---
+
+## 热重载
+
+OpenClaw Gateway 会监视 `~/.openclaw/openclaw.json`。默认 `hybrid` 模式会立即应用安全变更，并为需要重启的关键变更自动重启；大多数设置无需手工杀进程。
+
+```json5
+{
+  gateway: {
+    reload: { mode: "hybrid", debounceMs: 300 },
+  },
+}
+```
+
+如果日志出现 `config reload skipped (invalid config)`，当前运行时会保留最后一次有效配置。先修复 JSON5 或 schema，再用官方命令/服务管理方式重启；不要用 `pkill -f` 或 `Stop-Process -Force` 作为默认配置步骤。
+
+---
+
+## 验证
+
+1. 运行 `openclaw models list --provider <provider>` 查看实际模型
+2. 查看 Gateway 日志是否接受新配置
+3. 从不含敏感数据的最小请求开始
+4. 401 检查环境变量；403 向网关确认鉴权；400 检查协议兼容性
+5. Dashboard 默认只应绑定在预期接口；向外网暴露前阅读官方 Gateway 安全文档
 
 <RelatedPages
   title="相关"
   items={[
-    { route: '/openclaw/cc-switch', hint: '回到 CC Switch 流程' },
-    { route: '/openclaw/install', hint: '装客户端 + onboard 向导' },
+    { route: '/openclaw/cc-switch', hint: 'CC Switch 第三方配置说明' },
+    { route: '/openclaw/install', hint: '安装与 onboarding' },
   ]}
 />
+
+资料来源：[OpenClaw Configuration](https://docs.openclaw.ai/gateway/configuration) · [Model providers](https://docs.openclaw.ai/concepts/model-providers) · [openclaw/openclaw](https://github.com/openclaw/openclaw)（2026-07-26 核对）

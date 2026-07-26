@@ -1,12 +1,12 @@
 ---
 title: "OpenCode · CC Switch 配置"
-description: "用 CC Switch 一键配 OpenCode CLI / 桌面版（共享同一份配置）。"
+description: "用第三方社区工具 CC Switch 管理 OpenCode provider 配置与密钥。"
 navLabel: "CC Switch 配置"
 ---
 
 # OpenCode · CC Switch 配置
 
-<VersionBadge version="v1.17.8" date="2026-06-20" license="MIT" github="https://github.com/anomalyco/opencode" />
+<VersionBadge version="v1.18.5" date="2026-07-24" license="MIT" github="https://github.com/anomalyco/opencode" />
 
 <PageHeader
   useCase="可视化配置 OpenCode；CLI 与桌面版配置共享，配一次两边都生效"
@@ -16,6 +16,10 @@ navLabel: "CC Switch 配置"
 
 > 还没装 CC Switch？先看 [CC Switch 安装](/cc-switch)。
 
+<Callout type="warning" title="第三方工具会写入敏感配置">
+CC Switch 不是 OpenCode 或模型厂商的官方组成部分。使用前备份 OpenCode 配置，核对最终 API 域名；Key、provider 地址和备份文件均应按敏感数据处理。
+</Callout>
+
 ---
 
 ## 配置步骤
@@ -23,8 +27,8 @@ navLabel: "CC Switch 配置"
 <Walkthrough title="CC Switch · 配置 OpenCode（CLI / 桌面版通用）">
   <Frame step="1" title="选中 OpenCode 图标，点击添加"
     image="/img/cc-switch/cc-switch-opencode-main-add.png"
-    imageAlt="CC Switch 主界面：选中 OpenCode 方块图标（第5个），点右上角橙色添加按钮">
-    打开 CC Switch，顶部工具栏选中 **OpenCode 图标**（方块样式，第 5 个），点右上角橙色 **＋** 按钮新建一项。
+    imageAlt="CC Switch 主界面：选中 OpenCode 图标，点右上角橙色添加按钮">
+    打开 CC Switch，顶部工具栏按名称选中 **OpenCode 图标**，点右上角橙色 **＋** 按钮新建一项；不要依赖图标排列位置。
 
     **CLI 和桌面版共享 `~/.config/opencode/opencode.json`**——只配一次，两者都生效。
   </Frame>
@@ -34,10 +38,10 @@ navLabel: "CC Switch 配置"
     imageAlt="GPT 分组：供应商标识填 for，接口格式选 OpenAI Responses，Base URL 填 https://foropencode.com/v1">
     弹出「添加新供应商」表单。**供应商标识**填一个简短唯一名（如 `for`，只能小写字母、数字和连字符）；**接口格式**根据模型类型选择：
 
-    **GPT 分组**（gpt-5.5 / gpt-5.4 等，上图示例）：接口格式选 `OpenAI Responses`，填入 API Key，Base URL 填：
+    **OpenAI Responses 兼容分组**（上图是旧界面示例）：接口格式选 `OpenAI Responses`，填入 API Key。本站截图中的网关地址为：
 
     <CommandTable header={false} rows={[
-      { cmd: 'https://foropencode.com/v1', desc: 'GPT 系列必须带 /v1' },
+      { cmd: 'https://foropencode.com/v1', desc: '第三方网关示例；提交 Key 前到其控制台核对当前端点' },
     ]} />
 
     **Claude 分组**（claude-sonnet 等，下图示例）：接口格式选 `Anthropic`，填入 API Key，Base URL 填：
@@ -45,7 +49,7 @@ navLabel: "CC Switch 配置"
     <img src="/img/cc-switch/cc-switch-opencode-claude-form.png" alt="Claude 分组：接口格式选 Anthropic，Base URL 填 https://foropencode.com（不带 /v1）" style={{width:'100%', borderRadius:'8px', margin:'8px 0'}} />
 
     <CommandTable header={false} rows={[
-      { cmd: 'https://foropencode.com', desc: 'Claude 系列不带 /v1' },
+      { cmd: 'https://foropencode.com', desc: '第三方网关示例；以其当前 Anthropic 兼容说明为准' },
     ]} />
 
     <Callout type="warning">**暂不要点「添加」**，先向下滚动完成模型配置。</Callout>
@@ -58,7 +62,7 @@ navLabel: "CC Switch 配置"
 
     1. 点击 **获取模型列表** 拉取可用模型
     2. 点击 **＋ 添加模型** 插入一行空白模型条目
-    3. 点击中间展开箭头，从下拉列表选择 **模型 ID**（如 `gpt-5.4`、`gpt-5.5`）
+    3. 点击中间展开箭头，从网关实时返回的下拉列表选择 **模型 ID**；不要照抄旧截图中的名称
   </Frame>
 
   <Frame step="4" title="配置模型属性，点击添加"
@@ -66,7 +70,7 @@ navLabel: "CC Switch 配置"
     imageAlt="模型配置区：variants 控制推理深度，modalities 控制输入输出能力，最后点添加">
     选好模型 ID 后，可为该模型设置两个可选属性。
 
-    **variants**（推理深度）——每个 key 对应一个档位，值为 `reasoningEffort` 对象。GPT 分组推荐填入：
+    **variants**（推理深度）——每个 key 对应一个档位，值为 `reasoningEffort` 对象。只有当前模型、OpenCode 与网关三方资料都确认支持时，才按类似以下结构填写：
 
     ```json
     {
@@ -76,12 +80,12 @@ navLabel: "CC Switch 配置"
     }
     ```
 
-    **modalities**（输入输出能力）——声明模型支持的 I/O 类型，影响附件处理行为。GPT-5.5 是原生全模态（natively omnimodal），GPT-5.4 同样支持图片输出，推荐：
+    上述档位只是结构示例，不代表当前网关或任一模型支持全部值。**modalities**（输入输出能力）也只有在模型或网关正式文档明确支持时才填写。旧版页面把特定 GPT 模型写成确定的图片输出能力，本次无法由网关公开资料确认，故不再给出固定建议。
 
     ```json
     {
-      "input":  ["text", "image"],
-      "output": ["text", "image"]
+      "input":  ["text"],
+      "output": ["text"]
     }
     ```
 
@@ -104,25 +108,7 @@ navLabel: "CC Switch 配置"
 
 ## 可用模型
 
-### OpenAI 模型
-
-接口格式选 `OpenAI Responses`，Base URL 填 `https://foropencode.com/v1`：
-
-| 模型 ID | 上下文窗口 | 最大输出 |
-| --- | --- | --- |
-| `gpt-5.5` | 270,000（普通）/ 1,050,000（Pro/Plus Codex） | 128,000 |
-| `gpt-5.4` | 1,050,000 | 128,000 |
-| `gpt-5.4-mini` | 400,000 | 128,000 |
-
-### Anthropic 模型
-
-接口格式选 `Anthropic`，Base URL 填 `https://foropencode.com`（**不带 `/v1`**）：
-
-| 模型 ID | 上下文窗口 | 最大输出 |
-| --- | --- | --- |
-| `claude-opus-4-8` | 1,000,000 | 128,000 |
-| `claude-sonnet-4-6` | 1,000,000 | 64,000 |
-| `claude-haiku-4-5-20251001` | 200,000 | 64,000 |
+在 CC Switch 中先使用“获取模型列表”查看网关实际返回结果。OpenAI/Anthropic 官方模型列表、截图中的旧模型和第三方网关当前能力不是一回事；上下文、最大输出、模态和 reasoning variants 只有在网关文档明确时才手动填写。
 
 ---
 
@@ -133,7 +119,9 @@ CC Switch 将供应商信息写入 `~/.config/opencode/opencode.json`。CLI 和�
 | 平台 | 路径 |
 | --- | --- |
 | Linux / macOS | `~/.config/opencode/opencode.json` |
-| Windows | `%APPDATA%\opencode\opencode.json` |
+| Windows | `%USERPROFILE%\.config\opencode\opencode.json` |
+
+OpenCode 官方文档记录的全局配置位置为 `~/.config/opencode/opencode.json`（Windows 上对应用户目录下的 `.config` 路径）。若 CC Switch 实际写入位置与 OpenCode 读取位置不一致，请以两者当前版本的实际行为为准并核对生效情况。
 
 <RelatedPages
   title="下一步"
@@ -142,3 +130,5 @@ CC Switch 将供应商信息写入 `~/.config/opencode/opencode.json`。CLI 和�
     { route: '/cc-switch', hint: 'CC Switch 安装与其他工具向导' },
   ]}
 />
+
+资料来源：[OpenCode Providers](https://opencode.ai/docs/providers/) · [OpenCode Config](https://opencode.ai/docs/config/) · [CC Switch 官方仓库](https://github.com/farion1231/cc-switch)（2026-07-26 核对）
