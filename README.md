@@ -8,11 +8,11 @@ Key  ->  CC Switch  ->  Provider  ->  Tool  ->  Verify
 
 ## 技术栈
 
-- **Next.js 15**（App Router, React 19, Server Components）
+- **Next.js 16**（App Router, React 19, Server Components）
 - **MDX** 内容（`src/content/**/*.mdx`）
 - **CSS Modules** + design tokens（`src/styles/tokens.css`）
 - **shiki** 构建时语法高亮（通过 `rehype-pretty-code`）
-- **FlexSearch** 本地全文搜索（构建时索引）
+- 构建时生成的本地 JSON 全文搜索索引
 
 ## 单一内容真相源
 
@@ -46,7 +46,7 @@ TOC 锚点 id 由 `github-slugger`（与 rehype-slug 同一库）在构建期产
 | `scripts/gen-content-manifest.mjs` | 内容 manifest codegen（含死链护栏） |
 | `scripts/build-search-index.mjs` | 生成 `public/search-index.json` |
 
-> 这是 **pnpm** 仓库——用 `pnpm`，不要用 `npm`。
+> 这是 **Node.js 24 LTS + pnpm 11** 仓库——用 `pnpm`，不要用 `npm`。
 
 ## 本地开发
 
@@ -84,8 +84,7 @@ pnpm start        # 生产 server
 ## 部署
 
 ```bash
-docker build -t foropencode-docs .
-docker run -p 3020:3020 foropencode-docs
+docker compose up -d --build
 ```
 
 完整流程见 [DEPLOY.md](./DEPLOY.md)。

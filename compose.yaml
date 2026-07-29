@@ -11,6 +11,17 @@ services:
       NODE_ENV: production
       PORT: "3020"
       HOSTNAME: 0.0.0.0
+    user: "1001:1001"
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /app/.next/cache:size=64m,uid=1001,gid=1001,mode=0700
+    pids_limit: 256
     ports:
       - "${HOST_PORT:-8081}:3020"
     restart: unless-stopped

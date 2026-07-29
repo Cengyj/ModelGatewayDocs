@@ -10,8 +10,8 @@
 项目提供以下部署文件：
 
 - `.github/workflows/docker-image.yml` — CI 构建并推送镜像到 GHCR
-- `Dockerfile` — 多阶段构建，输出 Node.js 运行时镜像
-- `compose.yaml` — Docker Compose 编排（默认拉取 GHCR 镜像）
+- `Dockerfile` — 多阶段构建，输出 Node.js 24 standalone 非 root 运行镜像
+- `compose.yaml` — Docker Compose 编排（默认拉取 GHCR 镜像，并启用只读文件系统、能力删除与提权防护）
 - `.env.container.example` — 环境变量模板
 
 ## 前置条件
@@ -120,7 +120,7 @@ server {
 
 ### 搜索面板没有结果
 
-本地 FlexSearch 索引在 `pnpm build` 期间生成到 `public/search-index.json`。容器构建已包含这一步；若手动构建出错，可单独运行：
+本地搜索索引在 `pnpm build` 期间生成到 `public/search-index.json`。容器构建已包含这一步；若手动构建出错，可单独运行：
 
 ```bash
 node scripts/build-search-index.mjs

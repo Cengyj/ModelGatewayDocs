@@ -75,6 +75,7 @@ const productionSecurityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   pageExtensions: ['ts', 'tsx', 'mdx'],
   reactStrictMode: true,
   poweredByHeader: false,
